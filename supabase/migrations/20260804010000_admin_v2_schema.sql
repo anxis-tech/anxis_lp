@@ -336,12 +336,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- RLS READ/WRITE Policies for Authenticated Admin/Team Members
+-- RLS READ/WRITE Policies for Authenticated Admin/Team Members (Idempotent)
+DROP POLICY IF EXISTS "Auth members read profiles" ON public.profiles;
 CREATE POLICY "Auth members read profiles" ON public.profiles FOR SELECT USING (auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "Auth members read roles" ON public.roles;
 CREATE POLICY "Auth members read roles" ON public.roles FOR SELECT USING (auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "Auth members read permissions" ON public.permissions;
 CREATE POLICY "Auth members read permissions" ON public.permissions FOR SELECT USING (auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "Auth members read client_projects" ON public.client_projects;
 CREATE POLICY "Auth members read client_projects" ON public.client_projects FOR SELECT USING (public.check_user_permission(auth.uid(), 'client_projects.view'));
+
+DROP POLICY IF EXISTS "Auth members write client_projects" ON public.client_projects;
 CREATE POLICY "Auth members write client_projects" ON public.client_projects FOR ALL USING (public.check_user_permission(auth.uid(), 'client_projects.create') OR public.check_user_permission(auth.uid(), 'client_projects.edit'));
+
+DROP POLICY IF EXISTS "Auth members read pricing_settings" ON public.pricing_settings;
 CREATE POLICY "Auth members read pricing_settings" ON public.pricing_settings FOR SELECT USING (public.check_user_permission(auth.uid(), 'pricing.view'));
+
+DROP POLICY IF EXISTS "Auth members read quotes" ON public.quotes;
 CREATE POLICY "Auth members read quotes" ON public.quotes FOR SELECT USING (public.check_user_permission(auth.uid(), 'pricing.view'));
+
+DROP POLICY IF EXISTS "Auth members write quotes" ON public.quotes;
 CREATE POLICY "Auth members write quotes" ON public.quotes FOR ALL USING (public.check_user_permission(auth.uid(), 'pricing.save_quote'));

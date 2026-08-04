@@ -1,4 +1,4 @@
--- ANXIS Initial Database Schema and RLS Policies
+-- ANXIS Initial Database Schema and RLS Policies (100% Idempotent)
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS public.admin_profiles (
 );
 
 -- ========================================================
--- ROW LEVEL SECURITY (RLS) POLICIES
+-- ROW LEVEL SECURITY (RLS) POLICIES (IDEMPOTENT)
 -- ========================================================
 
 ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
@@ -179,29 +179,55 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Public READ policies (Visitors can read visible content)
+DROP POLICY IF EXISTS "Public read site_settings" ON public.site_settings;
 CREATE POLICY "Public read site_settings" ON public.site_settings FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Public read page_sections" ON public.page_sections;
 CREATE POLICY "Public read page_sections" ON public.page_sections FOR SELECT USING (is_visible = true);
+
+DROP POLICY IF EXISTS "Public read projects" ON public.projects;
 CREATE POLICY "Public read projects" ON public.projects FOR SELECT USING (is_visible = true);
+
+DROP POLICY IF EXISTS "Public read technologies" ON public.technologies;
 CREATE POLICY "Public read technologies" ON public.technologies FOR SELECT USING (is_visible = true);
+
+DROP POLICY IF EXISTS "Public read services" ON public.services;
 CREATE POLICY "Public read services" ON public.services FOR SELECT USING (is_visible = true);
+
+DROP POLICY IF EXISTS "Public read testimonials" ON public.testimonials;
 CREATE POLICY "Public read testimonials" ON public.testimonials FOR SELECT USING (is_visible = true);
+
+DROP POLICY IF EXISTS "Public read faq_items" ON public.faq_items;
 CREATE POLICY "Public read faq_items" ON public.faq_items FOR SELECT USING (is_visible = true);
 
 -- Public INSERT policy for leads (Anyone can submit a proposal)
+DROP POLICY IF EXISTS "Public insert leads" ON public.leads;
 CREATE POLICY "Public insert leads" ON public.leads FOR INSERT WITH CHECK (true);
 
 -- Admin ALL policies (Admins have full CRUD control)
+DROP POLICY IF EXISTS "Admin full access site_settings" ON public.site_settings;
 CREATE POLICY "Admin full access site_settings" ON public.site_settings FOR ALL USING (public.is_admin());
-CREATE POLICY "Admin full access page_sections" ON public.page_sections FOR ALL USING (public.is_admin());
-CREATE POLICY "Admin full access projects" ON public.projects FOR ALL USING (public.is_admin());
-CREATE POLICY "Admin full access technologies" ON public.technologies FOR ALL USING (public.is_admin());
-CREATE POLICY "Admin full access services" ON public.services FOR ALL USING (public.is_admin());
-CREATE POLICY "Admin full access testimonials" ON public.testimonials FOR ALL USING (public.is_admin());
-CREATE POLICY "Admin full access faq_items" ON public.faq_items FOR ALL USING (public.is_admin());
-CREATE POLICY "Admin full access leads" ON public.leads FOR ALL USING (public.is_admin());
-CREATE POLICY "Admin full access admin_profiles" ON public.admin_profiles FOR ALL USING (public.is_admin());
 
--- Storage Buckets Configuration (Run in Supabase dashboard or via API):
--- Buckets to create: 'projects', 'technologies', 'testimonials', 'branding'
--- Public read access enabled on all buckets.
--- Write access restricted to authenticated admins.
+DROP POLICY IF EXISTS "Admin full access page_sections" ON public.page_sections;
+CREATE POLICY "Admin full access page_sections" ON public.page_sections FOR ALL USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Admin full access projects" ON public.projects;
+CREATE POLICY "Admin full access projects" ON public.projects FOR ALL USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Admin full access technologies" ON public.technologies;
+CREATE POLICY "Admin full access technologies" ON public.technologies FOR ALL USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Admin full access services" ON public.services;
+CREATE POLICY "Admin full access services" ON public.services FOR ALL USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Admin full access testimonials" ON public.testimonials;
+CREATE POLICY "Admin full access testimonials" ON public.testimonials FOR ALL USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Admin full access faq_items" ON public.faq_items;
+CREATE POLICY "Admin full access faq_items" ON public.faq_items FOR ALL USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Admin full access leads" ON public.leads;
+CREATE POLICY "Admin full access leads" ON public.leads FOR ALL USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Admin full access admin_profiles" ON public.admin_profiles;
+CREATE POLICY "Admin full access admin_profiles" ON public.admin_profiles FOR ALL USING (public.is_admin());
