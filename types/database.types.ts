@@ -1,5 +1,5 @@
 export interface SiteSettings {
-  id: string
+  id?: string
   company_name: string
   logo_light_url: string
   logo_dark_url: string
@@ -12,8 +12,8 @@ export interface SiteSettings {
     linkedin?: string
     facebook?: string
   }
-  primary_cta_label: string
-  primary_cta_url: string
+  primary_cta_label?: string
+  primary_cta_url?: string
   gtm_id?: string
   meta_pixel_id?: string
   google_ads_id?: string
@@ -31,7 +31,7 @@ export interface PageSection {
   description?: string
   content_json?: Record<string, any>
   display_order: number
-  is_visible: boolean
+  is_visible?: boolean
   updated_at?: string
 }
 
@@ -67,8 +67,8 @@ export interface Technology {
   category: string
   website_url?: string
   image_alt?: string
-  is_visible: boolean
-  display_order: number
+  is_visible?: boolean
+  display_order?: number
   created_at?: string
   updated_at?: string
 }
@@ -80,8 +80,8 @@ export interface ServiceItem {
   icon: string
   benefits: string[]
   link?: string
-  is_visible: boolean
-  display_order: number
+  is_visible?: boolean
+  display_order?: number
 }
 
 export interface Testimonial {
@@ -92,16 +92,16 @@ export interface Testimonial {
   photo_url?: string
   content: string
   related_project_id?: string
-  is_visible: boolean
-  display_order: number
+  is_visible?: boolean
+  display_order?: number
 }
 
 export interface FAQItem {
   id: string
   question: string
   answer: string
-  is_visible: boolean
-  display_order: number
+  is_visible?: boolean
+  display_order?: number
 }
 
 export interface Lead {

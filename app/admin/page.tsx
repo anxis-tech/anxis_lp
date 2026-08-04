@@ -6,107 +6,134 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import {
-  Project,
-  Technology,
-  ServiceItem,
-  Testimonial,
-  FAQItem,
-  Lead,
-  SiteSettings,
-} from '@/types/database.types'
+  UserProfileWithRole,
+  hasPermission,
+  PERMISSIONS,
+} from '@/lib/auth/permissions'
+import { Project } from '@/types/database.types'
+import { ClientProject } from '@/types/client-project.types'
+import { INITIAL_PROJECTS } from '@/lib/constants/initial-data'
+import { HomePortfolioTab } from '@/components/admin/tabs/home-portfolio-tab'
+import { ClientProjectsTab, MOCK_CLIENT_PROJECTS_FULL } from '@/components/admin/tabs/client-projects-tab'
+import { KanbanBoardTab } from '@/components/admin/tabs/kanban-board-tab'
+import { PricingCalculatorTab } from '@/components/admin/tabs/pricing-calculator-tab'
+import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-tab'
 import {
-  INITIAL_SITE_SETTINGS,
-  INITIAL_SERVICES,
-  INITIAL_PROJECTS,
-  INITIAL_TECHNOLOGIES,
-  INITIAL_FAQS,
-  INITIAL_TESTIMONIALS,
-} from '@/lib/constants/initial-data'
-import {
-  LayoutDashboard,
-  FolderKanban,
-  Cpu,
-  Layers,
-  MessageSquare,
-  HelpCircle,
-  Users,
-  Settings,
   Globe,
+  FolderKanban,
+  Kanban,
+  Calculator,
+  Shield,
   LogOut,
-  Plus,
-  Trash2,
-  Edit,
-  Eye,
-  EyeOff,
-  Star,
   ExternalLink,
-  Save,
-  Search,
-  CheckCircle2,
+  ShieldAlert,
+  Loader2,
+  X,
+  FileText,
+  Paperclip,
+  Link as LinkIcon,
+  Download,
+  Mail,
+  User,
+  Calendar,
+  CheckSquare,
+  Trash2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function AdminDashboardPage() {
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<string>('projetos')
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
 
-  // State entities
-  const [settings, setSettings] = useState<SiteSettings>(INITIAL_SITE_SETTINGS)
-  const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS)
-  const [technologies, setTechnologies] = useState<Technology[]>(INITIAL_TECHNOLOGIES)
-  const [services, setServices] = useState<ServiceItem[]>(INITIAL_SERVICES)
-  const [testimonials, setTestimonials] = useState<Testimonial[]>(INITIAL_TESTIMONIALS)
-  const [faqs, setFaqs] = useState<FAQItem[]>(INITIAL_FAQS)
-  const [leads, setLeads] = useState<Lead[]>([])
+  // Unified Auth & Permission Loading Guard (Prevents flicker & premature tab disappearance)
+  const [authResolved, setAuthResolved] = useState<boolean>(false)
+  const [userProfile, setUserProfile] = useState<UserProfileWithRole | null>(null)
+  const [activeTab, setActiveTab] = useState<string>('kanban_board')
 
-  // Project Modal State
-  const [searchProject, setSearchProject] = useState('')
-  const [editingProject, setEditingProject] = useState<Partial<Project> | null>(null)
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false)
+  // Live state
+  const [homeProjects, setHomeProjects] = useState<Project[]>(INITIAL_PROJECTS)
+  const [clientProjects, setClientProjects] = useState<ClientProject[]>(MOCK_CLIENT_PROJECTS_FULL)
+
+  // Expanded Detail Drawer State
+  const [selectedDetailProject, setSelectedDetailProject] = useState<ClientProject | null>(null)
+  const [drawerTab, setDrawerTab] = useState<'geral' | 'contato' | 'escopo' | 'links_arquivos'>('geral')
 
   useEffect(() => {
-    fetchInitialAdminData()
+    initAdminSession()
   }, [])
 
-  const fetchInitialAdminData = async () => {
+  const initAdminSession = async () => {
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
 
       if (!user && process.env.NEXT_PUBLIC_SUPABASE_URL) {
         router.push('/admin/login')
         return
       }
 
-      // Fetch database items if available
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*, roles(slug)')
+          .eq('user_id', user.id)
+          .single()
+
+        if (profile) {
+          setUserProfile({
+            id: profile.id,
+            user_id: user.id,
+            full_name: profile.full_name || user.email?.split('@')[0] || 'Usuário',
+            email: user.email || '',
+            role_slug: (profile as any).roles?.slug || 'admin',
+            is_active: profile.is_active ?? true,
+          })
+        } else {
+          setUserProfile({
+            id: 'admin-fallback-id',
+            user_id: user.id,
+            full_name: user.email?.split('@')[0] || 'Administrador',
+            email: user.email || '',
+            role_slug: 'admin',
+            is_active: true,
+          })
+        }
+      } else {
+        // Local Demo / Offline Mode Fallback
+        setUserProfile({
+          id: 'demo-admin-id',
+          user_id: 'demo-user-id',
+          full_name: 'Administrador ANXIS (Demo)',
+          email: 'admin@anxis.com.br',
+          role_slug: 'admin',
+          is_active: true,
+        })
+      }
+
+      // Fetch live home projects & client projects
       const [
-        { data: sData },
         { data: pData },
-        { data: tData },
-        { data: servData },
-        { data: testData },
-        { data: fData },
-        { data: lData },
+        { data: cpData }
       ] = await Promise.all([
-        supabase.from('site_settings').select('*').single(),
         supabase.from('projects').select('*').order('display_order', { ascending: true }),
-        supabase.from('technologies').select('*').order('display_order', { ascending: true }),
-        supabase.from('services').select('*').order('display_order', { ascending: true }),
-        supabase.from('testimonials').select('*').order('display_order', { ascending: true }),
-        supabase.from('faq_items').select('*').order('display_order', { ascending: true }),
-        supabase.from('leads').select('*').order('created_at', { ascending: false }),
+        supabase.from('client_projects').select('*').order('updated_at', { ascending: false }),
       ])
 
-      if (sData) setSettings(sData)
-      if (pData) setProjects(pData)
-      if (tData) setTechnologies(tData)
-      if (servData) setServices(servData)
-      if (testData) setTestimonials(testData)
-      if (fData) setFaqs(fData)
-      if (lData) setLeads(lData)
+      if (pData && pData.length > 0) setHomeProjects(pData)
+      if (cpData && cpData.length > 0) setClientProjects(cpData as any)
     } catch (e) {
-      console.log('Running admin in offline/demo mode.')
+      console.warn('Running admin in offline/demo mode.')
+      setUserProfile({
+        id: 'demo-admin-id',
+        user_id: 'demo-user-id',
+        full_name: 'Administrador ANXIS (Demo)',
+        email: 'admin@anxis.com.br',
+        role_slug: 'admin',
+        is_active: true,
+      })
+    } finally {
+      setAuthResolved(true)
     }
   }
 
@@ -116,134 +143,128 @@ export default function AdminDashboardPage() {
     router.push('/admin/login')
   }
 
-  // --- PROJECT CRUD ACTIONS ---
-  const handleSaveProject = () => {
-    if (!editingProject?.title) return
-
-    if (editingProject.id) {
-      // Update existing
-      setProjects((prev) =>
-        prev.map((p) => (p.id === editingProject.id ? ({ ...p, ...editingProject } as Project) : p))
-      )
-    } else {
-      // Create new
-      const newProj: Project = {
-        id: `p-${Date.now()}`,
-        title: editingProject.title || 'Novo Projeto',
-        client: editingProject.client || 'Cliente Exemplo',
-        category: editingProject.category || 'institucional',
-        short_description: editingProject.short_description || '',
-        desktop_image_url: editingProject.desktop_image_url || 'https://images.unsplash.com/photo-1618221195710-dd6b41faAEA6?q=80&w=1200&auto=format&fit=crop',
-        project_url: editingProject.project_url || '#',
-        technologies: editingProject.technologies || ['Next.js', 'Tailwind CSS'],
-        year: editingProject.year || '2026',
-        is_featured: editingProject.is_featured || false,
-        is_visible: editingProject.is_visible ?? true,
-        display_order: projects.length + 1,
-      }
-      setProjects((prev) => [...prev, newProj])
+  const handleDeleteProjectFromDrawer = (projectId: string, projectTitle: string) => {
+    const canDelete = isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)
+    if (!canDelete) {
+      alert('Você não possui permissão para excluir projetos.')
+      return
     }
 
-    setIsProjectModalOpen(false)
-    setEditingProject(null)
-    triggerSaveFeedback()
-  }
-
-  const toggleProjectVisibility = (id: string) => {
-    setProjects((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, is_visible: !p.is_visible } : p))
+    const confirmDelete = window.confirm(
+      `Tem certeza de que deseja excluir permanentemente o projeto "${projectTitle}"?\n\nEsta ação removerá todos os arquivos, links e pendências vinculadas ao projeto.`
     )
-    triggerSaveFeedback()
-  }
 
-  const toggleProjectFeatured = (id: string) => {
-    setProjects((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, is_featured: !p.is_featured } : p))
-    )
-    triggerSaveFeedback()
-  }
-
-  const handleDeleteProject = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este projeto?')) {
-      setProjects((prev) => prev.filter((p) => p.id !== id))
-      triggerSaveFeedback()
+    if (confirmDelete) {
+      setClientProjects((prev) => prev.filter((p) => p.id !== projectId))
+      setSelectedDetailProject(null)
+      alert(`Projeto "${projectTitle}" excluído com sucesso!`)
     }
   }
 
-  const triggerSaveFeedback = () => {
-    setSaveStatus('saving')
-    setTimeout(() => {
-      setSaveStatus('saved')
-      setTimeout(() => setSaveStatus('idle'), 3000)
-    }, 600)
+  // SKELETON SCREEN DURING AUTH RESOLUTION (ZERO FLICKER)
+  if (!authResolved) {
+    return (
+      <div className="min-h-screen bg-[#081D3A] text-white flex flex-col items-center justify-center p-6 space-y-4">
+        <div className="relative w-40 h-10 animate-pulse">
+          <Image src="/images/logo-dark.svg" alt="ANXIS Logo" fill className="object-contain" />
+        </div>
+        <div className="flex items-center gap-2 text-slate-300 text-xs font-bold bg-[#0B2F63] px-4 py-2 rounded-xl border border-slate-700">
+          <Loader2 className="w-4 h-4 animate-spin text-[#0075FF]" />
+          <span>Verificando autenticação e permissões do sistema...</span>
+        </div>
+      </div>
+    )
   }
 
-  const tabs = [
-    { id: 'projetos', label: 'Projetos (Cases)', icon: FolderKanban },
-    { id: 'tecnologias', label: 'Tecnologias', icon: Cpu },
-    { id: 'servicos', label: 'Serviços', icon: Layers },
-    { id: 'depoimentos', label: 'Depoimentos', icon: MessageSquare },
-    { id: 'faq', label: 'FAQ', icon: HelpCircle },
-    { id: 'leads', label: 'Leads Capturados', icon: Users, badge: leads.length },
-    { id: 'configuracoes', label: 'Configurações & SEO', icon: Settings },
-  ]
+  const isAdmin = userProfile?.role_slug === 'admin'
 
-  const filteredProjects = projects.filter(
-    (p) =>
-      p.title.toLowerCase().includes(searchProject.toLowerCase()) ||
-      p.client?.toLowerCase().includes(searchProject.toLowerCase())
-  )
+  const navTabs = [
+    {
+      id: 'portfolio_home',
+      label: 'Portfólio da Home',
+      icon: Globe,
+      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_VIEW),
+    },
+    {
+      id: 'client_projects',
+      label: 'Projetos de Clientes',
+      icon: FolderKanban,
+      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
+    },
+    {
+      id: 'kanban_board',
+      label: 'Kanban de Projetos',
+      icon: Kanban,
+      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
+    },
+    {
+      id: 'pricing_calculator',
+      label: 'Calculadora de Precificação',
+      icon: Calculator,
+      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
+    },
+    {
+      id: 'users_permissions',
+      label: 'Usuários e Permissões',
+      icon: Shield,
+      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_VIEW),
+    },
+  ].filter((t) => t.allowed)
+
+  const currentTabObj = navTabs.find((t) => t.id === activeTab) || navTabs[0]
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#0C1D36] flex flex-col font-sans">
-      {/* ADMIN HEADER */}
+    <div className="min-h-screen bg-[#F7F8FA] text-[#0C1D36] flex flex-col font-sans max-w-full overflow-hidden">
+      {/* HEADER */}
       <header className="bg-[#081D3A] text-white py-4 px-6 sticky top-0 z-30 shadow-md border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="relative w-32 h-8">
+          <div className="relative w-36 h-9">
             <Image src="/images/logo-dark.svg" alt="ANXIS Admin" fill className="object-contain" />
           </div>
-          <span className="text-xs bg-[#0075FF] text-white font-bold px-2.5 py-1 rounded-md uppercase tracking-wider">
-            PAINEL DE CONTROLE
+          <span className="text-[10px] bg-[#0075FF] text-white font-bold px-2.5 py-1 rounded-md uppercase tracking-wider hidden sm:inline-block">
+            PAINEL OPERACIONAL
           </span>
         </div>
 
         <div className="flex items-center gap-4">
-          {saveStatus === 'saved' && (
-            <span className="text-xs text-emerald-400 font-bold flex items-center gap-1.5 animate-in fade-in">
-              <CheckCircle2 className="w-4 h-4" /> Alterações Salvas
-            </span>
-          )}
+          <div className="text-right hidden sm:block">
+            <div className="text-xs font-bold text-white">{userProfile?.full_name}</div>
+            <div className="text-[10px] text-[#168CFF] font-mono capitalize">
+              Cargo: {userProfile?.role_slug}
+            </div>
+          </div>
 
           <Link
             href="/"
             target="_blank"
-            className="inline-flex items-center text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 px-3.5 py-2 rounded-lg transition-colors"
+            className="inline-flex items-center text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 px-3.5 py-2 rounded-xl transition-colors border border-slate-700"
           >
-            <Globe className="w-4 h-4 mr-1.5 text-[#0075FF]" />
-            <span>Ver Site Ao Vivo</span>
-            <ExternalLink className="w-3.5 h-3.5 ml-1.5 opacity-60" />
+            <Globe className="w-3.5 h-3.5 mr-1.5 text-[#0075FF]" />
+            <span className="hidden sm:inline">Ver Site Ao Vivo</span>
+            <ExternalLink className="w-3.5 h-3.5 sm:ml-1.5 opacity-60" />
           </Link>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="inline-flex items-center text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 px-3.5 py-2 rounded-lg transition-colors border border-rose-500/20"
+            className="inline-flex items-center text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 px-3 py-2 rounded-xl transition-colors border border-rose-500/20"
+            title="Sair da Conta"
           >
-            <LogOut className="w-4 h-4 mr-1.5" />
-            <span>Sair</span>
+            <LogOut className="w-4 h-4 sm:mr-1.5" />
+            <span className="hidden sm:inline">Sair</span>
           </button>
         </div>
       </header>
 
       {/* DASHBOARD BODY */}
-      <div className="flex-1 flex max-w-7xl w-full mx-auto p-4 sm:p-6 gap-8">
+      <div className="flex-1 flex max-w-7xl w-full mx-auto p-4 sm:p-6 gap-8 overflow-hidden">
         {/* SIDEBAR TABS */}
         <aside className="w-64 shrink-0 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm h-fit space-y-2 sticky top-24 hidden md:block">
           <h3 className="text-[10px] font-extrabold uppercase tracking-widest text-[#596579] px-3 py-1">
-            Gerenciamento
+            Módulos Principais
           </h3>
           <nav className="space-y-1">
-            {tabs.map((tab) => {
+            {navTabs.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.id
               return (
@@ -262,324 +283,316 @@ export default function AdminDashboardPage() {
                     <Icon className="w-4 h-4" />
                     <span>{tab.label}</span>
                   </div>
-                  {tab.badge !== undefined && tab.badge > 0 && (
-                    <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-extrabold', isActive ? 'bg-white text-[#0075FF]' : 'bg-slate-200 text-[#0C1D36]')}>
-                      {tab.badge}
-                    </span>
-                  )}
                 </button>
               )
             })}
           </nav>
         </aside>
 
-        {/* MAIN PANEL CONTENT */}
-        <main className="flex-1 space-y-6">
-          {/* TAB 1: PROJETOS (CRUD) */}
-          {activeTab === 'projetos' && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-                <div>
-                  <h2 className="text-xl font-extrabold text-[#0C1D36]">Gerenciamento de Projetos</h2>
-                  <p className="text-xs text-[#596579]">Adicione, edite, oculte ou reordene os cases do seu portfólio.</p>
-                </div>
-
+        {/* MAIN PANEL CONTENT AREA */}
+        <main className="flex-1 space-y-6 overflow-hidden max-w-full">
+          {/* MOBILE TAB BAR */}
+          <div className="md:hidden flex items-center gap-2 overflow-x-auto pb-2">
+            {navTabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              return (
                 <button
+                  key={tab.id}
                   type="button"
-                  onClick={() => {
-                    setEditingProject({
-                      category: 'institucional',
-                      is_visible: true,
-                      is_featured: false,
-                      technologies: ['Next.js', 'Tailwind CSS'],
-                    })
-                    setIsProjectModalOpen(true)
-                  }}
-                  className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#0075FF] hover:bg-[#168CFF] shadow-md transition-all"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap',
+                    isActive ? 'bg-[#0075FF] text-white' : 'bg-white border border-slate-200 text-[#0C1D36]'
+                  )}
                 >
-                  <Plus className="w-4 h-4 mr-1.5" />
-                  <span>Novo Projeto</span>
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{tab.label}</span>
                 </button>
-              </div>
+              )
+            })}
+          </div>
 
-              {/* SEARCH BAR */}
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  value={searchProject}
-                  onChange={(e) => setSearchProject(e.target.value)}
-                  placeholder="Buscar projeto por título ou cliente..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs text-[#0C1D36] outline-none focus:border-[#0075FF]"
+          {/* ACCESS DENIED GUARD */}
+          {!currentTabObj ? (
+            <div className="bg-white rounded-2xl border border-rose-200 p-8 text-center space-y-4 shadow-sm">
+              <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto" />
+              <h3 className="text-xl font-bold text-rose-700">Acesso Negado (HTTP 403)</h3>
+              <p className="text-xs text-slate-600 max-w-md mx-auto">
+                Você não possui permissão suficiente para acessar este módulo.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* TAB 1: PORTFÓLIO DA HOME */}
+              {activeTab === 'portfolio_home' && (
+                <HomePortfolioTab
+                  projects={homeProjects}
+                  onUpdateProjects={setHomeProjects}
+                  canEdit={isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_EDIT)}
+                  canDelete={isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_DELETE)}
+                  canCreate={isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_CREATE)}
                 />
-              </div>
-
-              {/* PROJECTS TABLE / CARDS */}
-              <div className="space-y-3">
-                {filteredProjects.map((project) => (
-                  <div
-                    key={project.id}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 gap-4 transition-all"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-12 relative rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-slate-800">
-                        <img
-                          src={project.desktop_image_url}
-                          alt={project.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-bold text-[#0C1D36]">{project.title}</h4>
-                          {project.is_featured && (
-                            <span className="text-[10px] bg-amber-500/10 text-amber-600 font-bold px-2 py-0.5 rounded flex items-center gap-1">
-                              <Star className="w-3 h-3 fill-current" /> Destaque
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-xs text-[#596579]">
-                          {project.client} • <span className="font-mono text-[#0075FF]">{project.category}</span>
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 self-end sm:self-center">
-                      <button
-                        type="button"
-                        onClick={() => toggleProjectFeatured(project.id)}
-                        className={cn('p-2 rounded-lg border text-xs font-bold transition-colors', project.is_featured ? 'bg-amber-50 border-amber-200 text-amber-600' : 'bg-white border-slate-200 text-slate-400')}
-                        title="Alternar Destaque"
-                      >
-                        <Star className="w-4 h-4 fill-current" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => toggleProjectVisibility(project.id)}
-                        className={cn('p-2 rounded-lg border text-xs font-bold transition-colors', project.is_visible ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-rose-50 border-rose-200 text-rose-600')}
-                        title={project.is_visible ? 'Projeto Visível' : 'Projeto Oculto'}
-                      >
-                        {project.is_visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingProject(project)
-                          setIsProjectModalOpen(true)
-                        }}
-                        className="p-2 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-[#0075FF] transition-colors"
-                        title="Editar Projeto"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteProject(project.id)}
-                        className="p-2 rounded-lg bg-white border border-slate-200 text-rose-600 hover:bg-rose-50 transition-colors"
-                        title="Excluir Projeto"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: LEADS */}
-          {activeTab === 'leads' && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
-              <div>
-                <h2 className="text-xl font-extrabold text-[#0C1D36]">Leads & Propostas Capturadas</h2>
-                <p className="text-xs text-[#596579]">Lista de propostas recebidas através da landing page com dados de UTM.</p>
-              </div>
-
-              {leads.length === 0 ? (
-                <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                  <Users className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-[#596579]">Nenhuma proposta recebida até o momento.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {leads.map((lead) => (
-                    <div key={lead.id} className="p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 pb-3">
-                        <div>
-                          <h4 className="text-base font-bold text-[#0C1D36]">{lead.name}</h4>
-                          <p className="text-xs text-[#596579]">{lead.company ? `${lead.company} • ` : ''}{lead.email} • {lead.whatsapp}</p>
-                        </div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider bg-[#0075FF]/10 text-[#0075FF] px-2.5 py-1 rounded">
-                          {lead.project_type}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-[#596579]">
-                        <div><span className="font-semibold text-[#0C1D36]">Plataforma:</span> {lead.current_platform || 'N/I'}</div>
-                        <div><span className="font-semibold text-[#0C1D36]">Orçamento:</span> {lead.budget_range || 'N/I'}</div>
-                        <div><span className="font-semibold text-[#0C1D36]">Prazo:</span> {lead.desired_deadline || 'N/I'}</div>
-                        <div><span className="font-semibold text-[#0C1D36]">Origem:</span> {lead.utm_source || 'Direto'}</div>
-                      </div>
-
-                      {lead.message && (
-                        <p className="text-xs text-slate-700 bg-white p-3 rounded-lg border border-slate-200 italic">
-                          "{lead.message}"
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
               )}
-            </div>
-          )}
 
-          {/* TAB 3: SETTINGS & SEO */}
-          {activeTab === 'configuracoes' && (
-            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
-              <div>
-                <h2 className="text-xl font-extrabold text-[#0C1D36]">Configurações Gerais & Scripts SEO</h2>
-                <p className="text-xs text-[#596579]">Altere contatos, WhatsApp e IDs de pixels de campanhas (GTM/Meta).</p>
-              </div>
+              {/* TAB 2: PROJETOS DE CLIENTES */}
+              {activeTab === 'client_projects' && (
+                <ClientProjectsTab
+                  projects={clientProjects}
+                  onUpdateProjects={setClientProjects}
+                  userProfile={userProfile}
+                  canCreate={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_CREATE)}
+                  canEdit={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_EDIT)}
+                  canDelete={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)}
+                  canAssignResponsible={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_ASSIGN_RESPONSIBLE)}
+                  canViewAll={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ALL)}
+                  onOpenProjectDetail={(p) => {
+                    setSelectedDetailProject(p)
+                    setDrawerTab('geral')
+                  }}
+                />
+              )}
 
-              <div className="space-y-4 max-w-xl">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-1">Empresa</label>
-                  <input
-                    type="text"
-                    value={settings.company_name}
-                    onChange={(e) => setSettings({ ...settings, company_name: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs"
-                  />
-                </div>
+              {/* TAB 3: KANBAN DE PROJETOS */}
+              {activeTab === 'kanban_board' && (
+                <KanbanBoardTab
+                  projects={clientProjects}
+                  onUpdateProjects={setClientProjects}
+                  userProfile={userProfile}
+                  canMoveKanban={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_MOVE_KANBAN)}
+                  canViewAll={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ALL)}
+                  onOpenProjectDetail={(p) => {
+                    setSelectedDetailProject(p)
+                    setDrawerTab('geral')
+                  }}
+                />
+              )}
 
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-1">WhatsApp (com DDD)</label>
-                  <input
-                    type="text"
-                    value={settings.whatsapp}
-                    onChange={(e) => setSettings({ ...settings, whatsapp: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs"
-                  />
-                </div>
+              {/* TAB 4: CALCULADORA DE PRECIFICAÇÃO */}
+              {activeTab === 'pricing_calculator' && (
+                <PricingCalculatorTab
+                  canManageSettings={isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_MANAGE_SETTINGS)}
+                  canSaveQuote={isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_SAVE_QUOTE)}
+                />
+              )}
 
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-1">Google Tag Manager ID (ex: GTM-XXXXXX)</label>
-                  <input
-                    type="text"
-                    value={settings.gtm_id || ''}
-                    onChange={(e) => setSettings({ ...settings, gtm_id: e.target.value })}
-                    placeholder="GTM-XXXXXXX"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-1">Meta Pixel ID (Facebook Ads)</label>
-                  <input
-                    type="text"
-                    value={settings.meta_pixel_id || ''}
-                    onChange={(e) => setSettings({ ...settings, meta_pixel_id: e.target.value })}
-                    placeholder="1234567890"
-                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono"
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  onClick={triggerSaveFeedback}
-                  className="inline-flex items-center justify-center px-6 py-3 rounded-xl text-xs font-bold text-white bg-[#0075FF] hover:bg-[#168CFF] shadow-md transition-all"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  <span>Salvar Configurações</span>
-                </button>
-              </div>
-            </div>
+              {/* TAB 5: USUÁRIOS E PERMISSÕES */}
+              {activeTab === 'users_permissions' && (
+                <UsersPermissionsTab
+                  currentUserId={userProfile?.user_id}
+                  canCreateUser={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_CREATE)}
+                  canEditUser={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_EDIT)}
+                  canManageRoles={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_ROLES)}
+                  canManagePermissions={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_PERMISSIONS)}
+                />
+              )}
+            </>
           )}
         </main>
       </div>
 
-      {/* MODAL EDIT PROJECT */}
-      {isProjectModalOpen && editingProject && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5 animate-in zoom-in-95 duration-200">
-            <h3 className="text-lg font-extrabold text-[#0C1D36]">
-              {editingProject.id ? 'Editar Case de Portfólio' : 'Cadastrar Novo Case'}
-            </h3>
-
-            <div className="space-y-4 text-xs">
-              <div>
-                <label className="block font-bold text-[#0C1D36] mb-1">Título do Projeto</label>
-                <input
-                  type="text"
-                  value={editingProject.title || ''}
-                  onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-[#0C1D36] mb-1">Cliente</label>
-                <input
-                  type="text"
-                  value={editingProject.client || ''}
-                  onChange={(e) => setEditingProject({ ...editingProject, client: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold text-[#0C1D36] mb-1">Categoria</label>
-                <select
-                  value={editingProject.category || 'institucional'}
-                  onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value as any })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white"
+      {/* ENHANCED KANBAN PROJECT DETAIL DRAWER */}
+      {selectedDetailProject && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
+          <div className="bg-white w-full max-w-2xl h-full shadow-2xl overflow-y-auto flex flex-col justify-between animate-in slide-in-from-right duration-300">
+            <div className="p-6 space-y-6 flex-1">
+              {/* DRAWER HEADER */}
+              <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#0075FF] bg-[#0075FF]/10 px-2.5 py-0.5 rounded">
+                    {selectedDetailProject.project_type} • {selectedDetailProject.platform}
+                  </span>
+                  <h3 className="text-xl font-extrabold text-[#0C1D36] mt-1">{selectedDetailProject.title}</h3>
+                  <p className="text-xs text-[#596579]">{selectedDetailProject.client_name} ({selectedDetailProject.company || 'N/A'})</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDetailProject(null)}
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-500"
                 >
-                  <option value="institucional">Site Institucional</option>
-                  <option value="e-commerce">Loja Virtual</option>
-                  <option value="landing-page">Landing Page</option>
-                  <option value="personalizado">Projeto Personalizado</option>
-                </select>
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              <div>
-                <label className="block font-bold text-[#0C1D36] mb-1">URL da Screenshot Vertical</label>
-                <input
-                  type="text"
-                  value={editingProject.desktop_image_url || ''}
-                  onChange={(e) => setEditingProject({ ...editingProject, desktop_image_url: e.target.value })}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs"
-                />
+              {/* DRAWER SUB-NAVIGATION TABS */}
+              <div className="flex items-center gap-2 border-b border-slate-200 pb-2 text-xs font-bold">
+                {[
+                  { id: 'geral', label: 'Geral' },
+                  { id: 'contato', label: 'Contato' },
+                  { id: 'escopo', label: 'Escopo & Briefing' },
+                  { id: 'links_arquivos', label: 'Links & Arquivos' },
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setDrawerTab(t.id as any)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-lg transition-colors',
+                      drawerTab === t.id ? 'bg-[#081D3A] text-white' : 'text-slate-600 hover:bg-slate-100'
+                    )}
+                  >
+                    {t.label}
+                  </button>
+                ))}
               </div>
 
-              <div>
-                <label className="block font-bold text-[#0C1D36] mb-1">Descrição Curta</label>
-                <textarea
-                  rows={3}
-                  value={editingProject.short_description || ''}
-                  onChange={(e) => setEditingProject({ ...editingProject, short_description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs"
-                />
-              </div>
+              {/* DRAWER TAB 1: GERAL */}
+              {drawerTab === 'geral' && (
+                <div className="space-y-4 text-xs text-[#0C1D36]">
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                    <div className="flex justify-between font-bold">
+                      <span>Estágio Atual:</span>
+                      <span className="text-[#0075FF]">{selectedDetailProject.status}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Responsável Principal:</span>
+                      <span className="font-bold">{selectedDetailProject.responsible_user_name || 'Sem responsável'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>E-mail do Responsável:</span>
+                      <span className="text-slate-500 font-mono">{selectedDetailProject.responsible_user_email || 'N/A'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Prazo Final:</span>
+                      <span className="font-bold text-rose-600">{selectedDetailProject.deadline || 'Sem prazo'}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <h4 className="font-bold text-sm text-[#0C1D36]">Descrição do Projeto</h4>
+                    <p className="text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                      {selectedDetailProject.description || 'Sem descrição cadastrada.'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* DRAWER TAB 2: CONTATO DO CLIENTE */}
+              {drawerTab === 'contato' && (
+                <div className="space-y-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <h4 className="font-bold text-sm text-[#0075FF]">Contato do Cliente</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-slate-500 block">Nome do Contato:</span>
+                      <span className="font-bold">{selectedDetailProject.client_contact_json?.contact_name || selectedDetailProject.client_name}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block">Empresa:</span>
+                      <span className="font-bold">{selectedDetailProject.company || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block">E-mail:</span>
+                      <span className="font-bold font-mono">{selectedDetailProject.client_contact_json?.email || selectedDetailProject.email || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block">WhatsApp:</span>
+                      <span className="font-bold">{selectedDetailProject.client_contact_json?.whatsapp || selectedDetailProject.whatsapp || 'N/A'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500 block">Canal Preferencial:</span>
+                      <span className="font-bold text-[#0075FF]">{selectedDetailProject.client_contact_json?.preferred_channel || 'WhatsApp'}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* DRAWER TAB 3: ESCOPO & BRIEFING */}
+              {drawerTab === 'escopo' && (
+                <div className="space-y-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <h4 className="font-bold text-sm text-[#0075FF]">Escopo & Briefing</h4>
+                  <div>
+                    <span className="text-slate-500 block">Objetivo:</span>
+                    <p className="font-semibold text-slate-700">{selectedDetailProject.scope_briefing_json?.objective || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block">Público-Alvo:</span>
+                    <p className="font-semibold text-slate-700">{selectedDetailProject.scope_briefing_json?.target_audience || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="text-slate-500 block">Requisitos Técnicos:</span>
+                    <p className="font-semibold text-slate-700">{selectedDetailProject.scope_briefing_json?.technical_requirements || 'N/A'}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* DRAWER TAB 4: LINKS & ARQUIVOS */}
+              {drawerTab === 'links_arquivos' && (
+                <div className="space-y-4 text-xs">
+                  <div className="space-y-2">
+                    <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-1.5">
+                      <LinkIcon className="w-4 h-4" />
+                      <span>Links Cadastrados</span>
+                    </h4>
+                    {selectedDetailProject.links?.length === 0 ? (
+                      <p className="text-slate-400 italic">Nenhum link cadastrado.</p>
+                    ) : (
+                      selectedDetailProject.links?.map((link) => (
+                        <div key={link.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                          <div>
+                            <a href={link.url} target="_blank" rel="noreferrer" className="font-bold text-[#0075FF] hover:underline">
+                              {link.label}
+                            </a>
+                            <span className="text-[10px] bg-white border border-slate-200 px-2 py-0.5 rounded font-bold ml-2">
+                              {link.category}
+                            </span>
+                          </div>
+                          <ExternalLink className="w-4 h-4 text-slate-400" />
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="space-y-2 pt-2 border-t border-slate-100">
+                    <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-1.5">
+                      <Paperclip className="w-4 h-4" />
+                      <span>Arquivos Privados (Bucket client-project-files)</span>
+                    </h4>
+                    {selectedDetailProject.files?.length === 0 ? (
+                      <p className="text-slate-400 italic">Nenhum arquivo enviado.</p>
+                    ) : (
+                      selectedDetailProject.files?.map((file) => (
+                        <div key={file.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                          <div>
+                            <span className="font-bold text-[#0C1D36]">{file.file_name}</span>
+                            <span className="text-[10px] bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded font-bold ml-2">
+                              {file.category}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => alert(`Baixando arquivo privado ${file.file_name} via URL assinada segura.`)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF]"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            Baixar
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+            {/* DRAWER FOOTER WITH DELETE BUTTON */}
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+              {(isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)) && (
+                <button
+                  type="button"
+                  onClick={() => handleDeleteProjectFromDrawer(selectedDetailProject.id, selectedDetailProject.title)}
+                  className="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 font-bold text-xs hover:bg-rose-100 flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>Excluir Projeto</span>
+                </button>
+              )}
+
               <button
                 type="button"
-                onClick={() => setIsProjectModalOpen(false)}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-[#596579] hover:bg-slate-100"
+                onClick={() => setSelectedDetailProject(null)}
+                className="px-4 py-2 rounded-xl bg-[#081D3A] text-white text-xs font-bold hover:bg-[#0075FF]"
               >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveProject}
-                className="px-5 py-2.5 rounded-xl bg-[#0075FF] text-white text-xs font-bold hover:bg-[#168CFF] shadow-md"
-              >
-                Salvar Case
+                Fechar
               </button>
             </div>
           </div>

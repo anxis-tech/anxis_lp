@@ -1,0 +1,107 @@
+'use server'
+
+import { createClient as createServerSupabase } from '@/lib/supabase/server'
+import { createClient as createAdminSupabase } from '@supabase/supabase-js'
+import { z } from 'zod'
+
+const createUserSchema = z.object({
+  fullName: z.string().min(2, 'Nome é obrigatório'),
+  email: z.string().email('E-mail inválido'),
+  roleSlug: z.enum(['admin', 'comercial', 'designer']),
+  method: z.enum(['invite', 'temp_password']),
+  tempPassword: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+export async function createAdminUserAction(formData: unknown) {
+  try {
+    // 1. Verify current session in server
+    const serverSupabase = await createServerSupabase()
+    const { data: { user: currentUser } } = await serverSupabase.auth.getUser()
+
+    if (!currentUser) {
+      return { success: false, message: 'Sessão inválida ou não autenticada.' }
+    }
+
+    // 2. Parse & Validate Input
+    const validated = createUserSchema.parse(formData)
+
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+
+    if (!serviceRoleKey || !supabaseUrl) {
+      // Offline / Demo fallback mock response
+      return {
+        success: true,
+        message: `[Modo Demo] Usuário ${validated.fullName} (${validated.email}) registrado com sucesso!`,
+      }
+    }
+
+    // 3. Initialize Admin Supabase Client with Service Role Key
+    const supabaseAdmin = createAdminSupabase(supabaseUrl, serviceRoleKey)
+
+    // 4. Create Auth User
+    let newUserId: string
+
+    if (validated.method === 'invite') {
+      const { data: inviteData, error: inviteErr } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+        validated.email,
+        { data: { full_name: validated.fullName } }
+      )
+      if (inviteErr) throw inviteErr
+      newUserId = inviteData.user.id
+    } else {
+      if (!validated.tempPassword || validated.tempPassword.length < 6) {
+        return { success: false, message: 'Senha temporária deve ter pelo menos 6 caracteres.' }
+      }
+      const { data: createData, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+        email: validated.email,
+        password: validated.tempPassword,
+        email_confirm: true,
+        user_metadata: { full_name: validated.fullName },
+      })
+      if (createErr) throw createErr
+      newUserId = createData.user.id
+    }
+
+    // 5. Get Role ID
+    const { data: roleData } = await supabaseAdmin
+      .from('roles')
+      .select('id')
+      .eq('slug', validated.roleSlug)
+      .single()
+
+    // 6. Insert Profile
+    await supabaseAdmin.from('profiles').insert({
+      user_id: newUserId,
+      full_name: validated.fullName,
+      email: validated.email,
+      role_id: roleData?.id || null,
+      is_active: true,
+      must_change_password: validated.method === 'temp_password',
+      notes: validated.notes || null,
+      created_by: currentUser.id,
+    })
+
+    // 7. Audit Log
+    await supabaseAdmin.from('audit_logs').insert({
+      user_id: currentUser.id,
+      user_email: currentUser.email,
+      action: 'create_user',
+      module: 'users',
+      record_id: newUserId,
+      new_data: { email: validated.email, role: validated.roleSlug, method: validated.method },
+    })
+
+    return {
+      success: true,
+      message: `Usuário ${validated.fullName} criado com sucesso!`,
+    }
+  } catch (err: any) {
+    console.error('Error creating user:', err)
+    return {
+      success: false,
+      message: err?.message || 'Erro ao criar usuário.',
+    }
+  }
+}
