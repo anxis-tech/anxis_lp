@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 120" width="100%" height="100%">
+  <defs>
+    <!-- Gradient for Blue Arrow in 'A' -->
+    <linearGradient id="blueGradLight" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#081D3A" />
+      <stop offset="50%" stop-color="#0055D4" />
+      <stop offset="100%" stop-color="#0075FF" />
+    </linearGradient>
+
+    <!-- Gradient for Metallic Silver Right Bar -->
+    <linearGradient id="silverGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#657184" />
+      <stop offset="40%" stop-color="#A5B0C0" />
+      <stop offset="70%" stop-color="#E2E7F0" />
+      <stop offset="100%" stop-color="#657184" />
+    </linearGradient>
+
+    <!-- Blue gradient for 'x' cross and 'i' dot -->
+    <linearGradient id="blueAccLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0075FF" />
+      <stop offset="100%" stop-color="#081D3A" />
+    </linearGradient>
+  </defs>
+
+  <!-- GEOMETRIC SMBOL 'A' -->
+  <g transform="translate(140, 10)">
+    <!-- Left Blue Chevron / Arrow shape -->
+    <path d="M 50 10 L 10 75 L 75 75 L 75 55 L 38 55 L 58 24 Z" fill="url(#blueGradLight)" />
+    <!-- Right Metallic Slash -->
+    <path d="M 58 8 C 58 8 98 68 108 82 L 80 82 L 35 15 Z" fill="url(#silverGradLight)" />
+  </g>
+
+  <!-- TYPOGRAPHY 'anxis' -->
+  <g transform="translate(30, 85)" fill="#0C1D36" font-family="system-ui, -apple-system, sans-serif" font-weight="400" font-size="44" letter-spacing="12">
+    <!-- a -->
+    <text x="0" y="32" font-size="42" font-family="'Outfit', 'Inter', sans-serif">a</text>
+    <!-- n -->
+    <text x="75" y="32" font-size="42" font-family="'Outfit', 'Inter', sans-serif">n</text>
+    <!-- x with gradient stroke accent -->
+    <g transform="translate(160, 0)">
+      <path d="M 5 36 L 35 4 L 28 4 L 0 36 Z" fill="#0C1D36" />
+      <path d="M 0 4 L 32 36 L 38 36 L 8 4 Z" fill="url(#blueAccLight)" />
+    </g>
+    <!-- i with electric blue dot -->
+    <g transform="translate(245, 0)">
+      <text x="0" y="32" font-size="42" font-family="'Outfit', 'Inter', sans-serif">i</text>
+      <circle cx="9" cy="-2" r="4.5" fill="#0075FF" />
+    </g>
+    <!-- s -->
+    <text x="300" y="32" font-size="42" font-family="'Outfit', 'Inter', sans-serif">s</text>
+  </g>
+</svg>

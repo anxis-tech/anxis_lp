@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #F7F8FA;
+    --foreground: #0C1D36;
+
+    --navy-deep: #081D3A;
+    --navy-medium: #0B2F63;
+    --blue-electric: #0075FF;
+    --blue-luminous: #168CFF;
+    --gray-metallic-dark: #657184;
+    --gray-metallic-light: #BBC4D1;
+
+    --card: #FFFFFF;
+    --card-foreground: #0C1D36;
+
+    --primary: #0075FF;
+    --primary-foreground: #FFFFFF;
+
+    --secondary: #081D3A;
+    --secondary-foreground: #FFFFFF;
+
+    --muted: #EEF2F6;
+    --muted-foreground: #596579;
+
+    --accent: #168CFF;
+    --accent-foreground: #FFFFFF;
+
+    --border: #E2E8F0;
+    --input: #E2E8F0;
+    --ring: #0075FF;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: #081D3A;
+    --foreground: #F7F8FA;
+
+    --card: #0B2F63;
+    --card-foreground: #F7F8FA;
+
+    --primary: #0075FF;
+    --primary-foreground: #FFFFFF;
+
+    --secondary: #168CFF;
+    --secondary-foreground: #FFFFFF;
+
+    --muted: #0F284D;
+    --muted-foreground: #BBC4D1;
+
+    --border: #163968;
+    --input: #163968;
+    --ring: #168CFF;
+  }
+}
+
+@layer utilities {
+  /* ANXIS Gradient Utilities */
+  .bg-gradient-anxis {
+    background: linear-gradient(135deg, #081D3A 0%, #0B2F63 50%, #0075FF 100%);
+  }
+
+  .bg-gradient-blue-glow {
+    background: radial-gradient(circle at center, rgba(0, 117, 255, 0.15) 0%, rgba(8, 29, 58, 0) 70%);
+  }
+
+  .bg-gradient-metallic {
+    background: linear-gradient(135deg, #657184 0%, #BBC4D1 50%, #E2E7F0 100%);
+  }
+
+  .text-gradient-blue {
+    background: linear-gradient(135deg, #0075FF 0%, #168CFF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gradient-metallic {
+    background: linear-gradient(135deg, #0C1D36 0%, #657184 60%, #0075FF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .shadow-glow-blue {
+    box-shadow: 0 0 25px -5px rgba(0, 117, 255, 0.35);
+  }
+
+  .shadow-glow-blue-lg {
+    box-shadow: 0 0 50px -10px rgba(0, 117, 255, 0.45);
+  }
+
+  .border-metallic {
+    border-color: rgba(187, 196, 209, 0.3);
+  }
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F7F8FA;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #BBC4D1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0075FF;
+}
+
+/* Tech Marquee Animations */
+@keyframes marquee-left {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
+}
+
+.animate-marquee-left {
+  display: flex;
+  width: max-content;
+  animation: marquee-left 35s linear infinite;
+}
+
+.animate-marquee-right {
+  display: flex;
+  width: max-content;
+  animation: marquee-right 35s linear infinite;
+}
+
+.animate-marquee-left:hover,
+.animate-marquee-right:hover {
+  animation-play-state: paused;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
