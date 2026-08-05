@@ -58,6 +58,22 @@ export function UsersPermissionsTab({
       role_slug: 'admin',
       is_active: true,
     },
+    {
+      id: 'u-comercial-demo',
+      user_id: 'usr-comercial-demo',
+      full_name: 'Gestor Comercial',
+      email: 'comercial@anxis.com.br',
+      role_slug: 'comercial',
+      is_active: true,
+    },
+    {
+      id: 'u-designer-demo',
+      user_id: 'usr-designer-demo',
+      full_name: 'Designer Lead',
+      email: 'design@anxis.com.br',
+      role_slug: 'designer',
+      is_active: true,
+    },
   ]
 
   useEffect(() => {
