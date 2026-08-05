@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PERMISSIONS, UserProfileWithRole } from '@/lib/auth/permissions'
+import { updateUserRoleAction } from '@/lib/actions/users'
 import {
   Shield,
   Search,
@@ -14,35 +15,11 @@ import {
   UserX,
   UserCheck,
   Info,
+  Crown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const MOCK_USERS: UserProfileWithRole[] = [
-  {
-    id: 'u-1',
-    user_id: 'user-admin-uuid',
-    full_name: 'Administrador ANXIS',
-    email: 'admin@anxis.com.br',
-    role_slug: 'admin',
-    is_active: true,
-  },
-  {
-    id: 'u-2',
-    user_id: 'user-comercial-uuid',
-    full_name: 'Ana Comercial',
-    email: 'comercial@anxis.com.br',
-    role_slug: 'comercial',
-    is_active: true,
-  },
-  {
-    id: 'u-3',
-    user_id: 'user-designer-uuid',
-    full_name: 'Carlos Designer',
-    email: 'designer@anxis.com.br',
-    role_slug: 'designer',
-    is_active: true,
-  },
-]
+import { createClient } from '@/lib/supabase/client'
 
 export const TAB_PERMISSION_KEYS = [
   { key: 'dashboard.view', label: 'Visualizar Dashboard', category: 'Visão Geral' },
@@ -68,9 +45,57 @@ export function UsersPermissionsTab({
   canManageRoles = true,
   canManagePermissions = true,
 }: UsersPermissionsTabProps) {
-  const [userList, setUserList] = useState<UserProfileWithRole[]>(MOCK_USERS)
+  const [userList, setUserList] = useState<UserProfileWithRole[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState('todos')
+
+  const fallbackUsers: UserProfileWithRole[] = [
+    {
+      id: 'u-main-admin',
+      user_id: currentUserId || 'usr-admin-principal',
+      full_name: 'Usuário Principal (Administrador)',
+      email: 'admin@anxis.com.br',
+      role_slug: 'admin',
+      is_active: true,
+    },
+  ]
+
+  useEffect(() => {
+    fetchRealUsers()
+  }, [])
+
+  const fetchRealUsers = async () => {
+    try {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*, roles(slug)')
+        .order('created_at', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching user profiles:', error)
+        setUserList(fallbackUsers)
+        return
+      }
+
+      if (data && data.length > 0) {
+        const mappedUsers: UserProfileWithRole[] = data.map((p: any) => ({
+          id: p.id,
+          user_id: p.user_id,
+          full_name: p.full_name || p.email?.split('@')[0] || 'Usuário',
+          email: p.email,
+          role_slug: p.roles?.slug || 'admin',
+          is_active: p.is_active ?? true,
+        }))
+        setUserList(mappedUsers)
+      } else {
+        setUserList(fallbackUsers)
+      }
+    } catch (e) {
+      console.warn('Could not fetch user profiles:', e)
+      setUserList(fallbackUsers)
+    }
+  }
 
   // Permission Matrix Edit Modal State
   const [editingUserPerms, setEditingUserPerms] = useState<UserProfileWithRole | null>(null)
@@ -83,6 +108,18 @@ export function UsersPermissionsTab({
     const matchesRole = roleFilter === 'todos' || u.role_slug === roleFilter
     return matchesSearch && matchesRole
   })
+
+  const handleRoleChange = async (userId: string, newRoleSlug: string) => {
+    setUserList((prev) =>
+      prev.map((u) => (u.user_id === userId ? { ...u, role_slug: newRoleSlug } : u))
+    )
+    const res = await updateUserRoleAction(userId, newRoleSlug)
+    if (res.success) {
+      alert(`Cargo atualizado para "${newRoleSlug.toUpperCase()}" (Controle Total ativado se Admin)!`)
+    } else {
+      alert(`Aviso: ${res.message}`)
+    }
+  }
 
   const handleToggleUserStatus = (userId: string) => {
     setUserList((prev) =>
@@ -102,6 +139,13 @@ export function UsersPermissionsTab({
   const handleOpenPermissionsModal = (user: UserProfileWithRole) => {
     setEditingUserPerms(user)
     setCustomPerms(user.custom_permissions || {})
+  }
+
+  const handleGrantFullAdmin = async (userId: string) => {
+    await handleRoleChange(userId, 'admin')
+    if (editingUserPerms && editingUserPerms.user_id === userId) {
+      setEditingUserPerms((prev) => (prev ? { ...prev, role_slug: 'admin' } : null))
+    }
   }
 
   const handleTogglePermissionKey = (permKey: string) => {
@@ -130,10 +174,10 @@ export function UsersPermissionsTab({
       <div className="border-b border-slate-100 pb-4">
         <h2 className="text-xl font-extrabold text-[#0C1D36] flex items-center gap-2">
           <Shield className="w-5 h-5 text-[#0075FF]" />
-          <span>Gestão de Permissões de Acesso por Usuário</span>
+          <span>Gestão de Permissões e Controle de Acesso</span>
         </h2>
         <p className="text-xs text-[#596579] mt-1">
-          Configure as permissões de visualização de cada aba do painel para os usuários da equipe.
+          Gerencie cargos e atribua controle total (Administrador) ou permissões específicas por aba aos usuários.
         </p>
       </div>
 
@@ -173,7 +217,7 @@ export function UsersPermissionsTab({
           <thead>
             <tr className="bg-[#081D3A] text-white border-b border-slate-800 font-bold uppercase tracking-wider text-[11px]">
               <th className="p-3.5 whitespace-nowrap">Usuário</th>
-              <th className="p-3.5 whitespace-nowrap">Cargo Institucional</th>
+              <th className="p-3.5 whitespace-nowrap">Cargo / Nível de Acesso</th>
               <th className="p-3.5 whitespace-nowrap">Status do Acesso</th>
               <th className="p-3.5 whitespace-nowrap">Permissões de Abas</th>
               <th className="p-3.5 text-right whitespace-nowrap">Ações de Permissão</th>
@@ -183,23 +227,45 @@ export function UsersPermissionsTab({
             {filteredUsers.map((user) => (
               <tr key={user.id} className="hover:bg-slate-50 transition-colors">
                 <td className="p-3.5">
-                  <div className="font-extrabold text-[#0C1D36] text-xs">{user.full_name}</div>
+                  <div className="font-extrabold text-[#0C1D36] text-xs flex items-center gap-1.5">
+                    {user.role_slug === 'admin' && <Crown className="w-3.5 h-3.5 text-amber-500" />}
+                    <span>{user.full_name}</span>
+                  </div>
                   <div className="text-[11px] text-slate-500 font-mono">{user.email}</div>
                 </td>
 
                 <td className="p-3.5">
-                  <span
-                    className={cn(
-                      'inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider',
-                      user.role_slug === 'admin'
-                        ? 'bg-rose-500/10 text-rose-600 border border-rose-200'
-                        : user.role_slug === 'comercial'
-                        ? 'bg-[#0075FF]/10 text-[#0075FF] border border-[#0075FF]/20'
-                        : 'bg-purple-500/10 text-purple-600 border border-purple-200'
-                    )}
-                  >
-                    {user.role_slug}
-                  </span>
+                  {canManageRoles ? (
+                    <select
+                      value={user.role_slug}
+                      onChange={(e) => handleRoleChange(user.user_id, e.target.value)}
+                      className={cn(
+                        'px-2.5 py-1 rounded-lg text-[11px] font-extrabold border outline-none cursor-pointer shadow-sm transition-all',
+                        user.role_slug === 'admin'
+                          ? 'bg-rose-50 text-rose-700 border-rose-300 focus:ring-rose-400'
+                          : user.role_slug === 'comercial'
+                          ? 'bg-blue-50 text-blue-700 border-blue-300 focus:ring-blue-400'
+                          : 'bg-purple-50 text-purple-700 border-purple-300 focus:ring-purple-400'
+                      )}
+                    >
+                      <option value="admin">★ Admin (Controle Total)</option>
+                      <option value="comercial">Comercial</option>
+                      <option value="designer">Designer</option>
+                    </select>
+                  ) : (
+                    <span
+                      className={cn(
+                        'inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider',
+                        user.role_slug === 'admin'
+                          ? 'bg-rose-500/10 text-rose-600 border border-rose-200'
+                          : user.role_slug === 'comercial'
+                          ? 'bg-[#0075FF]/10 text-[#0075FF] border border-[#0075FF]/20'
+                          : 'bg-purple-500/10 text-purple-600 border border-purple-200'
+                      )}
+                    >
+                      {user.role_slug === 'admin' ? 'Admin (Controle Total)' : user.role_slug}
+                    </span>
+                  )}
                 </td>
 
                 <td className="p-3.5">
@@ -276,13 +342,25 @@ export function UsersPermissionsTab({
                   Cargo: <span className="font-bold text-[#0075FF] uppercase">{editingUserPerms.role_slug}</span> • {editingUserPerms.email}
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => setEditingUserPerms(null)}
-                className="text-slate-400 hover:text-[#0C1D36] font-bold p-1 rounded-lg"
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-2">
+                {editingUserPerms.role_slug !== 'admin' && (
+                  <button
+                    type="button"
+                    onClick={() => handleGrantFullAdmin(editingUserPerms.user_id)}
+                    className="px-3 py-1.5 rounded-xl bg-amber-500 text-white font-extrabold text-[11px] hover:bg-amber-600 shadow-sm flex items-center gap-1"
+                  >
+                    <Crown className="w-3.5 h-3.5" />
+                    <span>Conceder Controle Total (Admin)</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setEditingUserPerms(null)}
+                  className="text-slate-400 hover:text-[#0C1D36] font-bold p-1 rounded-lg"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 text-xs">

@@ -105,3 +105,72 @@ export async function createAdminUserAction(formData: unknown) {
     }
   }
 }
+
+export async function updateUserRoleAction(userId: string, roleSlug: string) {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!serviceRoleKey || !supabaseUrl) {
+      return { success: true, message: `[Modo Demo] Cargo alterado para ${roleSlug}` }
+    }
+
+    const supabaseAdmin = createAdminSupabase(supabaseUrl, serviceRoleKey)
+
+    const { data: roleData, error: roleErr } = await supabaseAdmin
+      .from('roles')
+      .select('id')
+      .eq('slug', roleSlug)
+      .single()
+
+    if (roleErr || !roleData) {
+      return { success: false, message: 'Cargo não encontrado no banco de dados.' }
+    }
+
+    const { error: updateErr } = await supabaseAdmin
+      .from('profiles')
+      .update({ role_id: roleData.id })
+      .eq('user_id', userId)
+
+    if (updateErr) throw updateErr
+
+    return { success: true, message: `Cargo alterado para ${roleSlug} com sucesso!` }
+  } catch (err: any) {
+    console.error('Error updating user role:', err)
+    return { success: false, message: err?.message || 'Erro ao atualizar cargo.' }
+  }
+}
+
+export async function setUserAsAdminByEmailAction(email: string) {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!serviceRoleKey || !supabaseUrl) {
+      return { success: true, message: `[Modo Demo] Usuário ${email} definido como Administrador!` }
+    }
+
+    const supabaseAdmin = createAdminSupabase(supabaseUrl, serviceRoleKey)
+
+    const { data: roleData } = await supabaseAdmin
+      .from('roles')
+      .select('id')
+      .eq('slug', 'admin')
+      .single()
+
+    if (!roleData) return { success: false, message: 'Cargo de Administrador não encontrado.' }
+
+    const { error } = await supabaseAdmin
+      .from('profiles')
+      .update({ role_id: roleData.id, is_active: true })
+      .eq('email', email)
+
+    if (error) throw error
+
+    return { success: true, message: `Usuário ${email} promovido a Administrador (Controle Total)!` }
+  } catch (err: any) {
+    console.error('Error setting admin by email:', err)
+    return { success: false, message: err?.message || 'Erro ao atribuir permissão de administrador.' }
+  }
+}
+

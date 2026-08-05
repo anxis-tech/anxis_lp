@@ -61,10 +61,10 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<string>('dashboard')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
 
-  // Live state
-  const [homeProjects, setHomeProjects] = useState<Project[]>(INITIAL_PROJECTS)
-  const [clientProjects, setClientProjects] = useState<ClientProject[]>(MOCK_CLIENT_PROJECTS_FULL)
-  const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>(MOCK_SAVED_QUOTES)
+  // Live state from Supabase DB
+  const [homeProjects, setHomeProjects] = useState<Project[]>([])
+  const [clientProjects, setClientProjects] = useState<ClientProject[]>([])
+  const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([])
   const [calculatorInitialData, setCalculatorInitialData] = useState<QuoteFormData | undefined>()
 
   // Project Modal & Detail Drawer State
@@ -102,12 +102,14 @@ export default function AdminDashboardPage() {
             return
           }
 
+          const userRoleSlug = (profile as any).roles?.slug || 'admin'
+
           setUserProfile({
             id: profile.id,
             user_id: user.id,
             full_name: profile.full_name || user.email?.split('@')[0] || 'Usuário',
             email: user.email || '',
-            role_slug: (profile as any).roles?.slug || 'admin',
+            role_slug: userRoleSlug,
             is_active: profile.is_active ?? true,
           })
 
@@ -117,28 +119,49 @@ export default function AdminDashboardPage() {
             .update({ last_access_at: new Date().toISOString() })
             .eq('user_id', user.id)
         } else {
+          // Profile row does not exist in Supabase DB yet - Auto provision Admin profile
+          try {
+            const { data: adminRole } = await supabase
+              .from('roles')
+              .select('id')
+              .eq('slug', 'admin')
+              .single()
+
+            const newProfile = {
+              user_id: user.id,
+              full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Administrador',
+              email: user.email || '',
+              role_id: adminRole?.id || null,
+              is_active: true,
+            }
+
+            await supabase.from('profiles').upsert(newProfile, { onConflict: 'user_id' })
+          } catch (err) {
+            console.warn('Could not auto-provision profile:', err)
+          }
+
           setUserProfile({
-            id: 'admin-fallback-id',
+            id: user.id,
             user_id: user.id,
-            full_name: user.email?.split('@')[0] || 'Administrador',
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Administrador',
             email: user.email || '',
             role_slug: 'admin',
             is_active: true,
           })
         }
       } else {
-        // Local Demo / Offline Mode Fallback
+        // Offline / Demo mode default
         setUserProfile({
-          id: 'demo-admin-id',
-          user_id: 'demo-user-id',
-          full_name: 'Administrador ANXIS (Demo)',
+          id: 'usr-admin-default',
+          user_id: 'usr-admin-default',
+          full_name: 'Administrador Principal',
           email: 'admin@anxis.com.br',
           role_slug: 'admin',
           is_active: true,
         })
       }
 
-      // Fetch live home projects, client projects & saved quotes from Supabase
+      // Fetch live home projects, client projects & saved quotes from Supabase DB
       const [
         { data: pData },
         { data: cpData },
@@ -149,19 +172,11 @@ export default function AdminDashboardPage() {
         supabase.from('quotes').select('*').order('created_at', { ascending: false }),
       ])
 
-      if (pData && pData.length > 0) setHomeProjects(pData)
-      if (cpData && cpData.length > 0) setClientProjects(cpData as any)
-      if (qData && qData.length > 0) setSavedQuotes(qData as any)
+      setHomeProjects(pData || [])
+      setClientProjects((cpData as any) || [])
+      setSavedQuotes((qData as any) || [])
     } catch (e) {
-      console.warn('Running admin in offline/demo mode.')
-      setUserProfile({
-        id: 'demo-admin-id',
-        user_id: 'demo-user-id',
-        full_name: 'Administrador ANXIS (Demo)',
-        email: 'admin@anxis.com.br',
-        role_slug: 'admin',
-        is_active: true,
-      })
+      console.warn('Supabase DB connection error:', e)
     } finally {
       setAuthResolved(true)
     }
