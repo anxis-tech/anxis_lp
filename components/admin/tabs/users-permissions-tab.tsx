@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { PERMISSIONS, UserProfileWithRole } from '@/lib/auth/permissions'
-import { updateUserRoleAction } from '@/lib/actions/users'
+import { updateUserRoleAction, updateUserPermissionsAction, syncAuthUsersToProfilesAction } from '@/lib/actions/users'
 import {
   Shield,
   Search,
@@ -59,6 +59,9 @@ export function UsersPermissionsTab({
     setIsLoading(true)
     setFetchError(null)
     try {
+      // Sync auth.users to profiles first
+      await syncAuthUsersToProfilesAction()
+
       const supabase = createClient()
       const { data, error } = await supabase
         .from('profiles')
@@ -78,8 +81,9 @@ export function UsersPermissionsTab({
           user_id: p.user_id,
           full_name: p.full_name || p.email?.split('@')[0] || 'Usuário',
           email: p.email,
-          role_slug: p.roles?.slug || 'viewer',
+          role_slug: p.roles?.slug || '',
           is_active: p.is_active ?? true,
+          custom_permissions: p.custom_permissions || {},
         }))
         setUserList(mappedUsers)
       } else {
@@ -112,7 +116,7 @@ export function UsersPermissionsTab({
     )
     const res = await updateUserRoleAction(userId, newRoleSlug)
     if (res.success) {
-      alert(`Cargo atualizado para "${newRoleSlug.toUpperCase()}" (Controle Total ativado se Admin)!`)
+      alert(`Cargo atualizado para "${newRoleSlug ? newRoleSlug.toUpperCase() : 'SEM CARGO (APENAS DASHBOARD)'}"!`)
     } else {
       alert(`Aviso: ${res.message}`)
     }
@@ -147,22 +151,26 @@ export function UsersPermissionsTab({
 
   const handleTogglePermissionKey = (permKey: string) => {
     setCustomPerms((prev) => {
-      const currentVal = prev[permKey] ?? true
+      const currentVal = prev[permKey] ?? false
       return { ...prev, [permKey]: !currentVal }
     })
   }
 
-  const handleSavePermissions = () => {
+  const handleSavePermissions = async () => {
     if (!editingUserPerms) return
 
-    setUserList((prev) =>
-      prev.map((u) =>
-        u.id === editingUserPerms.id ? { ...u, custom_permissions: { ...customPerms } } : u
+    const res = await updateUserPermissionsAction(editingUserPerms.user_id, customPerms)
+    if (res.success) {
+      setUserList((prev) =>
+        prev.map((u) =>
+          u.id === editingUserPerms.id ? { ...u, custom_permissions: { ...customPerms } } : u
+        )
       )
-    )
-
-    setEditingUserPerms(null)
-    alert(`Permissões de visualização atualizadas para ${editingUserPerms.full_name}!`)
+      setEditingUserPerms(null)
+      alert(`Permissões de visualização atualizadas para ${editingUserPerms.full_name}!`)
+    } else {
+      alert(`Erro ao salvar permissões: ${res.message}`)
+    }
   }
 
   return (
@@ -284,9 +292,12 @@ export function UsersPermissionsTab({
                             ? 'bg-rose-50 text-rose-700 border-rose-300 focus:ring-rose-400'
                             : user.role_slug === 'comercial'
                             ? 'bg-blue-50 text-blue-700 border-blue-300 focus:ring-blue-400'
-                            : 'bg-purple-50 text-purple-700 border-purple-300 focus:ring-purple-400'
+                            : user.role_slug === 'designer'
+                            ? 'bg-purple-50 text-purple-700 border-purple-300 focus:ring-purple-400'
+                            : 'bg-slate-100 text-slate-700 border-slate-300 focus:ring-slate-400'
                         )}
                       >
+                        <option value="">Sem cargo (Somente Dashboard)</option>
                         <option value="admin">★ Admin (Controle Total)</option>
                         <option value="comercial">Comercial</option>
                         <option value="designer">Designer</option>

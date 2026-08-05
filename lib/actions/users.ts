@@ -116,24 +116,29 @@ export async function updateUserRoleAction(userId: string, roleSlug: string) {
 
     const supabaseAdmin = createAdminSupabase(supabaseUrl, serviceRoleKey)
 
-    const { data: roleData, error: roleErr } = await supabaseAdmin
-      .from('roles')
-      .select('id')
-      .eq('slug', roleSlug)
-      .single()
+    let roleId: string | null = null
 
-    if (roleErr || !roleData) {
-      return { success: false, message: 'Cargo não encontrado no banco de dados.' }
+    if (roleSlug) {
+      const { data: roleData, error: roleErr } = await supabaseAdmin
+        .from('roles')
+        .select('id')
+        .eq('slug', roleSlug)
+        .single()
+
+      if (roleErr || !roleData) {
+        return { success: false, message: 'Cargo não encontrado no banco de dados.' }
+      }
+      roleId = roleData.id
     }
 
     const { error: updateErr } = await supabaseAdmin
       .from('profiles')
-      .update({ role_id: roleData.id })
+      .update({ role_id: roleId })
       .eq('user_id', userId)
 
     if (updateErr) throw updateErr
 
-    return { success: true, message: `Cargo alterado para ${roleSlug} com sucesso!` }
+    return { success: true, message: `Cargo alterado com sucesso!` }
   } catch (err: any) {
     console.error('Error updating user role:', err)
     return { success: false, message: err?.message || 'Erro ao atualizar cargo.' }
@@ -170,6 +175,98 @@ export async function setUserAsAdminByEmailAction(email: string) {
   } catch (err: any) {
     console.error('Error setting admin by email:', err)
     return { success: false, message: err?.message || 'Erro ao atribuir permissão de administrador.' }
+  }
+}
+
+export async function updateUserPermissionsAction(
+  targetUserId: string,
+  customPermissions: Record<string, boolean>
+) {
+  try {
+    const serverSupabase = await createServerSupabase()
+    const { data: { user: currentUser } } = await serverSupabase.auth.getUser()
+
+    if (!currentUser) {
+      return { success: false, message: 'Sessão inválida ou não autenticada.' }
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!serviceRoleKey || !supabaseUrl) {
+      return { success: false, message: 'Erro de configuração: SUPABASE_SERVICE_ROLE_KEY não está definida no servidor.' }
+    }
+
+    const supabaseAdmin = createAdminSupabase(supabaseUrl, serviceRoleKey)
+
+    const { error: updateErr } = await supabaseAdmin
+      .from('profiles')
+      .update({ custom_permissions: customPermissions })
+      .eq('user_id', targetUserId)
+
+    if (updateErr) throw updateErr
+
+    // Audit log
+    await supabaseAdmin.from('audit_logs').insert({
+      user_id: currentUser.id,
+      user_email: currentUser.email,
+      action: 'update_permissions',
+      module: 'users',
+      record_id: targetUserId,
+      new_data: { custom_permissions: customPermissions },
+    })
+
+    return { success: true, message: 'Permissões salvas com sucesso no Supabase!' }
+  } catch (err: any) {
+    console.error('Error updating user permissions:', err)
+    return { success: false, message: err?.message || 'Erro ao salvar permissões.' }
+  }
+}
+
+export async function syncAuthUsersToProfilesAction() {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!serviceRoleKey || !supabaseUrl) {
+      return { success: false, message: 'Service key missing' }
+    }
+
+    const supabaseAdmin = createAdminSupabase(supabaseUrl, serviceRoleKey)
+
+    // Fetch all auth users
+    const { data: authUsersData, error: listErr } = await supabaseAdmin.auth.admin.listUsers()
+    if (listErr || !authUsersData?.users) {
+      return { success: false, message: listErr?.message || 'Failed to list auth users' }
+    }
+
+    // Fetch existing profile user_ids
+    const { data: existingProfiles } = await supabaseAdmin
+      .from('profiles')
+      .select('user_id')
+
+    const existingUserIds = new Set((existingProfiles || []).map((p) => p.user_id))
+
+    // Insert profiles for auth users who don't have one
+    const missingUsers = authUsersData.users.filter((u) => !existingUserIds.has(u.id))
+
+    if (missingUsers.length > 0) {
+      const newProfiles = missingUsers.map((u) => ({
+        user_id: u.id,
+        full_name: u.user_metadata?.full_name || u.email?.split('@')[0] || 'Usuário',
+        email: u.email || '',
+        role_id: null,
+        is_active: true,
+        custom_permissions: {},
+      }))
+
+      await supabaseAdmin.from('profiles').insert(newProfiles)
+    }
+
+    return { success: true, syncedCount: missingUsers.length }
+  } catch (err: any) {
+    console.error('Error syncing auth users:', err)
+    return { success: false, message: err?.message }
   }
 }
 

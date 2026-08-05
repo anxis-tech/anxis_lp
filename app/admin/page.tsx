@@ -73,7 +73,34 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     initAdminSession()
+
+    // Real-time subscription to update profile & permissions when changed by admin
+    const supabase = createClient()
+    const channel = supabase
+      .channel('profile_updates')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        () => {
+          initAdminSession()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
+
+  // Ensure activeTab is always an allowed tab for the current user
+  useEffect(() => {
+    if (authResolved && userProfile) {
+      const allowedTabIds = navSections.flatMap((s) => s.items).filter((t) => t.allowed).map((t) => t.id)
+      if (allowedTabIds.length > 0 && !allowedTabIds.includes(activeTab)) {
+        setActiveTab(allowedTabIds[0])
+      }
+    }
+  }, [authResolved, userProfile, activeTab])
 
   const initAdminSession = async () => {
     try {
@@ -102,7 +129,7 @@ export default function AdminDashboardPage() {
             return
           }
 
-          const userRoleSlug = (profile as any).roles?.slug || 'admin'
+          const userRoleSlug = (profile as any).roles?.slug || ''
 
           setUserProfile({
             id: profile.id,
@@ -111,6 +138,7 @@ export default function AdminDashboardPage() {
             email: user.email || '',
             role_slug: userRoleSlug,
             is_active: profile.is_active ?? true,
+            custom_permissions: (profile as any).custom_permissions || {},
           })
 
           // Update last access timestamp in Supabase
@@ -119,15 +147,33 @@ export default function AdminDashboardPage() {
             .update({ last_access_at: new Date().toISOString() })
             .eq('user_id', user.id)
         } else {
-          // No profile exists but user is authenticated — redirect to login
-          // Profile should be created by the Supabase trigger on auth.users INSERT
-          console.warn('User profile not found for authenticated user. Redirecting to login.')
-          await supabase.auth.signOut()
-          router.push('/admin/login?error=no_profile')
-          return
+          // Profile row does not exist in Supabase DB yet - Auto provision profile (unassigned role)
+          const newProfileData = {
+            user_id: user.id,
+            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuário',
+            email: user.email || '',
+            role_id: null,
+            is_active: true,
+            custom_permissions: {},
+          }
+
+          try {
+            await supabase.from('profiles').upsert(newProfileData, { onConflict: 'user_id' })
+          } catch (err) {
+            console.warn('Could not auto-provision profile:', err)
+          }
+
+          setUserProfile({
+            id: user.id,
+            user_id: user.id,
+            full_name: newProfileData.full_name,
+            email: newProfileData.email,
+            role_slug: '',
+            is_active: true,
+            custom_permissions: {},
+          })
         }
       } else {
-        // No authenticated user and Supabase is configured — redirect to login
         router.push('/admin/login')
         return
       }
@@ -157,8 +203,9 @@ export default function AdminDashboardPage() {
             user_id: p.user_id,
             full_name: p.full_name || p.email?.split('@')[0] || 'Usuário',
             email: p.email,
-            role_slug: (p as any).roles?.slug || 'viewer',
+            role_slug: (p as any).roles?.slug || '',
             is_active: p.is_active ?? true,
+            custom_permissions: p.custom_permissions || {},
           }))
         )
       }
