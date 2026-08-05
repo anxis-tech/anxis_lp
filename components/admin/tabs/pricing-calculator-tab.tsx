@@ -116,6 +116,7 @@ export function PricingCalculatorTab({
     formData.projectType === 'Site institucional'
 
   const isLojaVirtual = formData.projectType === 'Loja virtual'
+  const isBlog = formData.projectType === 'Blog'
 
   // Live Calculation Breakdown
   const breakdown = calculateProjectQuote(formData, pricingConfig)
@@ -413,9 +414,9 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               <span>Estrutura, Páginas & Recursos Especiais</span>
             </h3>
 
-            {/* PÁGINAS PADRÃO (OCULTO PARA LOJA VIRTUAL) & ADICIONAIS */}
+            {/* PÁGINAS PADRÃO (OCULTO PARA LOJA VIRTUAL E BLOG) & ADICIONAIS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              {!isLojaVirtual ? (
+              {!isLojaVirtual && !isBlog ? (
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-slate-600 font-bold">Páginas Padrão</label>
@@ -441,10 +442,25 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                     )}
                   />
                 </div>
+              ) : isLojaVirtual ? (
+                <div className="bg-blue-50/90 border border-blue-200 p-3.5 rounded-2xl text-blue-900 text-xs font-medium space-y-1">
+                  <div className="font-extrabold flex items-center gap-1.5 text-[#0075FF]">
+                    <Globe className="w-4 h-4" />
+                    <span>Loja Virtual Selecionada</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-blue-800">
+                    Páginas padrão inclusas: <strong>Home, Página de Produto Único, Páginas de Categorias, Painel do Usuário e Painel Administrativo</strong>.
+                  </p>
+                </div>
               ) : (
-                <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl text-blue-800 text-xs font-semibold flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-[#0075FF]" />
-                  <span>Loja Virtual selecionada: a contagem de páginas padrão foi omitida.</span>
+                <div className="bg-purple-50/90 border border-purple-200 p-3.5 rounded-2xl text-purple-900 text-xs font-medium space-y-1">
+                  <div className="font-extrabold flex items-center gap-1.5 text-purple-700">
+                    <FileText className="w-4 h-4" />
+                    <span>Blog Selecionado</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-purple-800">
+                    Páginas padrão inclusas: <strong>Home, Página do Artigo, Páginas de Categorias e Painel Administrativo de Conteúdo</strong>.
+                  </p>
                 </div>
               )}
 
