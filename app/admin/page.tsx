@@ -332,50 +332,32 @@ export default function AdminDashboardPage() {
         </div>
       </aside>
 
-      {/* RIGHT SIDE MAIN CONTAINER (SLOTS NEXT TO FULL-HEIGHT SIDEBAR) */}
+      {/* RIGHT SIDE MAIN CONTAINER */}
       <div
         className={cn(
           'flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out max-w-full overflow-hidden',
           isSidebarCollapsed ? 'md:pl-20' : 'md:pl-64'
         )}
       >
-        {/* HEADER TOP BAR */}
-        <header className="bg-[#081D3A] text-white py-3.5 px-6 sticky top-0 z-30 shadow-md border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="relative w-36 h-9">
-              <Image src="/images/logo-dark.svg" alt="ANXIS Admin" fill className="object-contain" />
-            </div>
-            <span className="text-[10px] bg-[#0075FF] text-white font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider hidden sm:inline-block">
-              PAINEL OPERACIONAL
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <div className="text-xs font-bold text-white">{userProfile?.full_name}</div>
-              <div className="text-[10px] text-[#168CFF] font-mono capitalize">
-                Cargo: {userProfile?.role_slug}
-              </div>
-            </div>
-
+        {/* MINIMAL TOP HEADER BAR (ONLY ICON BUTTONS FOR GLOBE AND LOGOUT) */}
+        <header className="bg-[#081D3A] text-white py-3 px-6 sticky top-0 z-30 shadow-md border-b border-slate-800/80 flex items-center justify-end">
+          <div className="flex items-center gap-3">
             <Link
               href="/"
               target="_blank"
-              className="inline-flex items-center text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 px-3.5 py-2 rounded-xl transition-colors border border-slate-700"
+              className="p-2.5 rounded-xl text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-800 transition-all border border-slate-700/60"
+              title="Ver Site Ao Vivo"
             >
-              <Globe className="w-3.5 h-3.5 mr-1.5 text-[#0075FF]" />
-              <span className="hidden sm:inline">Ver Site Ao Vivo</span>
-              <ExternalLink className="w-3.5 h-3.5 sm:ml-1.5 opacity-60" />
+              <Globe className="w-4 h-4 text-[#0075FF]" />
             </Link>
 
             <button
               type="button"
               onClick={handleLogout}
-              className="inline-flex items-center text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 px-3 py-2 rounded-xl transition-colors border border-rose-500/20"
+              className="p-2.5 rounded-xl text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 transition-all border border-rose-500/20"
               title="Sair da Conta"
             >
-              <LogOut className="w-4 h-4 sm:mr-1.5" />
-              <span className="hidden sm:inline">Sair</span>
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         </header>
@@ -597,7 +579,7 @@ export default function AdminDashboardPage() {
                     </div>
                     <div>
                       <span className="text-slate-500 block">Canal Preferencial:</span>
-                      <span className="font-bold text-[#0075FF]">{selectedDetailProject.client_contact_json?.preferred_channel || 'WhatsApp'}</span>
+                      <span className="font-[#0075FF]">{selectedDetailProject.client_contact_json?.preferred_channel || 'WhatsApp'}</span>
                     </div>
                   </div>
                 </div>
