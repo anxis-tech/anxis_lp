@@ -93,9 +93,13 @@ export function PricingCalculatorTab({
 
     if (newType === 'Landing page' || newType === 'Página de vendas') {
       newPageCount = 1
-    } else if (newType === 'Site institucional' || newType === 'Blog') {
+    } else if (newType === 'Site institucional') {
       newPageCount = 5
-    } else if (newType === 'Loja virtual') {
+    } else if (
+      newType === 'Loja virtual' ||
+      newType === 'Blog' ||
+      newType === 'Integração ou funcionalidade'
+    ) {
       newPageCount = 0
     } else if (formData.pageCount < 1) {
       newPageCount = 1
@@ -117,6 +121,7 @@ export function PricingCalculatorTab({
 
   const isLojaVirtual = formData.projectType === 'Loja virtual'
   const isBlog = formData.projectType === 'Blog'
+  const isIntegracao = formData.projectType === 'Integração ou funcionalidade'
 
   // Live Calculation Breakdown
   const breakdown = calculateProjectQuote(formData, pricingConfig)
@@ -414,9 +419,9 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               <span>Estrutura, Páginas & Recursos Especiais</span>
             </h3>
 
-            {/* PÁGINAS PADRÃO (OCULTO PARA LOJA VIRTUAL E BLOG) & ADICIONAIS */}
+            {/* PÁGINAS PADRÃO (OCULTO PARA LOJA VIRTUAL, BLOG E INTEGRAÇÃO) & ADICIONAIS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              {!isLojaVirtual && !isBlog ? (
+              {!isLojaVirtual && !isBlog && !isIntegracao ? (
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="block text-slate-600 font-bold">Páginas Padrão</label>
@@ -452,7 +457,7 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                     Páginas padrão inclusas: <strong>Home, Página de Produto Único, Páginas de Categorias, Painel do Usuário e Painel Administrativo</strong>.
                   </p>
                 </div>
-              ) : (
+              ) : isBlog ? (
                 <div className="bg-purple-50/90 border border-purple-200 p-3.5 rounded-2xl text-purple-900 text-xs font-medium space-y-1">
                   <div className="font-extrabold flex items-center gap-1.5 text-purple-700">
                     <FileText className="w-4 h-4" />
@@ -460,6 +465,16 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                   </div>
                   <p className="text-[11px] leading-relaxed text-purple-800">
                     Páginas padrão inclusas: <strong>Home, Página do Artigo, Páginas de Categorias e Painel Administrativo de Conteúdo</strong>.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-emerald-50/90 border border-emerald-200 p-3.5 rounded-2xl text-emerald-900 text-xs font-medium space-y-1">
+                  <div className="font-extrabold flex items-center gap-1.5 text-emerald-700">
+                    <Code className="w-4 h-4" />
+                    <span>Integração ou Funcionalidade Selecionada</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-emerald-800">
+                    Projeto sem estrutura de páginas padrão (conectores API, módulos ou recursos sob medida). Telas adicionais podem ser inseridas em "Páginas adicionais".
                   </p>
                 </div>
               )}

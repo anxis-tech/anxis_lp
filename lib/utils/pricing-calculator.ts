@@ -44,8 +44,12 @@ export function calculateProjectQuote(
   const baseValue = config.baseRates[form.projectType] || 2500
 
   // 2. Pages Cost (Standard & Additional)
-  const isLojaVirtual = form.projectType === 'Loja virtual'
-  const actualStandardPages = isLojaVirtual ? 0 : (form.pageCount || 0)
+  const isNoStandardPageType =
+    form.projectType === 'Loja virtual' ||
+    form.projectType === 'Blog' ||
+    form.projectType === 'Integração ou funcionalidade'
+
+  const actualStandardPages = isNoStandardPageType ? 0 : (form.pageCount || 0)
 
   const pagesValue = actualStandardPages * (config.perPageRate || 350)
   const additionalPagesValue = (form.additionalPageCount || 0) * (config.perAdditionalPageRate || 500)
