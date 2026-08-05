@@ -11,6 +11,8 @@ import {
   Settings,
   Lock,
   User,
+  UserX,
+  UserCheck,
   Info,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -224,32 +226,35 @@ export function UsersPermissionsTab({
                   )}
                 </td>
 
-                <td className="p-3.5 text-right space-x-1.5 whitespace-nowrap">
-                  {canManagePermissions && (
-                    <button
-                      type="button"
-                      onClick={() => handleOpenPermissionsModal(user)}
-                      className="px-3 py-1.5 rounded-xl bg-[#0075FF] text-white font-extrabold hover:bg-[#168CFF] shadow-sm transition-all inline-flex items-center gap-1.5"
-                    >
-                      <Settings className="w-3.5 h-3.5" />
-                      <span>Editar Permissões de Abas</span>
-                    </button>
-                  )}
+                <td className="p-3.5 text-right whitespace-nowrap">
+                  <div className="flex items-center justify-end gap-1.5">
+                    {canManagePermissions && (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenPermissionsModal(user)}
+                        className="w-8 h-8 rounded-xl bg-[#0075FF] text-white hover:bg-[#168CFF] flex items-center justify-center shadow-sm transition-all"
+                        title="Editar Permissões de Abas"
+                      >
+                        <Settings className="w-4 h-4" />
+                      </button>
+                    )}
 
-                  {canEditUser && (
-                    <button
-                      type="button"
-                      onClick={() => handleToggleUserStatus(user.user_id)}
-                      className={cn(
-                        'px-3 py-1.5 rounded-xl text-xs font-bold transition-all border',
-                        user.is_active
-                          ? 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'
-                          : 'bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100'
-                      )}
-                    >
-                      {user.is_active ? 'Suspender' : 'Ativar'}
-                    </button>
-                  )}
+                    {canEditUser && (
+                      <button
+                        type="button"
+                        onClick={() => handleToggleUserStatus(user.user_id)}
+                        className={cn(
+                          'w-8 h-8 rounded-xl border flex items-center justify-center shadow-sm transition-all',
+                          user.is_active
+                            ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'
+                            : 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'
+                        )}
+                        title={user.is_active ? 'Suspender Acesso' : 'Reativar Acesso'}
+                      >
+                        {user.is_active ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
