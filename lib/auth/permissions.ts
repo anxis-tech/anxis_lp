@@ -55,7 +55,10 @@ export interface UserProfileWithRole {
 }
 
 /**
- * Centralized authorization check
+ * Centralized authorization check:
+ * - Supabase Administrator (role_slug === 'admin') has full access to everything.
+ * - Roles (Comercial, Designer, Desenvolvedor, etc.) are strictly organizational tags and DO NOT grant permissions.
+ * - All non-admin tab and action permissions are strictly controlled by user.custom_permissions.
  */
 export function hasPermission(
   user: UserProfileWithRole | null,
@@ -63,31 +66,32 @@ export function hasPermission(
 ): boolean {
   if (!user || !user.is_active) return false
 
-  // Administrador has full access to everything
+  // Administrador defined in Supabase has full access to everything
   if (user.role_slug === 'admin') return true
 
-  // Check individual custom permission override first
-  if (user.custom_permissions && permissionKey in user.custom_permissions) {
-    return user.custom_permissions[permissionKey]
+  // For non-admin users, access is determined strictly by custom_permissions
+  if (user.custom_permissions) {
+    if (permissionKey in user.custom_permissions) {
+      return Boolean(user.custom_permissions[permissionKey])
+    }
+
+    // Helper aliases for viewing tabs
+    if (permissionKey === 'client_projects.view') {
+      return (
+        Boolean(user.custom_permissions['client_projects.view']) ||
+        Boolean(user.custom_permissions['client_projects.view_all']) ||
+        Boolean(user.custom_permissions['client_projects.view_assigned'])
+      )
+    }
+
+    if (permissionKey === 'pricing.view') {
+      return (
+        Boolean(user.custom_permissions['pricing.view']) ||
+        Boolean(user.custom_permissions['quotes_history.view'])
+      )
+    }
   }
 
-  // Fallback to role default permissions
-  switch (user.role_slug) {
-    case 'comercial':
-      return (
-        permissionKey.startsWith('client_projects.') ||
-        permissionKey.startsWith('pricing.') ||
-        permissionKey === 'portfolio.view'
-      )
-    case 'designer':
-      return (
-        permissionKey === 'client_projects.view_assigned' ||
-        permissionKey === 'client_projects.view' ||
-        permissionKey === 'client_projects.move_kanban' ||
-        permissionKey === 'client_projects.upload_files' ||
-        permissionKey.startsWith('portfolio.')
-      )
-    default:
-      return false
-  }
+  // Non-admin users without explicit permission return false
+  return false
 }

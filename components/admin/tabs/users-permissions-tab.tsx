@@ -8,28 +8,41 @@ import {
   Search,
   CheckCircle2,
   XCircle,
-  Eye,
   Settings,
-  Lock,
   User,
   UserX,
   UserCheck,
-  Info,
   Crown,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
 import { createClient } from '@/lib/supabase/client'
 
 export const TAB_PERMISSION_KEYS = [
+  // Visão Geral
   { key: 'dashboard.view', label: 'Visualizar Dashboard', category: 'Visão Geral' },
-  { key: 'client_projects.view', label: 'Visualizar Projetos', category: 'Gestão de Projetos' },
+
+  // Gestão de Projetos
+  { key: 'client_projects.view', label: 'Visualizar Lista de Projetos', category: 'Gestão de Projetos' },
   { key: 'client_projects.view_assigned', label: 'Visualizar Apenas Projetos Atribuídos', category: 'Gestão de Projetos' },
+  { key: 'client_projects.create', label: 'Criar Novos Projetos de Clientes', category: 'Gestão de Projetos' },
+  { key: 'client_projects.edit', label: 'Editar Projetos de Clientes', category: 'Gestão de Projetos' },
+  { key: 'client_projects.delete', label: 'Excluir Projetos de Clientes', category: 'Gestão de Projetos' },
   { key: 'kanban_board.view', label: 'Visualizar Quadro Kanban', category: 'Gestão de Projetos' },
+  { key: 'client_projects.move_kanban', label: 'Mover Cards no Kanban', category: 'Gestão de Projetos' },
+
+  // Orçamentos
   { key: 'pricing.view', label: 'Visualizar Precificação (Calculadora)', category: 'Orçamentos' },
+  { key: 'pricing.save_quote', label: 'Salvar e Converter Orçamentos', category: 'Orçamentos' },
   { key: 'quotes_history.view', label: 'Visualizar Histórico de Orçamentos', category: 'Orçamentos' },
+
+  // Conteúdo & Website
   { key: 'portfolio.view', label: 'Visualizar Portfólio da Home', category: 'Conteúdo & Website' },
+  { key: 'portfolio.edit', label: 'Criar / Editar Cases do Portfólio', category: 'Conteúdo & Website' },
+  { key: 'portfolio.delete', label: 'Excluir Cases do Portfólio', category: 'Conteúdo & Website' },
+
+  // Configurações
   { key: 'users.view', label: 'Visualizar Permissões e Usuários', category: 'Configurações' },
+  { key: 'users.manage_permissions', label: 'Gerenciar Permissões da Equipe', category: 'Configurações' },
 ]
 
 interface UsersPermissionsTabProps {
@@ -116,7 +129,7 @@ export function UsersPermissionsTab({
     )
     const res = await updateUserRoleAction(userId, newRoleSlug)
     if (res.success) {
-      alert(`Cargo atualizado para "${newRoleSlug ? newRoleSlug.toUpperCase() : 'SEM CARGO (APENAS DASHBOARD)'}"!`)
+      alert(`Cargo alterado para "${newRoleSlug ? newRoleSlug.toUpperCase() : 'SEM CARGO'}". Lembre-se: o cargo é apenas organizacional e não altera as permissões de abas.`)
     } else {
       alert(`Aviso: ${res.message}`)
     }
@@ -139,19 +152,12 @@ export function UsersPermissionsTab({
 
   const handleOpenPermissionsModal = (user: UserProfileWithRole) => {
     setEditingUserPerms(user)
-    setCustomPerms(user.custom_permissions || {})
-  }
-
-  const handleGrantFullAdmin = async (userId: string) => {
-    await handleRoleChange(userId, 'admin')
-    if (editingUserPerms && editingUserPerms.user_id === userId) {
-      setEditingUserPerms((prev) => (prev ? { ...prev, role_slug: 'admin' } : null))
-    }
+    setCustomPerms(user.custom_permissions ? { ...user.custom_permissions } : {})
   }
 
   const handleTogglePermissionKey = (permKey: string) => {
     setCustomPerms((prev) => {
-      const currentVal = prev[permKey] ?? false
+      const currentVal = Boolean(prev[permKey])
       return { ...prev, [permKey]: !currentVal }
     })
   }
@@ -167,7 +173,7 @@ export function UsersPermissionsTab({
         )
       )
       setEditingUserPerms(null)
-      alert(`Permissões de visualização atualizadas para ${editingUserPerms.full_name}!`)
+      alert(`Ações de permissão atualizadas com sucesso para ${editingUserPerms.full_name}!`)
     } else {
       alert(`Erro ao salvar permissões: ${res.message}`)
     }
@@ -176,31 +182,33 @@ export function UsersPermissionsTab({
   return (
     <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-6 font-sans text-[#0C1D36]">
       {/* HEADER */}
-      <div className="border-b border-slate-100 pb-4">
-        <h2 className="text-xl font-extrabold text-[#0C1D36] flex items-center gap-2">
-          <Shield className="w-5 h-5 text-[#0075FF]" />
-          <span>Gestão de Permissões e Controle de Acesso</span>
-        </h2>
-        <p className="text-xs text-[#596579] mt-1">
-          Gerencie cargos e atribua controle total (Administrador) ou permissões específicas por aba aos usuários.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+        <div>
+          <h2 className="text-lg font-extrabold text-[#0C1D36] flex items-center gap-2">
+            <Shield className="w-5 h-5 text-[#0075FF]" />
+            <span>Gerenciamento de Usuários e Permissões</span>
+          </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            Cargos são organizacionais. As abas e ações de cada usuário são controladas estritamente pelas <strong className="text-[#0075FF]">Ações de Permissão</strong>.
+          </p>
+        </div>
       </div>
 
-      {/* SEARCH & CARGO FILTERS */}
+      {/* FILTERS & SEARCH */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400" />
+        <div className="relative w-full sm:w-72">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
           <input
             type="text"
+            placeholder="Buscar por nome ou e-mail..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por nome ou e-mail..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs outline-none focus:border-[#0075FF]"
+            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:border-[#0075FF] outline-none transition-colors"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          {['todos', 'admin', 'comercial', 'designer'].map((role) => (
+          {['todos', 'admin', 'comercial', 'designer', 'desenvolvedor'].map((role) => (
             <button
               key={role}
               type="button"
@@ -222,7 +230,7 @@ export function UsersPermissionsTab({
           <thead>
             <tr className="bg-[#081D3A] text-white border-b border-slate-800 font-bold uppercase tracking-wider text-[11px]">
               <th className="p-3.5 whitespace-nowrap">Usuário</th>
-              <th className="p-3.5 whitespace-nowrap">Cargo / Nível de Acesso</th>
+              <th className="p-3.5 whitespace-nowrap">Cargo</th>
               <th className="p-3.5 whitespace-nowrap">Status do Acesso</th>
               <th className="p-3.5 whitespace-nowrap">Permissões de Abas</th>
               <th className="p-3.5 text-right whitespace-nowrap">Ações de Permissão</th>
@@ -294,13 +302,16 @@ export function UsersPermissionsTab({
                             ? 'bg-blue-50 text-blue-700 border-blue-300 focus:ring-blue-400'
                             : user.role_slug === 'designer'
                             ? 'bg-purple-50 text-purple-700 border-purple-300 focus:ring-purple-400'
+                            : user.role_slug === 'desenvolvedor'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-300 focus:ring-emerald-400'
                             : 'bg-slate-100 text-slate-700 border-slate-300 focus:ring-slate-400'
                         )}
                       >
-                        <option value="">Sem cargo (Somente Dashboard)</option>
-                        <option value="admin">★ Admin (Controle Total)</option>
+                        <option value="">Sem cargo cadastrado</option>
                         <option value="comercial">Comercial</option>
                         <option value="designer">Designer</option>
+                        <option value="desenvolvedor">Desenvolvedor</option>
+                        <option value="admin">Administrador (Supabase)</option>
                       </select>
                     ) : (
                       <span
@@ -308,12 +319,10 @@ export function UsersPermissionsTab({
                           'inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider',
                           user.role_slug === 'admin'
                             ? 'bg-rose-500/10 text-rose-600 border border-rose-200'
-                            : user.role_slug === 'comercial'
-                            ? 'bg-[#0075FF]/10 text-[#0075FF] border border-[#0075FF]/20'
-                            : 'bg-purple-500/10 text-purple-600 border border-purple-200'
+                            : 'bg-slate-100 text-slate-700 border border-slate-200'
                         )}
                       >
-                        {user.role_slug === 'admin' ? 'Admin (Controle Total)' : user.role_slug}
+                        {user.role_slug ? user.role_slug : 'Sem cargo'}
                       </span>
                     )}
                   </td>
@@ -331,25 +340,29 @@ export function UsersPermissionsTab({
                   </td>
 
                   <td className="p-3.5">
-                    {user.custom_permissions && Object.keys(user.custom_permissions).length > 0 ? (
-                      <span className="text-[10px] bg-amber-500/10 text-amber-600 font-bold px-2 py-0.5 rounded border border-amber-200">
-                        Personalizado ({Object.values(user.custom_permissions).filter(Boolean).length} abas ativas)
+                    {user.role_slug === 'admin' ? (
+                      <span className="text-[10px] bg-emerald-500/10 text-emerald-700 font-extrabold px-2.5 py-1 rounded-md border border-emerald-200">
+                        Acesso Total (Administrador Supabase)
+                      </span>
+                    ) : Object.values(user.custom_permissions || {}).filter(Boolean).length > 0 ? (
+                      <span className="text-[10px] bg-amber-500/10 text-amber-700 font-bold px-2.5 py-1 rounded-md border border-amber-200">
+                        {Object.values(user.custom_permissions || {}).filter(Boolean).length} ações / abas ativas
                       </span>
                     ) : (
-                      <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded">
-                        Padrão do Cargo ({user.role_slug})
+                      <span className="text-[10px] bg-slate-100 text-slate-500 font-medium px-2.5 py-1 rounded-md">
+                        Sem permissões (Apenas Dashboard)
                       </span>
                     )}
                   </td>
 
                   <td className="p-3.5 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-1.5">
-                      {canManagePermissions && (
+                      {canManagePermissions && user.role_slug !== 'admin' && (
                         <button
                           type="button"
                           onClick={() => handleOpenPermissionsModal(user)}
                           className="w-8 h-8 rounded-xl bg-[#0075FF] text-white hover:bg-[#168CFF] flex items-center justify-center shadow-sm transition-all"
-                          title="Editar Permissões de Abas"
+                          title="Editar Ações de Permissão"
                         >
                           <Settings className="w-4 h-4" />
                         </button>
@@ -379,7 +392,7 @@ export function UsersPermissionsTab({
         </table>
       </div>
 
-      {/* GRANULAR TAB PERMISSION MATRIX MODAL */}
+      {/* GRANULAR TAB & ACTION PERMISSION MATRIX MODAL */}
       {editingUserPerms && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-sans">
           <div className="bg-white rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-5 animate-in zoom-in-95">
@@ -387,31 +400,19 @@ export function UsersPermissionsTab({
               <div>
                 <h3 className="text-base font-extrabold text-[#0C1D36] flex items-center gap-2">
                   <Shield className="w-4 h-4 text-[#0075FF]" />
-                  <span>Permissões de Abas: {editingUserPerms.full_name}</span>
+                  <span>Ações de Permissão: {editingUserPerms.full_name}</span>
                 </h3>
-                <p className="text-xs text-slate-500">
-                  Cargo: <span className="font-bold text-[#0075FF] uppercase">{editingUserPerms.role_slug}</span> • {editingUserPerms.email}
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Selecione quais abas e funcionalidades este usuário pode visualizar e executar.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                {editingUserPerms.role_slug !== 'admin' && (
-                  <button
-                    type="button"
-                    onClick={() => handleGrantFullAdmin(editingUserPerms.user_id)}
-                    className="px-3 py-1.5 rounded-xl bg-amber-500 text-white font-extrabold text-[11px] hover:bg-amber-600 shadow-sm flex items-center gap-1"
-                  >
-                    <Crown className="w-3.5 h-3.5" />
-                    <span>Conceder Controle Total (Admin)</span>
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setEditingUserPerms(null)}
-                  className="text-slate-400 hover:text-[#0C1D36] font-bold p-1 rounded-lg"
-                >
-                  ✕
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setEditingUserPerms(null)}
+                className="text-slate-400 hover:text-[#0C1D36] font-bold p-1 rounded-lg"
+              >
+                ✕
+              </button>
             </div>
 
             <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1 text-xs">
@@ -426,15 +427,15 @@ export function UsersPermissionsTab({
                     </h4>
                     <div className="space-y-2 pt-1">
                       {catKeys.map((item) => {
-                        const isChecked = customPerms[item.key] ?? true
+                        const isChecked = Boolean(customPerms[item.key])
                         return (
-                          <label key={item.key} className="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200/80 cursor-pointer hover:border-[#0075FF] transition-colors">
+                          <label key={item.key} className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200/80 cursor-pointer hover:border-[#0075FF] transition-colors">
                             <span className="font-bold text-[#0C1D36]">{item.label}</span>
                             <input
                               type="checkbox"
                               checked={isChecked}
                               onChange={() => handleTogglePermissionKey(item.key)}
-                              className="w-4 h-4 rounded text-[#0075FF] focus:ring-[#0075FF]"
+                              className="w-4.5 h-4.5 rounded text-[#0075FF] focus:ring-[#0075FF] cursor-pointer"
                             />
                           </label>
                         )
@@ -457,9 +458,9 @@ export function UsersPermissionsTab({
               <button
                 type="button"
                 onClick={handleSavePermissions}
-                className="px-5 py-2 rounded-xl bg-[#0075FF] text-white text-xs font-extrabold hover:bg-[#168CFF] shadow-md"
+                className="px-5 py-2 rounded-xl bg-[#0075FF] text-white text-xs font-extrabold hover:bg-[#168CFF] shadow-md transition-all"
               >
-                Salvar Permissões de Visualização
+                Salvar Permissões
               </button>
             </div>
           </div>
