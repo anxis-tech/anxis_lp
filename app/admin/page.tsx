@@ -571,7 +571,6 @@ export default function AdminDashboardPage() {
               {activeTab === 'users_permissions' && (
                 <UsersPermissionsTab
                   currentUserId={userProfile?.user_id}
-                  canCreateUser={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_CREATE)}
                   canEditUser={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_EDIT)}
                   canManageRoles={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_ROLES)}
                   canManagePermissions={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_PERMISSIONS)}
