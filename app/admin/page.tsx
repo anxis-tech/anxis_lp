@@ -40,11 +40,8 @@ import {
   Calendar,
   CheckSquare,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
-  Plus,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -228,138 +225,163 @@ export default function AdminDashboardPage() {
   const currentTabObj = navTabs.find((t) => t.id === activeTab) || navTabs[0]
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#0C1D36] flex flex-col font-sans max-w-full overflow-hidden">
-      {/* HEADER TOP BAR */}
-      <header className="bg-[#081D3A] text-white py-3.5 px-6 sticky top-0 z-30 shadow-md border-b border-slate-800 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="relative w-36 h-9">
-            <Image src="/images/logo-dark.svg" alt="ANXIS Admin" fill className="object-contain" />
-          </div>
-          <span className="text-[10px] bg-[#0075FF] text-white font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider hidden sm:inline-block">
-            PAINEL OPERACIONAL
-          </span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="text-right hidden sm:block">
-            <div className="text-xs font-bold text-white">{userProfile?.full_name}</div>
-            <div className="text-[10px] text-[#168CFF] font-mono capitalize">
-              Cargo: {userProfile?.role_slug}
-            </div>
-          </div>
-
-          <Link
-            href="/"
-            target="_blank"
-            className="inline-flex items-center text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 px-3.5 py-2 rounded-xl transition-colors border border-slate-700"
-          >
-            <Globe className="w-3.5 h-3.5 mr-1.5 text-[#0075FF]" />
-            <span className="hidden sm:inline">Ver Site Ao Vivo</span>
-            <ExternalLink className="w-3.5 h-3.5 sm:ml-1.5 opacity-60" />
-          </Link>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="inline-flex items-center text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 px-3 py-2 rounded-xl transition-colors border border-rose-500/20"
-            title="Sair da Conta"
-          >
-            <LogOut className="w-4 h-4 sm:mr-1.5" />
-            <span className="hidden sm:inline">Sair</span>
-          </button>
-        </div>
-      </header>
-
-      {/* DASHBOARD BODY (COLLAPSIBLE SIDEBAR + MAIN CONTENT AREA) */}
-      <div className="flex-1 flex w-full p-4 sm:p-6 gap-6 overflow-hidden max-w-[1600px] mx-auto">
-        {/* COLLAPSIBLE SIDEBAR (DARK ELEGANT AESTHETIC INSPIRED BY PRINT 2) */}
-        <aside
-          className={cn(
-            'bg-[#081D3A] text-white rounded-3xl border border-slate-800 shadow-xl flex flex-col justify-between transition-all duration-300 ease-in-out shrink-0 sticky top-24 h-[calc(100vh-120px)] hidden md:flex z-20',
-            isSidebarCollapsed ? 'w-20 p-3' : 'w-64 p-5'
-          )}
-        >
-          <div className="space-y-6">
-            {/* BRAND / LOGO AREA IN SIDEBAR */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
-              {!isSidebarCollapsed ? (
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-2xl bg-[#0075FF] text-white flex items-center justify-center font-black text-base shadow-md shadow-[#0075FF]/30">
-                    A
-                  </div>
-                  <div>
-                    <div className="font-extrabold text-sm text-white tracking-tight">ANXIS Panel</div>
-                    <div className="text-[10px] text-slate-400 font-mono">Gestão & Operação</div>
-                  </div>
-                </div>
-              ) : (
-                <div className="w-10 h-10 rounded-2xl bg-[#0075FF] text-white flex items-center justify-center font-black text-lg shadow-md shadow-[#0075FF]/30 mx-auto">
+    <div className="min-h-screen bg-[#F7F8FA] text-[#0C1D36] flex font-sans max-w-full overflow-x-hidden">
+      {/* FIXED FULL-HEIGHT SIDEBAR (100% SCREEN HEIGHT) */}
+      <aside
+        className={cn(
+          'bg-[#081D3A] text-white fixed top-0 left-0 bottom-0 h-screen border-r border-slate-800/80 shadow-2xl flex flex-col justify-between transition-all duration-300 ease-in-out z-40 hidden md:flex',
+          isSidebarCollapsed ? 'w-20 p-3.5' : 'w-64 p-5'
+        )}
+      >
+        <div className="space-y-6">
+          {/* BRAND & TOP COLLAPSE TOGGLE BUTTON (ICON ONLY AT THE TOP) */}
+          <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
+            {!isSidebarCollapsed ? (
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-2xl bg-[#0075FF] text-white flex items-center justify-center font-black text-base shadow-md shadow-[#0075FF]/30 shrink-0">
                   A
                 </div>
-              )}
-            </div>
-
-            {/* NAV ITEMS */}
-            <nav className="space-y-1.5">
-              {!isSidebarCollapsed && (
-                <div className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 px-3 pb-1">
-                  Módulos do Sistema
+                <div>
+                  <div className="font-extrabold text-sm text-white tracking-tight">ANXIS Panel</div>
+                  <div className="text-[10px] text-slate-400 font-mono">Gestão & Operação</div>
                 </div>
-              )}
+              </div>
+            ) : (
+              <div className="w-9 h-9 rounded-2xl bg-[#0075FF] text-white flex items-center justify-center font-black text-base shadow-md shadow-[#0075FF]/30 mx-auto">
+                A
+              </div>
+            )}
 
-              {navTabs.map((tab) => {
-                const Icon = tab.icon
-                const isActive = activeTab === tab.id
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    title={isSidebarCollapsed ? tab.label : undefined}
-                    className={cn(
-                      'w-full flex items-center rounded-2xl text-xs font-bold transition-all text-left group',
-                      isSidebarCollapsed ? 'justify-center p-3.5' : 'justify-between px-4 py-3',
-                      isActive
-                        ? 'bg-[#0075FF] text-white shadow-lg shadow-[#0075FF]/25 font-extrabold'
-                        : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-white' : 'text-slate-400 group-hover:text-white')} />
-                      {!isSidebarCollapsed && <span>{tab.label}</span>}
-                    </div>
-
-                    {!isSidebarCollapsed && isActive && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                    )}
-                  </button>
-                )
-              })}
-            </nav>
-          </div>
-
-          {/* COLLAPSE / EXPAND TOGGLE FOOTER */}
-          <div className="pt-4 border-t border-slate-800/80">
+            {/* TOP TOGGLE BUTTON (ICON ONLY - NO TEXT) */}
             <button
               type="button"
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               className={cn(
-                'w-full flex items-center rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all p-3',
-                isSidebarCollapsed ? 'justify-center' : 'justify-between px-4'
+                'p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all border border-slate-700/50',
+                isSidebarCollapsed && 'mt-3 mx-auto'
               )}
+              title={isSidebarCollapsed ? 'Expandir Menu' : 'Recolher Menu'}
             >
-              {!isSidebarCollapsed && <span>Recolher Sidebar</span>}
               {isSidebarCollapsed ? (
-                <PanelLeftOpen className="w-5 h-5 text-[#0075FF]" />
+                <PanelLeftOpen className="w-4.5 h-4.5 text-[#0075FF]" />
               ) : (
-                <PanelLeftClose className="w-5 h-5 text-slate-400" />
+                <PanelLeftClose className="w-4.5 h-4.5 text-slate-400" />
               )}
             </button>
           </div>
-        </aside>
 
-        {/* MAIN PANEL CONTENT AREA */}
-        <main className="flex-1 space-y-6 overflow-hidden max-w-full">
+          {/* NAV ITEMS */}
+          <nav className="space-y-1.5">
+            {!isSidebarCollapsed && (
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 px-3 pb-1">
+                Módulos do Sistema
+              </div>
+            )}
+
+            {navTabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  title={isSidebarCollapsed ? tab.label : undefined}
+                  className={cn(
+                    'w-full flex items-center rounded-2xl text-xs font-bold transition-all text-left group',
+                    isSidebarCollapsed ? 'justify-center p-3.5' : 'justify-between px-4 py-3',
+                    isActive
+                      ? 'bg-[#0075FF] text-white shadow-lg shadow-[#0075FF]/25 font-extrabold'
+                      : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                  )}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-white' : 'text-slate-400 group-hover:text-white')} />
+                    {!isSidebarCollapsed && <span>{tab.label}</span>}
+                  </div>
+
+                  {!isSidebarCollapsed && isActive && (
+                    <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  )}
+                </button>
+              )
+            })}
+          </nav>
+        </div>
+
+        {/* SIDEBAR FOOTER USER CARD */}
+        <div className="pt-4 border-t border-slate-800/80">
+          {!isSidebarCollapsed ? (
+            <div className="flex items-center gap-3 px-2 py-1">
+              <div className="w-8 h-8 rounded-full bg-[#0075FF] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                {userProfile?.full_name?.charAt(0) || 'A'}
+              </div>
+              <div className="overflow-hidden text-xs">
+                <div className="font-bold text-white truncate">{userProfile?.full_name}</div>
+                <div className="text-[10px] text-slate-400 font-mono capitalize">{userProfile?.role_slug}</div>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="w-8 h-8 rounded-full bg-[#0075FF] text-white flex items-center justify-center font-bold text-xs mx-auto"
+              title={userProfile?.full_name}
+            >
+              {userProfile?.full_name?.charAt(0) || 'A'}
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {/* RIGHT SIDE MAIN CONTAINER (SLOTS NEXT TO FULL-HEIGHT SIDEBAR) */}
+      <div
+        className={cn(
+          'flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out max-w-full overflow-hidden',
+          isSidebarCollapsed ? 'md:pl-20' : 'md:pl-64'
+        )}
+      >
+        {/* HEADER TOP BAR */}
+        <header className="bg-[#081D3A] text-white py-3.5 px-6 sticky top-0 z-30 shadow-md border-b border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="relative w-36 h-9">
+              <Image src="/images/logo-dark.svg" alt="ANXIS Admin" fill className="object-contain" />
+            </div>
+            <span className="text-[10px] bg-[#0075FF] text-white font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider hidden sm:inline-block">
+              PAINEL OPERACIONAL
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="text-right hidden sm:block">
+              <div className="text-xs font-bold text-white">{userProfile?.full_name}</div>
+              <div className="text-[10px] text-[#168CFF] font-mono capitalize">
+                Cargo: {userProfile?.role_slug}
+              </div>
+            </div>
+
+            <Link
+              href="/"
+              target="_blank"
+              className="inline-flex items-center text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 px-3.5 py-2 rounded-xl transition-colors border border-slate-700"
+            >
+              <Globe className="w-3.5 h-3.5 mr-1.5 text-[#0075FF]" />
+              <span className="hidden sm:inline">Ver Site Ao Vivo</span>
+              <ExternalLink className="w-3.5 h-3.5 sm:ml-1.5 opacity-60" />
+            </Link>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center text-xs font-semibold text-rose-400 hover:text-rose-300 bg-rose-500/10 px-3 py-2 rounded-xl transition-colors border border-rose-500/20"
+              title="Sair da Conta"
+            >
+              <LogOut className="w-4 h-4 sm:mr-1.5" />
+              <span className="hidden sm:inline">Sair</span>
+            </button>
+          </div>
+        </header>
+
+        {/* DASHBOARD BODY */}
+        <div className="flex-1 w-full p-4 sm:p-6 overflow-hidden max-w-[1600px] mx-auto">
           {/* MOBILE TAB BAR */}
           <div className="md:hidden flex items-center gap-2 overflow-x-auto pb-2">
             {navTabs.map((tab) => {
@@ -473,7 +495,7 @@ export default function AdminDashboardPage() {
               )}
             </>
           )}
-        </main>
+        </div>
       </div>
 
       {/* ENHANCED KANBAN PROJECT DETAIL DRAWER */}
