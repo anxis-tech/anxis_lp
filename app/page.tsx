@@ -115,7 +115,7 @@ export default async function HomePage() {
     '@type': 'ProfessionalService',
     name: settings.company_name,
     url: 'https://anxis.com.br',
-    logo: 'https://anxis.com.br/images/logo-light.svg',
+    logo: 'https://anxis.com.br/images/logo-transparente.png',
     image: 'https://anxis.com.br/images/og-image.jpg',
     description:
       'Empresa especializada em desenvolvimento de sites institucionais, lojas virtuais e projetos personalizados.',

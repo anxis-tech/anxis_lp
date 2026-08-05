@@ -302,11 +302,12 @@ export default function AdminDashboardPage() {
   // SKELETON SCREEN DURING AUTH RESOLUTION
   if (!authResolved) {
     return (
-      <div className="min-h-screen bg-[#0C1D36] text-white flex flex-col items-center justify-center p-6 space-y-4 font-sans">
-        <div className="relative w-40 h-10 animate-pulse">
-          <Image src="/images/logo-dark.svg" alt="ANXIS Logo" fill className="object-contain" />
+      <div className="min-h-screen bg-[#081D3A] text-white flex flex-col items-center justify-center p-6 space-y-5 font-sans relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#0075FF]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative w-48 h-12 animate-pulse">
+          <Image src="/images/logo-transparente.png" alt="ANXIS Logo" fill className="object-contain" priority />
         </div>
-        <div className="flex items-center gap-2 text-slate-300 text-xs font-bold bg-white/10 px-4 py-2 rounded-full border border-white/10">
+        <div className="flex items-center gap-2.5 text-slate-300 text-xs font-semibold bg-white/10 px-5 py-2.5 rounded-full border border-white/10 shadow-lg backdrop-blur-md">
           <Loader2 className="w-4 h-4 animate-spin text-[#0075FF]" />
           <span>Verificando autenticação e permissões do sistema...</span>
         </div>
@@ -404,17 +405,13 @@ export default function AdminDashboardPage() {
           <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             {!isSidebarCollapsed ? (
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-[#0C1D36] text-white flex items-center justify-center font-black text-lg shadow-md shrink-0">
-                  A
-                </div>
-                <div>
-                  <div className="font-extrabold text-base text-[#0C1D36] tracking-tight">ANXIS</div>
-                  <div className="text-[10px] text-slate-400 font-mono font-semibold uppercase">Painel Admin</div>
+                <div className="relative w-36 h-9">
+                  <Image src="/images/logo-transparente.png" alt="ANXIS Logo" fill className="object-contain object-left" priority />
                 </div>
               </div>
             ) : (
-              <div className="w-10 h-10 rounded-2xl bg-[#0C1D36] text-white flex items-center justify-center font-black text-lg shadow-md mx-auto">
-                A
+              <div className="relative w-10 h-10 mx-auto">
+                <Image src="/images/logo-transparente.png" alt="ANXIS Logo" fill className="object-contain" priority />
               </div>
             )}
 

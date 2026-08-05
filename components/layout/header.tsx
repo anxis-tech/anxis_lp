@@ -71,7 +71,7 @@ export function Header({ whatsapp = '5511999999999', ctaLabel = 'Solicitar propo
         <Link href="/" className="relative z-10 flex items-center gap-2 group">
           <div className="relative w-36 h-9 sm:w-40 sm:h-10 transition-transform duration-200 group-hover:scale-[1.02]">
             <Image
-              src="/images/logo-light.svg"
+              src="/images/logo-transparente.png"
               alt="ANXIS - Desenvolvimento de Sites e Lojas Virtuais"
               fill
               className="object-contain"

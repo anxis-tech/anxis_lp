@@ -3,8 +3,8 @@ import { Project, Technology, ServiceItem, FAQItem, Testimonial, SiteSettings } 
 export const INITIAL_SITE_SETTINGS: SiteSettings = {
   id: 'default-settings',
   company_name: 'ANXIS',
-  logo_light_url: '/images/logo-light.svg',
-  logo_dark_url: '/images/logo-dark.svg',
+  logo_light_url: '/images/logo-transparente.png',
+  logo_dark_url: '/images/logo-transparente.png',
   email: 'contato@anxis.com.br',
   phone: '(11) 99999-9999',
   whatsapp: '5511999999999',

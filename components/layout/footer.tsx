@@ -36,7 +36,7 @@ export function Footer({
           <div className="lg:col-span-4 space-y-4">
             <div className="relative w-40 h-10">
               <Image
-                src="/images/logo-dark.svg"
+                src="/images/logo-transparente.png"
                 alt="ANXIS - Desenvolvimento de Sites e Lojas Virtuais"
                 fill
                 className="object-contain"
