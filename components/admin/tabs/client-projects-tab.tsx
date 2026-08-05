@@ -29,6 +29,7 @@ import {
   Download,
   Trash2,
   Eye,
+  Edit,
   FileText,
   CheckCircle2,
   Building,
@@ -533,7 +534,6 @@ export function ClientProjectsTab({
                 <th className="p-3.5 whitespace-nowrap">Estágio Atual</th>
                 <th className="p-3.5 whitespace-nowrap">Responsável Principal</th>
                 <th className="p-3.5 whitespace-nowrap">Prazo</th>
-                <th className="p-3.5 text-center whitespace-nowrap">Links & Arquivos</th>
                 <th className="p-3.5 text-right whitespace-nowrap">Ações</th>
               </tr>
             </thead>
@@ -573,48 +573,45 @@ export function ClientProjectsTab({
                         <span>{formatDateBR(project.deadline)}</span>
                       </div>
                     </td>
-                    <td className="p-3.5 text-center">
-                      <div className="inline-flex items-center gap-2 font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
-                        <LinkIcon className="w-3 h-3 text-[#0075FF]" />
-                        <span>{project.links?.length || 0}</span>
-                        <span className="text-slate-300">•</span>
-                        <Paperclip className="w-3 h-3 text-[#0075FF]" />
-                        <span>{project.files?.length || 0}</span>
+                    <td className="p-3.5 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {/* VISUALIZAR */}
+                        <button
+                          type="button"
+                          onClick={() => onOpenProjectDetail(project)}
+                          className="w-8 h-8 rounded-xl bg-[#0C1D36] text-white hover:bg-[#0075FF] transition-all flex items-center justify-center shadow-sm"
+                          title="Ver Detalhes do Projeto"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+
+                        {/* EDITAR */}
+                        {canEdit && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingProject(project)
+                              setIsEditModalOpen(true)
+                            }}
+                            className="w-8 h-8 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-[#0075FF] hover:border-[#0075FF] hover:bg-slate-50 transition-all flex items-center justify-center shadow-sm"
+                            title="Editar Projeto"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        )}
+
+                        {/* EXCLUIR */}
+                        {canDelete && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProject(project.id, project.title)}
+                            className="w-8 h-8 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:border-rose-300 transition-all flex items-center justify-center shadow-sm"
+                            title="Excluir Projeto"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
-                    </td>
-                    <td className="p-3.5 text-right space-x-1.5 whitespace-nowrap">
-                      <button
-                        type="button"
-                        onClick={() => onOpenProjectDetail(project)}
-                        className="p-2 rounded-lg bg-[#081D3A] text-white hover:bg-[#0075FF] transition-colors inline-flex items-center justify-center"
-                        title="Ver Detalhes do Projeto"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-
-                      {canEdit && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingProject(project)
-                            setIsEditModalOpen(true)
-                          }}
-                          className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white font-bold text-slate-700 hover:text-[#0075FF]"
-                        >
-                          Editar
-                        </button>
-                      )}
-
-                      {canDelete && (
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteProject(project.id, project.title)}
-                          className="p-1.5 rounded-lg bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 transition-colors"
-                          title="Excluir Projeto"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
                     </td>
                   </tr>
                 )
