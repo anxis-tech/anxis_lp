@@ -92,7 +92,7 @@ export function DashboardOverviewTab({
   }
 
   return (
-    <div className="space-y-6 text-[#0C1D36] max-w-full overflow-hidden font-sans">
+    <div className="space-y-4 text-[#0C1D36] max-w-full overflow-hidden font-sans">
       {/* TOP HEADER ROW: BUSCA + LINK SITE AO VIVO */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* CAMPOS DE BUSCA ARREDONDADO */}
@@ -122,9 +122,9 @@ export function DashboardOverviewTab({
       </div>
 
       {/* HERO ROW: CARTÃO ESCURO DE VISÃO GERAL + GOAL CIRCULAR */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* ESQUERDA: CARTÃO DE BOAS VINDAS E MÉTRICAS */}
-        <div className="lg:col-span-2 bg-[#0C1D36] text-white rounded-[32px] p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[250px]">
+        <div className="lg:col-span-2 bg-[#0C1D36] text-white rounded-[32px] p-6 shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[240px]">
           {/* EFEITO VISUAL DE FUNDO */}
           <div className="absolute right-0 top-0 w-80 h-80 bg-gradient-to-br from-blue-600/30 to-purple-600/20 rounded-full blur-3xl pointer-events-none" />
 
@@ -140,7 +140,7 @@ export function DashboardOverviewTab({
           </div>
 
           {/* 2 CARDS INTERNOS DE RECEITA E PROJETOS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 relative z-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 relative z-10">
             {/* CARD INTERNO 1: RECEITA TOTAL */}
             <div className="bg-white/10 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/10 text-white flex items-center gap-4 shadow-inner">
               <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
@@ -179,7 +179,7 @@ export function DashboardOverviewTab({
         </div>
 
         {/* DIREITA: META E PROGRESSO DE ENTREGAS */}
-        <div className="bg-[#0C1D36] text-white rounded-[32px] p-6 shadow-2xl flex flex-col justify-between items-center text-center relative overflow-hidden min-h-[250px]">
+        <div className="bg-[#0C1D36] text-white rounded-[32px] p-6 shadow-xl flex flex-col justify-between items-center text-center relative overflow-hidden min-h-[240px]">
           <div className="w-full flex items-center justify-between border-b border-white/10 pb-3">
             <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-slate-300">
               Progresso de Entregas
@@ -234,7 +234,7 @@ export function DashboardOverviewTab({
       </div>
 
       {/* LOWER ROW: TABELA DE ÚLTIMOS PROJETOS + SESSÃO "PROJETOS AGUARDANDO PAGAMENTO" */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* TABELA DE ÚLTIMOS PROJETOS */}
         <div className="lg:col-span-2 bg-white rounded-[32px] border border-slate-200/80 p-6 shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
@@ -243,12 +243,12 @@ export function DashboardOverviewTab({
               <p className="text-xs text-slate-500">Acompanhamento das entregas e contratos mais recentes.</p>
             </div>
 
-            {/* FILTROS LIMPOS */}
+            {/* FILTROS LIMPOS COM ESPAÇAMENTO CONFORTÁVEL DA BORDAS */}
             <div className="flex items-center gap-2">
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-3.5 py-1.5 rounded-full border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+                className="pl-4 pr-9 py-2 rounded-full border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0075FF] cursor-pointer transition-all shadow-sm"
               >
                 <option value="todos">Status: Todos</option>
                 <option value="Novo projeto">Novo projeto</option>
@@ -260,7 +260,7 @@ export function DashboardOverviewTab({
               <select
                 value={responsibleFilter}
                 onChange={(e) => setResponsibleFilter(e.target.value)}
-                className="px-3.5 py-1.5 rounded-full border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+                className="pl-4 pr-9 py-2 rounded-full border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0075FF] cursor-pointer transition-all shadow-sm"
               >
                 <option value="todos">Responsável: Todos</option>
                 {uniqueResponsibles.map((resp) => (

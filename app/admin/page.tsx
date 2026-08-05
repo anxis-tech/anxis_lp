@@ -412,16 +412,13 @@ export default function AdminDashboardPage() {
       >
         <div className="space-y-4">
           {/* BRAND LOGO & COLLAPSE TOGGLE */}
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-            {!isSidebarCollapsed ? (
-              <div className="flex items-center gap-3">
-                <div className="relative w-36 h-9">
-                  <Image src="/images/logo-transparente.png" alt="ANXIS Logo" fill className="object-contain object-left" priority />
+          <div className={cn('flex items-center pb-4 border-b border-slate-100', isSidebarCollapsed ? 'justify-center' : 'justify-between')}>
+            {!isSidebarCollapsed && (
+              <div className="flex items-center gap-2.5">
+                <div className="relative w-8 h-8 shrink-0">
+                  <Image src="/images/Icon--Colorido.png" alt="ANXIS Logo" fill className="object-contain" priority />
                 </div>
-              </div>
-            ) : (
-              <div className="relative w-10 h-10 mx-auto">
-                <Image src="/images/logo-transparente.png" alt="ANXIS Logo" fill className="object-contain" priority />
+                <span className="font-black text-lg text-[#0C1D36] tracking-tight">ANXIS</span>
               </div>
             )}
 
@@ -429,10 +426,7 @@ export default function AdminDashboardPage() {
             <button
               type="button"
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className={cn(
-                'p-2 rounded-xl text-slate-400 hover:text-[#0C1D36] hover:bg-slate-100 transition-all border border-slate-200/60 cursor-pointer',
-                isSidebarCollapsed && 'mt-3 mx-auto'
-              )}
+              className="p-2 rounded-xl text-slate-400 hover:text-[#0C1D36] hover:bg-slate-100 transition-all border border-slate-200/60 cursor-pointer"
               title={isSidebarCollapsed ? 'Expandir Menu' : 'Recolher Menu'}
             >
               {isSidebarCollapsed ? (
