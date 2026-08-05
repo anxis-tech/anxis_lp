@@ -39,8 +39,9 @@ CREATE TRIGGER on_auth_user_created
 
 -- 2. ENHANCED RLS POLICIES FOR PROFILES
 
--- Drop existing overly permissive policy
+-- Drop existing policies
 DROP POLICY IF EXISTS "Auth read profiles" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_select_policy" ON public.profiles;
 
 -- Admins can see all profiles; non-admins see only their own
 CREATE POLICY "profiles_select_policy" ON public.profiles
