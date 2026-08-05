@@ -170,12 +170,6 @@ export function DashboardOverviewTab({
 
         {/* TOP RIGHT CONTROLS */}
         <div className="flex items-center gap-3 shrink-0">
-          {/* DATE TIME BADGE */}
-          <div className="bg-white px-5 py-2.5 rounded-full text-xs font-bold border border-slate-200/80 shadow-sm text-slate-700 flex items-center gap-2">
-            <Calendar className="w-3.5 h-3.5 text-slate-400" />
-            <span>05 Ago 2026 • 09:30</span>
-          </div>
-
           {/* LIVE SITE BUTTON */}
           <a
             href="/"
@@ -198,16 +192,6 @@ export function DashboardOverviewTab({
               <LogOut className="w-4 h-4" />
             </button>
           )}
-
-          {/* USER PROFILE AVATAR PILL */}
-          <div className="bg-white p-1 pr-3.5 rounded-full border border-slate-200/80 shadow-sm flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-[#0C1D36] text-white flex items-center justify-center font-bold text-xs">
-              {userProfile?.full_name?.charAt(0) || 'A'}
-            </div>
-            <span className="text-xs font-bold text-[#0C1D36] hidden lg:inline-block">
-              {userProfile?.full_name || 'Admin'}
-            </span>
-          </div>
         </div>
       </div>
 
