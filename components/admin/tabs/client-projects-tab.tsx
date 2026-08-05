@@ -48,123 +48,13 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export const MOCK_ACTIVE_TEAM_USERS: UserProfileWithRole[] = [
-  {
-    id: 'u-admin',
-    user_id: 'user-admin-uuid',
-    full_name: 'Administrador ANXIS',
-    email: 'admin@anxis.com.br',
-    role_slug: 'admin',
-    is_active: true,
-  },
-  {
-    id: 'u-comercial',
-    user_id: 'user-comercial-uuid',
-    full_name: 'Ana Comercial',
-    email: 'comercial@anxis.com.br',
-    role_slug: 'comercial',
-    is_active: true,
-  },
-  {
-    id: 'u-designer',
-    user_id: 'user-designer-uuid',
-    full_name: 'Carlos Designer',
-    email: 'designer@anxis.com.br',
-    role_slug: 'designer',
-    is_active: true,
-  },
-]
 
-export const MOCK_CLIENT_PROJECTS_FULL: ClientProject[] = [
-  {
-    id: 'cp-1',
-    title: 'Redesign E-commerce Iluminação',
-    client_name: 'Decor Studio Ltda',
-    company: 'Decor Studio',
-    email: 'contato@decorstudio.com.br',
-    phone: '(11) 98888-7777',
-    whatsapp: '5511988887777',
-    project_type: 'Loja Virtual',
-    platform: 'Tray',
-    status: 'Em desenvolvimento',
-    kanban_stage_name: 'Em desenvolvimento',
-    priority: 'Alta',
-    responsible_user_id: 'user-comercial-uuid',
-    responsible_user_name: 'Ana Comercial',
-    responsible_user_email: 'comercial@anxis.com.br',
-    start_date: '2026-07-15',
-    deadline: '2026-08-30',
-    deadline_status: 'Próximo do prazo',
-    description: 'Reformulação da loja Tray com checkout otimizado e catálogo dinâmico.',
-    client_contact_json: {
-      contact_name: 'Mariana Lima',
-      company: 'Decor Studio',
-      email: 'mariana@decorstudio.com.br',
-      phone: '(11) 98888-7777',
-      whatsapp: '5511988887777',
-      role: 'Gerente E-commerce',
-      preferred_channel: 'WhatsApp',
-      contact_notes: 'Preferência por alinhamentos nas terças e quintas.',
-    },
-    scope_briefing_json: {
-      objective: 'Aumentar taxa de conversão em 25% no mobile e modernizar a marca',
-      target_audience: 'Arquitetos, designers de interiores e clientes finais de alto padrão',
-      segment: 'Iluminação decorativa e arquitetônica',
-      requested_pages: ['Home', 'Catálogo de Produtos', 'Página do Produto', 'Sobre Nós', 'Carrinho / Checkout'],
-      requested_features: ['Filtro por temperatura de cor (K)', 'Calculadora de lâmpadas', 'Checkout transparente Tray'],
-      requested_integrations: ['Tray API', 'Melhor Envio', 'Asaas Gateway'],
-      visual_references: ['https://figma.com/file/example', 'https://reference-site.com'],
-      technical_requirements: 'Layout 100% responsivo com velocidade de carregamento superior a 90 no Mobile.',
-    },
-    files: [
-      {
-        id: 'f1',
-        project_id: 'cp-1',
-        file_name: 'manual_identidade_decor.pdf',
-        storage_path: 'client-project-files/decor/manual.pdf',
-        file_size: 4500000,
-        category: 'Identidade visual',
-        created_at: '2026-07-16',
-      },
-      {
-        id: 'f2',
-        project_id: 'cp-1',
-        file_name: 'briefing_aprovado_cliente.docx',
-        storage_path: 'client-project-files/decor/briefing.docx',
-        file_size: 1200000,
-        category: 'Documentos',
-        created_at: '2026-07-17',
-      },
-    ],
-    links: [
-      {
-        id: 'l1',
-        project_id: 'cp-1',
-        label: 'Layout Protótipo Figma',
-        url: 'https://figma.com/file/example-decor-studio',
-        category: 'Figma',
-        description: 'Wireframes e componentes visuais navegáveis.',
-        created_at: '2026-07-18',
-      },
-      {
-        id: 'l2',
-        project_id: 'cp-1',
-        label: 'Google Drive - Fotos HD de Produtos',
-        url: 'https://drive.google.com/drive/folders/example',
-        category: 'Google Drive',
-        description: 'Imagens tratadas em alta resolução.',
-        created_at: '2026-07-19',
-      },
-    ],
-    created_at: '2026-07-15',
-    updated_at: '2026-08-01',
-  },
-]
 
 interface ClientProjectsTabProps {
   projects: ClientProject[]
   onUpdateProjects: (updated: ClientProject[]) => void
   userProfile: UserProfileWithRole | null
+  teamUsers: UserProfileWithRole[]
   canCreate: boolean
   canEdit: boolean
   canDelete: boolean
@@ -174,9 +64,10 @@ interface ClientProjectsTabProps {
 }
 
 export function ClientProjectsTab({
-  projects = MOCK_CLIENT_PROJECTS_FULL,
+  projects = [],
   onUpdateProjects,
   userProfile,
+  teamUsers = [],
   canCreate,
   canEdit,
   canDelete,
@@ -224,7 +115,7 @@ export function ClientProjectsTab({
     return matchesSearch && matchesStatus && matchesPlatform
   })
 
-  const filteredTeamUsers = MOCK_ACTIVE_TEAM_USERS.filter(
+  const filteredTeamUsers = teamUsers.filter(
     (u) =>
       u.is_active &&
       (u.full_name.toLowerCase().includes(userSearchText.toLowerCase()) ||

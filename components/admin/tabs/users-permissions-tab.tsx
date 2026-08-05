@@ -46,41 +46,18 @@ export function UsersPermissionsTab({
   canManagePermissions = true,
 }: UsersPermissionsTabProps) {
   const [userList, setUserList] = useState<UserProfileWithRole[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [fetchError, setFetchError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [roleFilter, setRoleFilter] = useState('todos')
-
-  const fallbackUsers: UserProfileWithRole[] = [
-    {
-      id: 'u-main-admin',
-      user_id: currentUserId || 'usr-admin-principal',
-      full_name: 'Usuário Principal (Administrador)',
-      email: 'admin@anxis.com.br',
-      role_slug: 'admin',
-      is_active: true,
-    },
-    {
-      id: 'u-comercial-demo',
-      user_id: 'usr-comercial-demo',
-      full_name: 'Gestor Comercial',
-      email: 'comercial@anxis.com.br',
-      role_slug: 'comercial',
-      is_active: true,
-    },
-    {
-      id: 'u-designer-demo',
-      user_id: 'usr-designer-demo',
-      full_name: 'Designer Lead',
-      email: 'design@anxis.com.br',
-      role_slug: 'designer',
-      is_active: true,
-    },
-  ]
 
   useEffect(() => {
     fetchRealUsers()
   }, [])
 
   const fetchRealUsers = async () => {
+    setIsLoading(true)
+    setFetchError(null)
     try {
       const supabase = createClient()
       const { data, error } = await supabase
@@ -90,7 +67,8 @@ export function UsersPermissionsTab({
 
       if (error) {
         console.error('Error fetching user profiles:', error)
-        setUserList(fallbackUsers)
+        setFetchError(`Erro ao carregar usuários: ${error.message}`)
+        setUserList([])
         return
       }
 
@@ -100,16 +78,19 @@ export function UsersPermissionsTab({
           user_id: p.user_id,
           full_name: p.full_name || p.email?.split('@')[0] || 'Usuário',
           email: p.email,
-          role_slug: p.roles?.slug || 'admin',
+          role_slug: p.roles?.slug || 'viewer',
           is_active: p.is_active ?? true,
         }))
         setUserList(mappedUsers)
       } else {
-        setUserList(fallbackUsers)
+        setUserList([])
       }
-    } catch (e) {
-      console.warn('Could not fetch user profiles:', e)
-      setUserList(fallbackUsers)
+    } catch (e: any) {
+      console.error('Could not fetch user profiles:', e)
+      setFetchError(`Erro de conexão: ${e?.message || 'Falha ao conectar com o Supabase.'}`)
+      setUserList([])
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -240,106 +221,149 @@ export function UsersPermissionsTab({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 font-medium">
-            {filteredUsers.map((user) => (
-              <tr key={user.id} className="hover:bg-slate-50 transition-colors">
-                <td className="p-3.5">
-                  <div className="font-extrabold text-[#0C1D36] text-xs flex items-center gap-1.5">
-                    {user.role_slug === 'admin' && <Crown className="w-3.5 h-3.5 text-amber-500" />}
-                    <span>{user.full_name}</span>
-                  </div>
-                  <div className="text-[11px] text-slate-500 font-mono">{user.email}</div>
-                </td>
-
-                <td className="p-3.5">
-                  {canManageRoles ? (
-                    <select
-                      value={user.role_slug}
-                      onChange={(e) => handleRoleChange(user.user_id, e.target.value)}
-                      className={cn(
-                        'px-2.5 py-1 rounded-lg text-[11px] font-extrabold border outline-none cursor-pointer shadow-sm transition-all',
-                        user.role_slug === 'admin'
-                          ? 'bg-rose-50 text-rose-700 border-rose-300 focus:ring-rose-400'
-                          : user.role_slug === 'comercial'
-                          ? 'bg-blue-50 text-blue-700 border-blue-300 focus:ring-blue-400'
-                          : 'bg-purple-50 text-purple-700 border-purple-300 focus:ring-purple-400'
-                      )}
-                    >
-                      <option value="admin">★ Admin (Controle Total)</option>
-                      <option value="comercial">Comercial</option>
-                      <option value="designer">Designer</option>
-                    </select>
-                  ) : (
-                    <span
-                      className={cn(
-                        'inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider',
-                        user.role_slug === 'admin'
-                          ? 'bg-rose-500/10 text-rose-600 border border-rose-200'
-                          : user.role_slug === 'comercial'
-                          ? 'bg-[#0075FF]/10 text-[#0075FF] border border-[#0075FF]/20'
-                          : 'bg-purple-500/10 text-purple-600 border border-purple-200'
-                      )}
-                    >
-                      {user.role_slug === 'admin' ? 'Admin (Controle Total)' : user.role_slug}
-                    </span>
-                  )}
-                </td>
-
-                <td className="p-3.5">
-                  <span
-                    className={cn(
-                      'inline-flex items-center gap-1 font-bold text-[11px]',
-                      user.is_active ? 'text-emerald-600' : 'text-rose-500'
-                    )}
-                  >
-                    {user.is_active ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
-                    <span>{user.is_active ? 'Acesso Ativo' : 'Acesso Suspenso'}</span>
-                  </span>
-                </td>
-
-                <td className="p-3.5">
-                  {user.custom_permissions && Object.keys(user.custom_permissions).length > 0 ? (
-                    <span className="text-[10px] bg-amber-500/10 text-amber-600 font-bold px-2 py-0.5 rounded border border-amber-200">
-                      Personalizado ({Object.values(user.custom_permissions).filter(Boolean).length} abas ativas)
-                    </span>
-                  ) : (
-                    <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded">
-                      Padrão do Cargo ({user.role_slug})
-                    </span>
-                  )}
-                </td>
-
-                <td className="p-3.5 text-right whitespace-nowrap">
-                  <div className="flex items-center justify-end gap-1.5">
-                    {canManagePermissions && (
-                      <button
-                        type="button"
-                        onClick={() => handleOpenPermissionsModal(user)}
-                        className="w-8 h-8 rounded-xl bg-[#0075FF] text-white hover:bg-[#168CFF] flex items-center justify-center shadow-sm transition-all"
-                        title="Editar Permissões de Abas"
-                      >
-                        <Settings className="w-4 h-4" />
-                      </button>
-                    )}
-
-                    {canEditUser && (
-                      <button
-                        type="button"
-                        onClick={() => handleToggleUserStatus(user.user_id)}
-                        className={cn(
-                          'w-8 h-8 rounded-xl border flex items-center justify-center shadow-sm transition-all',
-                          user.is_active
-                            ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'
-                            : 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'
-                        )}
-                        title={user.is_active ? 'Suspender Acesso' : 'Reativar Acesso'}
-                      >
-                        {user.is_active ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
-                      </button>
-                    )}
+            {isLoading ? (
+              <tr>
+                <td colSpan={5} className="p-8 text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-6 h-6 border-2 border-[#0075FF] border-t-transparent rounded-full animate-spin" />
+                    <span className="text-xs text-slate-500 font-medium">Carregando usuários do Supabase...</span>
                   </div>
                 </td>
               </tr>
-            ))}
+            ) : fetchError ? (
+              <tr>
+                <td colSpan={5} className="p-8 text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <XCircle className="w-8 h-8 text-rose-400" />
+                    <span className="text-xs text-rose-600 font-bold">{fetchError}</span>
+                    <button
+                      type="button"
+                      onClick={fetchRealUsers}
+                      className="mt-2 px-4 py-1.5 rounded-lg bg-[#0075FF] text-white text-xs font-bold hover:bg-[#168CFF]"
+                    >
+                      Tentar novamente
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ) : filteredUsers.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="p-8 text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <User className="w-8 h-8 text-slate-300" />
+                    <span className="text-sm font-bold text-slate-500">
+                      {userList.length === 0 ? 'Nenhum usuário cadastrado.' : 'Nenhum resultado para o filtro aplicado.'}
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      {userList.length === 0
+                        ? 'Os usuários aparecerão aqui após serem criados no Supabase Auth.'
+                        : 'Tente alterar os filtros de busca ou cargo.'}
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              filteredUsers.map((user) => (
+                <tr key={user.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="p-3.5">
+                    <div className="font-extrabold text-[#0C1D36] text-xs flex items-center gap-1.5">
+                      {user.role_slug === 'admin' && <Crown className="w-3.5 h-3.5 text-amber-500" />}
+                      <span>{user.full_name}</span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 font-mono">{user.email}</div>
+                  </td>
+
+                  <td className="p-3.5">
+                    {canManageRoles ? (
+                      <select
+                        value={user.role_slug}
+                        onChange={(e) => handleRoleChange(user.user_id, e.target.value)}
+                        className={cn(
+                          'px-2.5 py-1 rounded-lg text-[11px] font-extrabold border outline-none cursor-pointer shadow-sm transition-all',
+                          user.role_slug === 'admin'
+                            ? 'bg-rose-50 text-rose-700 border-rose-300 focus:ring-rose-400'
+                            : user.role_slug === 'comercial'
+                            ? 'bg-blue-50 text-blue-700 border-blue-300 focus:ring-blue-400'
+                            : 'bg-purple-50 text-purple-700 border-purple-300 focus:ring-purple-400'
+                        )}
+                      >
+                        <option value="admin">★ Admin (Controle Total)</option>
+                        <option value="comercial">Comercial</option>
+                        <option value="designer">Designer</option>
+                      </select>
+                    ) : (
+                      <span
+                        className={cn(
+                          'inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider',
+                          user.role_slug === 'admin'
+                            ? 'bg-rose-500/10 text-rose-600 border border-rose-200'
+                            : user.role_slug === 'comercial'
+                            ? 'bg-[#0075FF]/10 text-[#0075FF] border border-[#0075FF]/20'
+                            : 'bg-purple-500/10 text-purple-600 border border-purple-200'
+                        )}
+                      >
+                        {user.role_slug === 'admin' ? 'Admin (Controle Total)' : user.role_slug}
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="p-3.5">
+                    <span
+                      className={cn(
+                        'inline-flex items-center gap-1 font-bold text-[11px]',
+                        user.is_active ? 'text-emerald-600' : 'text-rose-500'
+                      )}
+                    >
+                      {user.is_active ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                      <span>{user.is_active ? 'Acesso Ativo' : 'Acesso Suspenso'}</span>
+                    </span>
+                  </td>
+
+                  <td className="p-3.5">
+                    {user.custom_permissions && Object.keys(user.custom_permissions).length > 0 ? (
+                      <span className="text-[10px] bg-amber-500/10 text-amber-600 font-bold px-2 py-0.5 rounded border border-amber-200">
+                        Personalizado ({Object.values(user.custom_permissions).filter(Boolean).length} abas ativas)
+                      </span>
+                    ) : (
+                      <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded">
+                        Padrão do Cargo ({user.role_slug})
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="p-3.5 text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {canManagePermissions && (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenPermissionsModal(user)}
+                          className="w-8 h-8 rounded-xl bg-[#0075FF] text-white hover:bg-[#168CFF] flex items-center justify-center shadow-sm transition-all"
+                          title="Editar Permissões de Abas"
+                        >
+                          <Settings className="w-4 h-4" />
+                        </button>
+                      )}
+
+                      {canEditUser && (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleUserStatus(user.user_id)}
+                          className={cn(
+                            'w-8 h-8 rounded-xl border flex items-center justify-center shadow-sm transition-all',
+                            user.is_active
+                              ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'
+                              : 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'
+                          )}
+                          title={user.is_active ? 'Suspender Acesso' : 'Reativar Acesso'}
+                        >
+                          {user.is_active ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

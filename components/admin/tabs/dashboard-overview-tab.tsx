@@ -93,10 +93,6 @@ export function DashboardOverviewTab({
       const stage = normalizeProjectStage(p.status)
       return stage === 'Novo projeto' || stage === 'Aguardando revisão'
     })
-    .concat(
-      // Fallback mock pending items if list is small
-      projects.length > 0 ? [] : []
-    )
 
   // List of unique responsible team members for the filter dropdown
   const uniqueResponsibles = Array.from(

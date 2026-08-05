@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Project } from '@/types/database.types'
-import { INITIAL_PROJECTS } from '@/lib/constants/initial-data'
 import { Plus, Search, Edit, Trash2, Eye, EyeOff, Star, Sparkles, Globe } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { saveHomeProjectAction, deleteHomeProjectAction } from '@/lib/actions/projects'
@@ -16,7 +15,7 @@ interface HomePortfolioTabProps {
 }
 
 export function HomePortfolioTab({
-  projects = INITIAL_PROJECTS,
+  projects = [],
   onUpdateProjects,
   canEdit = true,
   canDelete = true,

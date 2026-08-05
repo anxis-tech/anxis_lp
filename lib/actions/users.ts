@@ -30,10 +30,9 @@ export async function createAdminUserAction(formData: unknown) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 
     if (!serviceRoleKey || !supabaseUrl) {
-      // Offline / Demo fallback mock response
       return {
-        success: true,
-        message: `[Modo Demo] Usuário ${validated.fullName} (${validated.email}) registrado com sucesso!`,
+        success: false,
+        message: 'Erro de configuração: SUPABASE_SERVICE_ROLE_KEY não está definida no servidor. Contate o administrador.',
       }
     }
 
@@ -112,7 +111,7 @@ export async function updateUserRoleAction(userId: string, roleSlug: string) {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (!serviceRoleKey || !supabaseUrl) {
-      return { success: true, message: `[Modo Demo] Cargo alterado para ${roleSlug}` }
+      return { success: false, message: 'Erro de configuração: SUPABASE_SERVICE_ROLE_KEY não está definida no servidor.' }
     }
 
     const supabaseAdmin = createAdminSupabase(supabaseUrl, serviceRoleKey)
@@ -147,7 +146,7 @@ export async function setUserAsAdminByEmailAction(email: string) {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (!serviceRoleKey || !supabaseUrl) {
-      return { success: true, message: `[Modo Demo] Usuário ${email} definido como Administrador!` }
+      return { success: false, message: 'Erro de configuração: SUPABASE_SERVICE_ROLE_KEY não está definida no servidor.' }
     }
 
     const supabaseAdmin = createAdminSupabase(supabaseUrl, serviceRoleKey)

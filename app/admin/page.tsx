@@ -13,13 +13,12 @@ import {
 import { Project } from '@/types/database.types'
 import { ClientProject } from '@/types/client-project.types'
 import { SavedQuote, QuoteFormData } from '@/types/pricing.types'
-import { INITIAL_PROJECTS } from '@/lib/constants/initial-data'
 import { DashboardOverviewTab } from '@/components/admin/tabs/dashboard-overview-tab'
 import { HomePortfolioTab } from '@/components/admin/tabs/home-portfolio-tab'
-import { ClientProjectsTab, MOCK_CLIENT_PROJECTS_FULL } from '@/components/admin/tabs/client-projects-tab'
+import { ClientProjectsTab } from '@/components/admin/tabs/client-projects-tab'
 import { KanbanBoardTab } from '@/components/admin/tabs/kanban-board-tab'
 import { PricingCalculatorTab } from '@/components/admin/tabs/pricing-calculator-tab'
-import { QuotesTab, MOCK_SAVED_QUOTES } from '@/components/admin/tabs/quotes-tab'
+import { QuotesTab } from '@/components/admin/tabs/quotes-tab'
 import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-tab'
 import { saveClientProjectAction, deleteClientProjectAction } from '@/lib/actions/client-projects'
 import { saveQuoteAction } from '@/lib/actions/quotes'
@@ -65,6 +64,7 @@ export default function AdminDashboardPage() {
   const [homeProjects, setHomeProjects] = useState<Project[]>([])
   const [clientProjects, setClientProjects] = useState<ClientProject[]>([])
   const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([])
+  const [teamUsers, setTeamUsers] = useState<UserProfileWithRole[]>([])
   const [calculatorInitialData, setCalculatorInitialData] = useState<QuoteFormData | undefined>()
 
   // Project Modal & Detail Drawer State
@@ -119,62 +119,49 @@ export default function AdminDashboardPage() {
             .update({ last_access_at: new Date().toISOString() })
             .eq('user_id', user.id)
         } else {
-          // Profile row does not exist in Supabase DB yet - Auto provision Admin profile
-          try {
-            const { data: adminRole } = await supabase
-              .from('roles')
-              .select('id')
-              .eq('slug', 'admin')
-              .single()
-
-            const newProfile = {
-              user_id: user.id,
-              full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Administrador',
-              email: user.email || '',
-              role_id: adminRole?.id || null,
-              is_active: true,
-            }
-
-            await supabase.from('profiles').upsert(newProfile, { onConflict: 'user_id' })
-          } catch (err) {
-            console.warn('Could not auto-provision profile:', err)
-          }
-
-          setUserProfile({
-            id: user.id,
-            user_id: user.id,
-            full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Administrador',
-            email: user.email || '',
-            role_slug: 'admin',
-            is_active: true,
-          })
+          // No profile exists but user is authenticated — redirect to login
+          // Profile should be created by the Supabase trigger on auth.users INSERT
+          console.warn('User profile not found for authenticated user. Redirecting to login.')
+          await supabase.auth.signOut()
+          router.push('/admin/login?error=no_profile')
+          return
         }
       } else {
-        // Offline / Demo mode default
-        setUserProfile({
-          id: 'usr-admin-default',
-          user_id: 'usr-admin-default',
-          full_name: 'Administrador Principal',
-          email: 'admin@anxis.com.br',
-          role_slug: 'admin',
-          is_active: true,
-        })
+        // No authenticated user and Supabase is configured — redirect to login
+        router.push('/admin/login')
+        return
       }
 
       // Fetch live home projects, client projects & saved quotes from Supabase DB
       const [
         { data: pData },
         { data: cpData },
-        { data: qData }
+        { data: qData },
+        { data: teamData }
       ] = await Promise.all([
         supabase.from('projects').select('*').order('display_order', { ascending: true }),
         supabase.from('client_projects').select('*').order('updated_at', { ascending: false }),
         supabase.from('quotes').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*, roles(slug)').eq('is_active', true).order('full_name', { ascending: true }),
       ])
 
       setHomeProjects(pData || [])
       setClientProjects((cpData as any) || [])
       setSavedQuotes((qData as any) || [])
+
+      // Map team users for the responsible user selector
+      if (teamData && teamData.length > 0) {
+        setTeamUsers(
+          teamData.map((p: any) => ({
+            id: p.id,
+            user_id: p.user_id,
+            full_name: p.full_name || p.email?.split('@')[0] || 'Usuário',
+            email: p.email,
+            role_slug: (p as any).roles?.slug || 'viewer',
+            is_active: p.is_active ?? true,
+          }))
+        )
+      }
     } catch (e) {
       console.warn('Supabase DB connection error:', e)
     } finally {
@@ -220,7 +207,7 @@ export default function AdminDashboardPage() {
       kanban_stage_name: 'Novo projeto',
       priority: 'Normal',
       responsible_user_name: userProfile?.full_name || 'Admin',
-      responsible_user_email: userProfile?.email || 'admin@anxis.com.br',
+      responsible_user_email: userProfile?.email || '',
       deadline: 'A definir',
       description: `Projeto convertido a partir do Orçamento #${quote.id}.`,
       quote_id: quote.id,
@@ -546,6 +533,7 @@ export default function AdminDashboardPage() {
                   projects={clientProjects}
                   onUpdateProjects={setClientProjects}
                   userProfile={userProfile}
+                  teamUsers={teamUsers}
                   canCreate={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_CREATE)}
                   canEdit={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_EDIT)}
                   canDelete={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)}
