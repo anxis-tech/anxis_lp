@@ -6,11 +6,13 @@ export const DEFAULT_PRICING_CONFIG: PricingConfig = {
     'Página de vendas': 3200,
     'Site institucional': 4500,
     'Loja virtual': 6500,
+    'Blog': 3800,
     'Integração ou funcionalidade': 2500,
-    'Desenvolvimento personalizado em código': 8500,
   },
   perPageRate: 350,
   perAdditionalPageRate: 500,
+  customCodeRate: 3500,
+  blogModuleRate: 1200,
   complexityMultipliers: {
     'Simples': 1.0,
     'Intermediária': 1.25,
@@ -42,31 +44,38 @@ export function calculateProjectQuote(
   const baseValue = config.baseRates[form.projectType] || 2500
 
   // 2. Pages Cost (Standard & Additional)
-  const pagesValue = (form.pageCount || 1) * config.perPageRate
+  const isLojaVirtual = form.projectType === 'Loja virtual'
+  const actualStandardPages = isLojaVirtual ? 0 : (form.pageCount || 0)
+
+  const pagesValue = actualStandardPages * (config.perPageRate || 350)
   const additionalPagesValue = (form.additionalPageCount || 0) * (config.perAdditionalPageRate || 500)
 
-  // 3. Content Cost
+  // 3. Custom Code & Blog Module Fees (Step 2 Checkboxes)
+  const customCodeValue = form.hasCustomCode ? (config.customCodeRate || 3500) : 0
+  const blogModuleValue = (form.hasBlogModule && form.projectType !== 'Blog') ? (config.blogModuleRate || 1200) : 0
+
+  // 4. Content Cost
   const contentValue = config.contentRates[form.contentOption] ?? 0
 
-  // 4. Multipliers
+  // 5. Multipliers
   const complexityMultiplier = config.complexityMultipliers[form.complexity] || 1.0
   const urgencyMultiplier = config.urgencyMultipliers[form.urgency] || 1.0
 
-  // 5. Raw Subtotal
+  // 6. Raw Subtotal
   const rawTotal =
-    (baseValue + pagesValue + additionalPagesValue + contentValue) *
+    (baseValue + pagesValue + additionalPagesValue + customCodeValue + blogModuleValue + contentValue) *
     complexityMultiplier *
     urgencyMultiplier
 
   const subtotal = Math.round(rawTotal * 100) / 100
 
-  // 6. Adjustments & Taxes
-  const maxDiscount = (subtotal * config.maxDiscountPercent) / 100
+  // 7. Adjustments & Taxes
+  const maxDiscount = (subtotal * (config.maxDiscountPercent || 15)) / 100
   const discount = Math.min(form.discountAmount || 0, maxDiscount)
   const additionalCosts = form.additionalCosts || 0
 
   const taxableAmount = Math.max(0, subtotal - discount + additionalCosts)
-  const taxes = Math.round(((taxableAmount * (form.taxPercent || config.taxPercent)) / 100) * 100) / 100
+  const taxes = Math.round(((taxableAmount * (form.taxPercent || config.taxPercent || 8)) / 100) * 100) / 100
 
   const finalValue = Math.round((taxableAmount + taxes) * 100) / 100
 
@@ -74,6 +83,8 @@ export function calculateProjectQuote(
     baseValue,
     pagesValue,
     additionalPagesValue,
+    customCodeValue,
+    blogModuleValue,
     contentValue,
     complexityMultiplier,
     urgencyMultiplier,

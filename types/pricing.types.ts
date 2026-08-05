@@ -9,6 +9,8 @@ export interface PricingConfig {
   baseRates: Record<StrictProjectType, number>
   perPageRate: number
   perAdditionalPageRate: number
+  customCodeRate: number
+  blogModuleRate: number
   complexityMultipliers: Record<string, number>
   urgencyMultipliers: Record<UrgencyOption, number>
   contentRates: Record<ContentCopyOption, number>
@@ -26,6 +28,8 @@ export interface QuoteFormData {
   desiredDeadline?: string
   pageCount: number
   additionalPageCount: number
+  hasCustomCode?: boolean
+  hasBlogModule?: boolean
   complexity: 'Simples' | 'Intermediária' | 'Avançada' | 'Personalizada'
   contentOption: ContentCopyOption
   urgency: UrgencyOption
@@ -40,6 +44,8 @@ export interface CalculationBreakdown {
   baseValue: number
   pagesValue: number
   additionalPagesValue: number
+  customCodeValue: number
+  blogModuleValue: number
   contentValue: number
   complexityMultiplier: number
   urgencyMultiplier: number

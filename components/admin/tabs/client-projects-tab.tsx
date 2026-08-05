@@ -727,12 +727,11 @@ export function ClientProjectsTab({
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-semibold"
                       >
                         <option value="Landing page">Landing page</option>
+                        <option value="Página de vendas">Página de vendas</option>
                         <option value="Site institucional">Site institucional</option>
                         <option value="Loja virtual">Loja virtual</option>
-                        <option value="Reformulação">Reformulação de Site Existente</option>
-                        <option value="Desenvolvimento personalizado">Desenvolvimento personalizado</option>
-                        <option value="Integração">Integração / API</option>
-                        <option value="Manutenção">Manutenção Contínua</option>
+                        <option value="Blog">Blog</option>
+                        <option value="Integração ou funcionalidade">Integração ou funcionalidade</option>
                       </select>
                     </div>
 

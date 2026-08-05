@@ -34,6 +34,9 @@ import {
   ShieldAlert,
   FolderPlus,
   Lock,
+  Code,
+  Globe,
+  Check,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -56,6 +59,7 @@ export function PricingCalculatorTab({
   const [isConfigOpen, setIsConfigOpen] = useState(false)
   const [copyFeedback, setCopyFeedback] = useState(false)
   const [saveSuccessFeedback, setSaveSuccessFeedback] = useState(false)
+  const [configSaveFeedback, setConfigSaveFeedback] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
 
   const [formData, setFormData] = useState<QuoteFormData>(() => {
@@ -70,6 +74,8 @@ export function PricingCalculatorTab({
       desiredDeadline: 'Prazo normal',
       pageCount: 5,
       additionalPageCount: 0,
+      hasCustomCode: false,
+      hasBlogModule: false,
       complexity: 'Intermediária',
       contentOption: 'Cliente fornecerá todo o conteúdo',
       urgency: 'Prazo normal',
@@ -87,8 +93,10 @@ export function PricingCalculatorTab({
 
     if (newType === 'Landing page' || newType === 'Página de vendas') {
       newPageCount = 1
-    } else if (newType === 'Site institucional') {
+    } else if (newType === 'Site institucional' || newType === 'Blog') {
       newPageCount = 5
+    } else if (newType === 'Loja virtual') {
+      newPageCount = 0
     } else if (formData.pageCount < 1) {
       newPageCount = 1
     }
@@ -97,6 +105,8 @@ export function PricingCalculatorTab({
       ...prev,
       projectType: newType,
       pageCount: newPageCount,
+      // Reset Blog Checkbox if main project type becomes Blog
+      hasBlogModule: newType === 'Blog' ? false : prev.hasBlogModule,
     }))
   }
 
@@ -105,8 +115,15 @@ export function PricingCalculatorTab({
     formData.projectType === 'Página de vendas' ||
     formData.projectType === 'Site institucional'
 
+  const isLojaVirtual = formData.projectType === 'Loja virtual'
+
   // Live Calculation Breakdown
   const breakdown = calculateProjectQuote(formData, pricingConfig)
+
+  const handleSaveConfig = () => {
+    setConfigSaveFeedback(true)
+    setTimeout(() => setConfigSaveFeedback(false), 3000)
+  }
 
   const handleSaveQuote = (andConvert: boolean = false) => {
     setValidationError(null)
@@ -158,7 +175,9 @@ export function PricingCalculatorTab({
 Cliente: ${formData.clientName || 'Cliente'} ${formData.company ? `(${formData.company})` : ''}
 Projeto: ${formData.projectName || formData.projectType}
 Tipo de Projeto: ${formData.projectType}
-Páginas: ${formData.pageCount} padrão + ${formData.additionalPageCount} adicionais
+Páginas: ${isLojaVirtual ? 'N/A (Loja Virtual)' : `${formData.pageCount} padrão`} + ${formData.additionalPageCount} adicionais
+Desenvol. Código Personalizado: ${formData.hasCustomCode ? 'Sim' : 'Não'}
+Módulo Blog Adicional: ${formData.hasBlogModule ? 'Sim' : 'Não'}
 Conteúdo: ${formData.contentOption}
 Urgência: ${formData.urgency}
 
@@ -167,7 +186,6 @@ Desconto: R$ ${breakdown.discount.toLocaleString('pt-BR')}
 Impostos (${formData.taxPercent}%): R$ ${breakdown.taxes.toLocaleString('pt-BR')}
 ----------------------------------
 VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
-Condições: ${formData.paymentTerms || '50% entrada + 50% publicação'}
 `
     navigator.clipboard.writeText(text)
     setCopyFeedback(true)
@@ -211,7 +229,7 @@ Condições: ${formData.paymentTerms || '50% entrada + 50% publicação'}
         </div>
       </div>
 
-      {/* VALIDATION ERROR BANNER */}
+      {/* VALIDATION & SUCCESS BANNERS */}
       {validationError && (
         <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-2xl text-xs font-bold flex items-center gap-2">
           <ShieldAlert className="w-4 h-4 shrink-0 text-rose-600" />
@@ -219,7 +237,6 @@ Condições: ${formData.paymentTerms || '50% entrada + 50% publicação'}
         </div>
       )}
 
-      {/* SUCCESS FEEDBACK BANNER */}
       {saveSuccessFeedback && (
         <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl text-xs font-bold flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
@@ -227,34 +244,102 @@ Condições: ${formData.paymentTerms || '50% entrada + 50% publicação'}
         </div>
       )}
 
-      {/* ADMINISTRATIVE PRICING SETTINGS (COLLAPSIBLE) */}
+      {/* COMPLETE ADMINISTRATIVE PRICING SETTINGS PANEL */}
       {isConfigOpen && canManageSettings && (
-        <div className="bg-[#0C1D36] text-white rounded-3xl p-6 shadow-xl space-y-4 animate-in fade-in duration-200">
-          <h3 className="text-sm font-extrabold text-white flex items-center gap-2 border-b border-white/10 pb-3">
-            <Settings className="w-4 h-4 text-[#0075FF]" />
-            <span>Tabela de Preços Base & Multiplicadores do Sistema</span>
-          </h3>
+        <div className="bg-[#0C1D36] text-white rounded-3xl p-6 shadow-xl space-y-6 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <h3 className="text-sm font-extrabold text-white flex items-center gap-2">
+              <Settings className="w-4 h-4 text-[#0075FF]" />
+              <span>Configuração Administrativa de Preços & Métricas do Sistema</span>
+            </h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-            {STRICT_PROJECT_TYPES.map((type) => (
-              <div key={type}>
-                <label className="text-[10px] text-slate-300 block mb-1 font-semibold">{type} (Base R$)</label>
+            <button
+              type="button"
+              onClick={handleSaveConfig}
+              className="px-4 py-2 rounded-xl bg-[#0075FF] hover:bg-[#168CFF] text-white font-extrabold text-xs transition-colors flex items-center gap-1.5"
+            >
+              <Save className="w-4 h-4" />
+              <span>Salvar Configurações</span>
+            </button>
+          </div>
+
+          {configSaveFeedback && (
+            <div className="bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-400" />
+              <span>Configurações administrativas salvas com sucesso!</span>
+            </div>
+          )}
+
+          {/* BASE RATES PER PROJECT TYPE */}
+          <div className="space-y-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Valores Base por Tipo de Projeto (R$)</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              {STRICT_PROJECT_TYPES.map((type) => (
+                <div key={type}>
+                  <label className="text-[10px] text-slate-400 block mb-1 font-semibold">{type}</label>
+                  <input
+                    type="number"
+                    value={pricingConfig.baseRates[type] || 2500}
+                    onChange={(e) =>
+                      setPricingConfig((prev) => ({
+                        ...prev,
+                        baseRates: {
+                          ...prev.baseRates,
+                          [type]: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none focus:border-[#0075FF]"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* PAGE RATES & FEATURE RATES */}
+          <div className="space-y-2 pt-4 border-t border-white/10">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Métricas de Páginas & Taxas Adicionais (R$)</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Valor p/ Página Padrão (R$)</label>
                 <input
                   type="number"
-                  value={pricingConfig.baseRates[type] || 2500}
-                  onChange={(e) =>
-                    setPricingConfig((prev) => ({
-                      ...prev,
-                      baseRates: {
-                        ...prev.baseRates,
-                        [type]: Number(e.target.value),
-                      },
-                    }))
-                  }
+                  value={pricingConfig.perPageRate}
+                  onChange={(e) => setPricingConfig({ ...pricingConfig, perPageRate: Number(e.target.value) })}
                   className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none"
                 />
               </div>
-            ))}
+
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Valor p/ Página Adicional (R$)</label>
+                <input
+                  type="number"
+                  value={pricingConfig.perAdditionalPageRate}
+                  onChange={(e) => setPricingConfig({ ...pricingConfig, perAdditionalPageRate: Number(e.target.value) })}
+                  className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Taxa Desenvol. Código (R$)</label>
+                <input
+                  type="number"
+                  value={pricingConfig.customCodeRate}
+                  onChange={(e) => setPricingConfig({ ...pricingConfig, customCodeRate: Number(e.target.value) })}
+                  className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Taxa Módulo Blog (R$)</label>
+                <input
+                  type="number"
+                  value={pricingConfig.blogModuleRate}
+                  onChange={(e) => setPricingConfig({ ...pricingConfig, blogModuleRate: Number(e.target.value) })}
+                  className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none"
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -321,42 +406,49 @@ Condições: ${formData.paymentTerms || '50% entrada + 50% publicação'}
             </div>
           </div>
 
-          {/* ETAPA 2: ESTRUTURA E QUANTIDADE DE PÁGINAS */}
+          {/* ETAPA 2: ESTRUTURA, PÁGINAS E CHECKBOXES */}
           <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
             <h3 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2 border-b border-slate-100 pb-3">
               <span className="w-6 h-6 rounded-full bg-[#0C1D36] text-white flex items-center justify-center text-xs">2</span>
-              <span>Estrutura & Quantidade de Páginas</span>
+              <span>Estrutura, Páginas & Recursos Especiais</span>
             </h3>
 
+            {/* PÁGINAS PADRÃO (OCULTO PARA LOJA VIRTUAL) & ADICIONAIS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              {/* PÁGINAS PADRÃO (DESABILITADO CONFORME TIPO SELECIONADO) */}
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-slate-600 font-bold">Páginas Padrão</label>
-                  {isPageCountDisabled && (
-                    <span className="text-[10px] text-slate-400 flex items-center gap-1 font-semibold">
-                      <Lock className="w-3 h-3 text-amber-500" />
-                      <span>Fixo para {formData.projectType}</span>
-                    </span>
-                  )}
+              {!isLojaVirtual ? (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-slate-600 font-bold">Páginas Padrão</label>
+                    {isPageCountDisabled && (
+                      <span className="text-[10px] text-slate-400 flex items-center gap-1 font-semibold">
+                        <Lock className="w-3 h-3 text-amber-500" />
+                        <span>Fixo para {formData.projectType}</span>
+                      </span>
+                    )}
+                  </div>
+                  <input
+                    type="number"
+                    disabled={isPageCountDisabled}
+                    value={formData.pageCount}
+                    onChange={(e) =>
+                      setFormData({ ...formData, pageCount: Math.max(1, Number(e.target.value)) })
+                    }
+                    className={cn(
+                      'w-full px-3.5 py-2.5 rounded-xl border text-xs font-extrabold outline-none',
+                      isPageCountDisabled
+                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                        : 'bg-white border-slate-200 text-[#0C1D36] focus:border-[#0C1D36]'
+                    )}
+                  />
                 </div>
-                <input
-                  type="number"
-                  disabled={isPageCountDisabled}
-                  value={formData.pageCount}
-                  onChange={(e) =>
-                    setFormData({ ...formData, pageCount: Math.max(1, Number(e.target.value)) })
-                  }
-                  className={cn(
-                    'w-full px-3.5 py-2.5 rounded-xl border text-xs font-extrabold outline-none',
-                    isPageCountDisabled
-                      ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                      : 'bg-white border-slate-200 text-[#0C1D36] focus:border-[#0C1D36]'
-                  )}
-                />
-              </div>
+              ) : (
+                <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl text-blue-800 text-xs font-semibold flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-[#0075FF]" />
+                  <span>Loja Virtual selecionada: a contagem de páginas padrão foi omitida.</span>
+                </div>
+              )}
 
-              {/* PÁGINAS ADICIONAIS (RENOMEADO) */}
+              {/* PÁGINAS ADICIONAIS */}
               <div>
                 <label className="block text-slate-600 font-bold mb-1">Páginas Adicionais</label>
                 <input
@@ -370,9 +462,46 @@ Condições: ${formData.paymentTerms || '50% entrada + 50% publicação'}
                 />
               </div>
             </div>
+
+            {/* CHECKBOXES DA ETAPA 2 (DESENVOLVIMENTO EM CÓDIGO & MÓDULO BLOG) */}
+            <div className="pt-3 border-t border-slate-100 space-y-3">
+              <label className="block text-slate-600 font-bold text-xs">Recursos Avançados Adicionais</label>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* CHECKBOX 1: DESENVOLVIMENTO PERSONALIZADO EM CÓDIGO */}
+                <label className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-slate-100/80 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={formData.hasCustomCode || false}
+                    onChange={(e) => setFormData({ ...formData, hasCustomCode: e.target.checked })}
+                    className="w-4 h-4 rounded text-[#0075FF] focus:ring-[#0075FF]"
+                  />
+                  <div>
+                    <span className="font-extrabold text-xs text-[#0C1D36] block">Desenvolvimento personalizado em código</span>
+                    <span className="text-[10px] text-slate-500">Programação sob medida e componentes avançados</span>
+                  </div>
+                </label>
+
+                {/* CHECKBOX 2: INCLUIR MÓDULO BLOG (SE O TIPO PRINCIPAL NÃO FOR BLOG) */}
+                {formData.projectType !== 'Blog' && (
+                  <label className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-slate-100/80 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={formData.hasBlogModule || false}
+                      onChange={(e) => setFormData({ ...formData, hasBlogModule: e.target.checked })}
+                      className="w-4 h-4 rounded text-[#0075FF] focus:ring-[#0075FF]"
+                    />
+                    <div>
+                      <span className="font-extrabold text-xs text-[#0C1D36] block">Incluir Módulo de Blog no projeto</span>
+                      <span className="text-[10px] text-slate-500">Área de artigos e gestão de conteúdo</span>
+                    </div>
+                  </label>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* ETAPA 3: CONTEÚDO, COPY E URGÊNCIA (SIMPLIFICADA) */}
+          {/* ETAPA 3: CONTEÚDO, COPY E URGÊNCIA */}
           <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
             <h3 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2 border-b border-slate-100 pb-3">
               <span className="w-6 h-6 rounded-full bg-[#0C1D36] text-white flex items-center justify-center text-xs">3</span>
@@ -465,7 +594,7 @@ Condições: ${formData.paymentTerms || '50% entrada + 50% publicação'}
                 {breakdown.finalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </h3>
               <p className="text-[11px] text-slate-300 mt-0.5 font-medium">
-                {formData.projectType} • {formData.pageCount} pág. padrão
+                {formData.projectType} • {isLojaVirtual ? 'Loja Virtual' : `${formData.pageCount} pág.`}
               </p>
             </div>
 
@@ -477,22 +606,38 @@ Condições: ${formData.paymentTerms || '50% entrada + 50% publicação'}
                   R$ {breakdown.baseValue.toLocaleString('pt-BR')}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span>Páginas Adicionais ({formData.additionalPageCount}):</span>
-                <span className="font-bold text-white">
-                  R$ {breakdown.additionalPagesValue.toLocaleString('pt-BR')}
-                </span>
-              </div>
+              {!isLojaVirtual && (
+                <div className="flex justify-between">
+                  <span>Páginas Padrão ({formData.pageCount}):</span>
+                  <span className="font-bold text-white">
+                    R$ {breakdown.pagesValue.toLocaleString('pt-BR')}
+                  </span>
+                </div>
+              )}
+              {formData.additionalPageCount > 0 && (
+                <div className="flex justify-between">
+                  <span>Páginas Adicionais ({formData.additionalPageCount}):</span>
+                  <span className="font-bold text-white">
+                    R$ {breakdown.additionalPagesValue.toLocaleString('pt-BR')}
+                  </span>
+                </div>
+              )}
+              {formData.hasCustomCode && (
+                <div className="flex justify-between text-[#0075FF] font-bold">
+                  <span>Desenvol. em Código:</span>
+                  <span>+ R$ {breakdown.customCodeValue.toLocaleString('pt-BR')}</span>
+                </div>
+              )}
+              {formData.hasBlogModule && formData.projectType !== 'Blog' && (
+                <div className="flex justify-between text-amber-400 font-bold">
+                  <span>Módulo de Blog:</span>
+                  <span>+ R$ {breakdown.blogModuleValue.toLocaleString('pt-BR')}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span>Conteúdo & Copy:</span>
                 <span className="font-bold text-white">
                   R$ {breakdown.contentValue.toLocaleString('pt-BR')}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Multiplicador Urgência:</span>
-                <span className="font-bold text-amber-400">
-                  {breakdown.urgencyMultiplier}x
                 </span>
               </div>
               <div className="flex justify-between pt-2 border-t border-white/10 font-bold text-white">

@@ -5,8 +5,8 @@ export const STRICT_PROJECT_TYPES = [
   'Página de vendas',
   'Site institucional',
   'Loja virtual',
+  'Blog',
   'Integração ou funcionalidade',
-  'Desenvolvimento personalizado em código',
 ] as const
 
 export type StrictProjectType = typeof STRICT_PROJECT_TYPES[number]
@@ -47,10 +47,10 @@ export const quoteFormSchema = z.object({
   projectType: z.enum(STRICT_PROJECT_TYPES),
   platform: z.string().optional(),
   desiredDeadline: z.string().optional(),
-  pageCount: z.number().min(1, 'Pelo menos 1 página padrão é necessária'),
+  pageCount: z.number().min(0, 'Quantidade não pode ser negativa'),
   additionalPageCount: z.number().min(0, 'Quantidade não pode ser negativa'),
-  productCount: z.number().min(0),
-  formCount: z.number().min(0),
+  hasCustomCode: z.boolean().optional(),
+  hasBlogModule: z.boolean().optional(),
   complexity: z.enum(['Simples', 'Intermediária', 'Avançada', 'Personalizada']),
   contentOption: z.enum(CONTENT_COPY_OPTIONS),
   urgency: z.enum(URGENCY_OPTIONS),
