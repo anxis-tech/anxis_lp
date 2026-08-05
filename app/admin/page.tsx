@@ -13,12 +13,14 @@ import {
 import { Project } from '@/types/database.types'
 import { ClientProject } from '@/types/client-project.types'
 import { INITIAL_PROJECTS } from '@/lib/constants/initial-data'
+import { DashboardOverviewTab } from '@/components/admin/tabs/dashboard-overview-tab'
 import { HomePortfolioTab } from '@/components/admin/tabs/home-portfolio-tab'
 import { ClientProjectsTab, MOCK_CLIENT_PROJECTS_FULL } from '@/components/admin/tabs/client-projects-tab'
 import { KanbanBoardTab } from '@/components/admin/tabs/kanban-board-tab'
 import { PricingCalculatorTab } from '@/components/admin/tabs/pricing-calculator-tab'
 import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-tab'
 import {
+  LayoutDashboard,
   Globe,
   FolderKanban,
   Kanban,
@@ -38,6 +40,11 @@ import {
   Calendar,
   CheckSquare,
   Trash2,
+  ChevronLeft,
+  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Plus,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -47,13 +54,14 @@ export default function AdminDashboardPage() {
   // Unified Auth & Permission Loading Guard (Prevents flicker & premature tab disappearance)
   const [authResolved, setAuthResolved] = useState<boolean>(false)
   const [userProfile, setUserProfile] = useState<UserProfileWithRole | null>(null)
-  const [activeTab, setActiveTab] = useState<string>('kanban_board')
+  const [activeTab, setActiveTab] = useState<string>('dashboard')
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
 
   // Live state
   const [homeProjects, setHomeProjects] = useState<Project[]>(INITIAL_PROJECTS)
   const [clientProjects, setClientProjects] = useState<ClientProject[]>(MOCK_CLIENT_PROJECTS_FULL)
 
-  // Expanded Detail Drawer State
+  // Project Modal & Detail Drawer State
   const [selectedDetailProject, setSelectedDetailProject] = useState<ClientProject | null>(null)
   const [drawerTab, setDrawerTab] = useState<'geral' | 'contato' | 'escopo' | 'links_arquivos'>('geral')
 
@@ -164,7 +172,7 @@ export default function AdminDashboardPage() {
   // SKELETON SCREEN DURING AUTH RESOLUTION (ZERO FLICKER)
   if (!authResolved) {
     return (
-      <div className="min-h-screen bg-[#081D3A] text-white flex flex-col items-center justify-center p-6 space-y-4">
+      <div className="min-h-screen bg-[#081D3A] text-white flex flex-col items-center justify-center p-6 space-y-4 font-sans">
         <div className="relative w-40 h-10 animate-pulse">
           <Image src="/images/logo-dark.svg" alt="ANXIS Logo" fill className="object-contain" />
         </div>
@@ -180,10 +188,10 @@ export default function AdminDashboardPage() {
 
   const navTabs = [
     {
-      id: 'portfolio_home',
-      label: 'Portfólio da Home',
-      icon: Globe,
-      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_VIEW),
+      id: 'dashboard',
+      label: 'Dashboard Overview',
+      icon: LayoutDashboard,
+      allowed: true,
     },
     {
       id: 'client_projects',
@@ -198,8 +206,14 @@ export default function AdminDashboardPage() {
       allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
     },
     {
+      id: 'portfolio_home',
+      label: 'Portfólio da Home',
+      icon: Globe,
+      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_VIEW),
+    },
+    {
       id: 'pricing_calculator',
-      label: 'Calculadora de Precificação',
+      label: 'Calculadora Comercial',
       icon: Calculator,
       allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
     },
@@ -215,13 +229,13 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#0C1D36] flex flex-col font-sans max-w-full overflow-hidden">
-      {/* HEADER */}
-      <header className="bg-[#081D3A] text-white py-4 px-6 sticky top-0 z-30 shadow-md border-b border-slate-800 flex items-center justify-between">
+      {/* HEADER TOP BAR */}
+      <header className="bg-[#081D3A] text-white py-3.5 px-6 sticky top-0 z-30 shadow-md border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="relative w-36 h-9">
             <Image src="/images/logo-dark.svg" alt="ANXIS Admin" fill className="object-contain" />
           </div>
-          <span className="text-[10px] bg-[#0075FF] text-white font-bold px-2.5 py-1 rounded-md uppercase tracking-wider hidden sm:inline-block">
+          <span className="text-[10px] bg-[#0075FF] text-white font-extrabold px-2.5 py-1 rounded-md uppercase tracking-wider hidden sm:inline-block">
             PAINEL OPERACIONAL
           </span>
         </div>
@@ -256,37 +270,92 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      {/* DASHBOARD BODY */}
-      <div className="flex-1 flex max-w-7xl w-full mx-auto p-4 sm:p-6 gap-8 overflow-hidden">
-        {/* SIDEBAR TABS */}
-        <aside className="w-64 shrink-0 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm h-fit space-y-2 sticky top-24 hidden md:block">
-          <h3 className="text-[10px] font-extrabold uppercase tracking-widest text-[#596579] px-3 py-1">
-            Módulos Principais
-          </h3>
-          <nav className="space-y-1">
-            {navTabs.map((tab) => {
-              const Icon = tab.icon
-              const isActive = activeTab === tab.id
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    'w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left',
-                    isActive
-                      ? 'bg-[#0075FF] text-white shadow-md'
-                      : 'text-[#0C1D36] hover:bg-slate-100 hover:text-[#0075FF]'
-                  )}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
+      {/* DASHBOARD BODY (COLLAPSIBLE SIDEBAR + MAIN CONTENT AREA) */}
+      <div className="flex-1 flex w-full p-4 sm:p-6 gap-6 overflow-hidden max-w-[1600px] mx-auto">
+        {/* COLLAPSIBLE SIDEBAR (DARK ELEGANT AESTHETIC INSPIRED BY PRINT 2) */}
+        <aside
+          className={cn(
+            'bg-[#081D3A] text-white rounded-3xl border border-slate-800 shadow-xl flex flex-col justify-between transition-all duration-300 ease-in-out shrink-0 sticky top-24 h-[calc(100vh-120px)] hidden md:flex z-20',
+            isSidebarCollapsed ? 'w-20 p-3' : 'w-64 p-5'
+          )}
+        >
+          <div className="space-y-6">
+            {/* BRAND / LOGO AREA IN SIDEBAR */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
+              {!isSidebarCollapsed ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-2xl bg-[#0075FF] text-white flex items-center justify-center font-black text-base shadow-md shadow-[#0075FF]/30">
+                    A
                   </div>
-                </button>
-              )
-            })}
-          </nav>
+                  <div>
+                    <div className="font-extrabold text-sm text-white tracking-tight">ANXIS Panel</div>
+                    <div className="text-[10px] text-slate-400 font-mono">Gestão & Operação</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-10 h-10 rounded-2xl bg-[#0075FF] text-white flex items-center justify-center font-black text-lg shadow-md shadow-[#0075FF]/30 mx-auto">
+                  A
+                </div>
+              )}
+            </div>
+
+            {/* NAV ITEMS */}
+            <nav className="space-y-1.5">
+              {!isSidebarCollapsed && (
+                <div className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 px-3 pb-1">
+                  Módulos do Sistema
+                </div>
+              )}
+
+              {navTabs.map((tab) => {
+                const Icon = tab.icon
+                const isActive = activeTab === tab.id
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    title={isSidebarCollapsed ? tab.label : undefined}
+                    className={cn(
+                      'w-full flex items-center rounded-2xl text-xs font-bold transition-all text-left group',
+                      isSidebarCollapsed ? 'justify-center p-3.5' : 'justify-between px-4 py-3',
+                      isActive
+                        ? 'bg-[#0075FF] text-white shadow-lg shadow-[#0075FF]/25 font-extrabold'
+                        : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-white' : 'text-slate-400 group-hover:text-white')} />
+                      {!isSidebarCollapsed && <span>{tab.label}</span>}
+                    </div>
+
+                    {!isSidebarCollapsed && isActive && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    )}
+                  </button>
+                )
+              })}
+            </nav>
+          </div>
+
+          {/* COLLAPSE / EXPAND TOGGLE FOOTER */}
+          <div className="pt-4 border-t border-slate-800/80">
+            <button
+              type="button"
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className={cn(
+                'w-full flex items-center rounded-2xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-all p-3',
+                isSidebarCollapsed ? 'justify-center' : 'justify-between px-4'
+              )}
+            >
+              {!isSidebarCollapsed && <span>Recolher Sidebar</span>}
+              {isSidebarCollapsed ? (
+                <PanelLeftOpen className="w-5 h-5 text-[#0075FF]" />
+              ) : (
+                <PanelLeftClose className="w-5 h-5 text-slate-400" />
+              )}
+            </button>
+          </div>
         </aside>
 
         {/* MAIN PANEL CONTENT AREA */}
@@ -302,8 +371,8 @@ export default function AdminDashboardPage() {
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap',
-                    isActive ? 'bg-[#0075FF] text-white' : 'bg-white border border-slate-200 text-[#0C1D36]'
+                    'flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap',
+                    isActive ? 'bg-[#0075FF] text-white shadow-md' : 'bg-white border border-slate-200 text-[#0C1D36]'
                   )}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -315,7 +384,7 @@ export default function AdminDashboardPage() {
 
           {/* ACCESS DENIED GUARD */}
           {!currentTabObj ? (
-            <div className="bg-white rounded-2xl border border-rose-200 p-8 text-center space-y-4 shadow-sm">
+            <div className="bg-white rounded-3xl border border-rose-200 p-8 text-center space-y-4 shadow-sm">
               <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto" />
               <h3 className="text-xl font-bold text-rose-700">Acesso Negado (HTTP 403)</h3>
               <p className="text-xs text-slate-600 max-w-md mx-auto">
@@ -324,6 +393,22 @@ export default function AdminDashboardPage() {
             </div>
           ) : (
             <>
+              {/* TAB 0: DASHBOARD OVERVIEW */}
+              {activeTab === 'dashboard' && (
+                <DashboardOverviewTab
+                  projects={clientProjects}
+                  userProfile={userProfile}
+                  onOpenProjectDetail={(p) => {
+                    setSelectedDetailProject(p)
+                    setDrawerTab('geral')
+                  }}
+                  onNavigateToTab={(tId) => setActiveTab(tId)}
+                  onOpenCreateModal={() => {
+                    setActiveTab('client_projects')
+                  }}
+                />
+              )}
+
               {/* TAB 1: PORTFÓLIO DA HOME */}
               {activeTab === 'portfolio_home' && (
                 <HomePortfolioTab
