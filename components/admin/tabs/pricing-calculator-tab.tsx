@@ -573,8 +573,8 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               </div>
             </div>
 
-            {/* COMPLEXIDADE E DESCONTO */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs pt-2 border-t border-slate-100">
+            {/* COMPLEXIDADE DO PROJETO */}
+            <div className="pt-2 border-t border-slate-100">
               <div>
                 <label className="block text-slate-600 font-bold mb-1">Complexidade do Projeto</label>
                 <select
@@ -587,28 +587,6 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                   <option value="Avançada">Avançada (1.5x)</option>
                   <option value="Personalizada">Personalizada (2.0x)</option>
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Desconto Comercial (R$)</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={formData.discountAmount}
-                  onChange={(e) => setFormData({ ...formData, discountAmount: Number(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white text-[#0C1D36]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Impostos (%)</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={formData.taxPercent}
-                  onChange={(e) => setFormData({ ...formData, taxPercent: Number(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white text-[#0C1D36]"
-                />
               </div>
             </div>
           </div>
