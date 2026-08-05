@@ -141,6 +141,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   last_access_at TIMESTAMPTZ
 );
 
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS last_access_at TIMESTAMPTZ;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS notes TEXT;
+
 -- Trigger for Auto-Creating Profile on Auth Signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -198,6 +202,12 @@ CREATE TABLE IF NOT EXISTS public.projects (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT TRUE;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS display_order INT DEFAULT 0;
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';
+ALTER TABLE public.projects ADD COLUMN IF NOT EXISTS live_url TEXT;
+
 -- 9. KANBAN PIPELINE STAGES TABLE
 CREATE TABLE IF NOT EXISTS public.kanban_stages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -212,6 +222,9 @@ CREATE TABLE IF NOT EXISTS public.kanban_stages (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE public.kanban_stages ADD COLUMN IF NOT EXISTS is_initial BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.kanban_stages ADD COLUMN IF NOT EXISTS is_completed BOOLEAN DEFAULT FALSE;
 
 INSERT INTO public.kanban_stages (name, slug, color, display_order, is_initial, is_completed) VALUES
   ('Novo projeto', 'novo-projeto', '#0075FF', 1, TRUE, FALSE),
