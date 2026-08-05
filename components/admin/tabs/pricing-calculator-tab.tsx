@@ -572,23 +572,6 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                 </select>
               </div>
             </div>
-
-            {/* COMPLEXIDADE DO PROJETO */}
-            <div className="pt-2 border-t border-slate-100">
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Complexidade do Projeto</label>
-                <select
-                  value={formData.complexity}
-                  onChange={(e) => setFormData({ ...formData, complexity: e.target.value as any })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white text-[#0C1D36]"
-                >
-                  <option value="Simples">Simples (1.0x)</option>
-                  <option value="Intermediária">Intermediária (1.25x)</option>
-                  <option value="Avançada">Avançada (1.5x)</option>
-                  <option value="Personalizada">Personalizada (2.0x)</option>
-                </select>
-              </div>
-            </div>
           </div>
         </div>
 
