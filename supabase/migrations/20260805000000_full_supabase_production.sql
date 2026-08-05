@@ -237,7 +237,7 @@ CREATE TABLE IF NOT EXISTS public.quotes (
   additional_costs NUMERIC(10,2) DEFAULT 0,
   taxes NUMERIC(10,2) DEFAULT 0,
   final_value NUMERIC(10,2) NOT NULL,
-  status TEXT DEFAULT 'Rascunho', -- 'Rascunho', 'Enviado', 'Em Negociação', 'Aprovado', 'Recusado', 'Convertido em Projeto'
+  status TEXT DEFAULT 'Rascunho',
   notes TEXT,
   created_by_name TEXT,
   created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
@@ -245,6 +245,10 @@ CREATE TABLE IF NOT EXISTS public.quotes (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Safely add missing columns to quotes table if it already existed
+ALTER TABLE public.quotes ADD COLUMN IF NOT EXISTS linked_project_id UUID;
+ALTER TABLE public.quotes ADD COLUMN IF NOT EXISTS created_by_name TEXT;
 
 -- 11. CLIENT PROJECTS TABLE (client_projects)
 CREATE TABLE IF NOT EXISTS public.client_projects (
@@ -270,7 +274,7 @@ CREATE TABLE IF NOT EXISTS public.client_projects (
   quote_data JSONB DEFAULT '{}'::jsonb,
   approved_value NUMERIC(10,2) DEFAULT 0,
   paid_value NUMERIC(10,2) DEFAULT 0,
-  payment_status TEXT DEFAULT 'Pendente', -- 'Pendente', 'Pago', 'Parcialmente Pago', 'Cancelado'
+  payment_status TEXT DEFAULT 'Pendente',
   payment_link TEXT,
   payment_method TEXT,
   paid_at TIMESTAMPTZ,
@@ -292,6 +296,18 @@ CREATE TABLE IF NOT EXISTS public.client_projects (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Safely add missing columns to client_projects table if it already existed
+ALTER TABLE public.client_projects ADD COLUMN IF NOT EXISTS quote_id UUID;
+ALTER TABLE public.client_projects ADD COLUMN IF NOT EXISTS quote_data JSONB DEFAULT '{}'::jsonb;
+ALTER TABLE public.client_projects ADD COLUMN IF NOT EXISTS approved_value NUMERIC(10,2) DEFAULT 0;
+ALTER TABLE public.client_projects ADD COLUMN IF NOT EXISTS paid_value NUMERIC(10,2) DEFAULT 0;
+ALTER TABLE public.client_projects ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'Pendente';
+ALTER TABLE public.client_projects ADD COLUMN IF NOT EXISTS payment_link TEXT;
+ALTER TABLE public.client_projects ADD COLUMN IF NOT EXISTS payment_method TEXT;
+ALTER TABLE public.client_projects ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ;
+ALTER TABLE public.client_projects ADD COLUMN IF NOT EXISTS responsible_user_name TEXT;
+ALTER TABLE public.client_projects ADD COLUMN IF NOT EXISTS responsible_user_email TEXT;
 
 -- Add Foreign Key for linked_project_id in quotes safely
 DO $$
