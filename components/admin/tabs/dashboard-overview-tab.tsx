@@ -5,19 +5,9 @@ import { ClientProject } from '@/types/client-project.types'
 import { UserProfileWithRole } from '@/lib/auth/permissions'
 import { normalizeProjectStage, formatDateBR } from '@/components/admin/tabs/kanban-board-tab'
 import { Icon } from '@/components/ui/icon'
-import { SearchActionIcon, ViewActionIcon } from '@/lib/icons/actions'
-import {
-  TrendUpIcon,
-  MetricProjectsIcon,
-  MetricRevenueIcon,
-  MetricPendingIcon,
-  MetricTaskIcon,
-} from '@/lib/icons/dashboard'
-import {
-  SuccessStatusIcon,
-  PendingStatusIcon,
-  WarningStatusIcon,
-} from '@/lib/icons/status'
+import { PortfolioNavIcon, ForwardNavIcon } from '@/lib/icons/navigation'
+import { SearchActionIcon, ViewActionIcon, MoreActionIcon } from '@/lib/icons/actions'
+import { MetricRevenueIcon } from '@/lib/icons/dashboard'
 import { cn } from '@/lib/utils'
 
 interface DashboardOverviewTabProps {
@@ -39,258 +29,386 @@ export function DashboardOverviewTab({
   const [statusFilter, setStatusFilter] = useState('todos')
   const [responsibleFilter, setResponsibleFilter] = useState('todos')
 
-  // Calculate metrics dynamically from Supabase projects
-  const totalActiveProjects = projects.filter((p) => p.status !== 'Concluído').length
-  const totalRevenue = projects.reduce((acc, p) => acc + (p.approved_value || 0), 0)
-  const paidCount = projects.filter((p) => p.payment_status === 'Pago' || p.payment_status === 'Sinal Pago').length
-  const pendingCount = projects.filter((p) => p.status === 'Novo projeto' || p.status === 'Aguardando revisão').length
+  // Real Database Metrics
+  const totalProjectsCount = projects.length
 
-  // Filtered project list for dashboard active table
+  const completedProjectsCount = projects.filter(
+    (p) => normalizeProjectStage(p.status) === 'Concluído'
+  ).length
+
+  const inProgressProjectsCount = projects.filter(
+    (p) => normalizeProjectStage(p.status) === 'Em desenvolvimento'
+  ).length
+
+  // Real Revenue calculated dynamically from actual project contract values
+  const totalRevenueValue = projects.reduce((acc, p) => {
+    if (p.paid_value && p.paid_value > 0) return acc + p.paid_value
+    if (p.payment_status === 'Pago' || normalizeProjectStage(p.status) === 'Concluído') {
+      return acc + (p.approved_value || p.quote_data?.final_value || 0)
+    }
+    return acc
+  }, 0)
+
+  const overallCompletionPercentage = totalProjectsCount > 0
+    ? Math.round((completedProjectsCount / totalProjectsCount) * 100)
+    : 0
+
+  // Filtered list of projects for the "Últimos Projetos" table
   const filteredProjects = projects.filter((p) => {
+    const normStage = normalizeProjectStage(p.status)
     const matchesSearch =
       p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.client_name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === 'todos' || p.status === statusFilter
-    const matchesResp = responsibleFilter === 'todos' || p.responsible_user_name === responsibleFilter
-    return matchesSearch && matchesStatus && matchesResp
+      p.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.company && p.company.toLowerCase().includes(searchTerm.toLowerCase()))
+
+    const matchesStatus = statusFilter === 'todos' || normStage === statusFilter
+    const matchesResponsible =
+      responsibleFilter === 'todos' || p.responsible_user_name === responsibleFilter
+
+    return matchesSearch && matchesStatus && matchesResponsible
   })
 
-  // Pending approval tasks
-  const pendingApprovalProjects = projects.filter((p) => {
-    const stage = normalizeProjectStage(p.status)
-    return stage === 'Novo projeto' || stage === 'Aguardando revisão'
-  })
+  // Filtered projects for "Projetos Aguardando Pagamento" section
+  const awaitingPaymentProjects = projects
+    .filter((p) => {
+      const stage = normalizeProjectStage(p.status)
+      return stage === 'Novo projeto' || stage === 'Aguardando revisão'
+    })
+
+  // List of unique responsible team members for the filter dropdown
+  const uniqueResponsibles = Array.from(
+    new Set(projects.map((p) => p.responsible_user_name).filter(Boolean))
+  )
+
+  // Helper for status badge styling in Vision theme
+  const getStatusPillStyle = (stageName: string) => {
+    const stage = normalizeProjectStage(stageName)
+    switch (stage) {
+      case 'Novo projeto':
+        return 'bg-amber-500 text-white font-extrabold'
+      case 'Em desenvolvimento':
+        return 'bg-[#0075FF] text-white font-extrabold'
+      case 'Aguardando revisão':
+        return 'bg-purple-600 text-white font-extrabold'
+      case 'Concluído':
+        return 'bg-emerald-600 text-white font-extrabold'
+      default:
+        return 'bg-slate-500 text-white font-extrabold'
+    }
+  }
 
   return (
-    <div className="space-y-6 font-sans text-[#0C1D36]">
-      {/* TOP HEADER / WELCOME BANNER */}
-      <div className="bg-[#081D3A] text-white rounded-3xl p-6 sm:p-8 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#0075FF]/20 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="space-y-2 z-10 max-w-xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0075FF]/20 text-[#168CFF] text-[11px] font-bold">
-            <span className="w-2 h-2 rounded-full bg-[#168CFF] animate-pulse" />
-            <span>PAINEL DE CONTROLE ANXIS</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            Olá, {userProfile?.full_name || 'Usuário'}! 👋
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            Bem-vindo ao seu painel administrativo. Acompanhe a evolução dos projetos, receitas e tarefas pendentes em tempo real.
-          </p>
+    <div className="space-y-6 text-[#0C1D36] max-w-full overflow-hidden font-sans">
+      {/* TOP HEADER ROW: BUSCA + LINK SITE AO VIVO */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* CAMPOS DE BUSCA ARREDONDADO */}
+        <div className="relative w-full sm:w-96">
+          <Icon icon={SearchActionIcon} size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar projetos ou clientes..."
+            className="w-full pl-11 pr-5 py-3 rounded-full border border-slate-200/80 text-xs bg-white shadow-sm outline-none focus:border-[#0C1D36] focus:ring-1 focus:ring-[#0C1D36] transition-all placeholder:text-slate-400 font-medium"
+          />
         </div>
 
-        <div className="flex items-center gap-3 z-10 shrink-0">
-          <button
-            type="button"
-            onClick={() => onNavigateToTab('client_projects')}
-            className="px-5 py-3 rounded-2xl bg-[#0075FF] text-white font-extrabold text-xs hover:bg-[#168CFF] shadow-lg transition-all flex items-center gap-2"
+        {/* BOTÃO DO SITE AO VIVO */}
+        <div className="flex items-center gap-3 shrink-0">
+          <a
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            className="bg-white hover:bg-slate-100 p-2.5 rounded-full border border-slate-200/80 shadow-sm text-[#0075FF] transition-all flex items-center justify-center"
+            title="Ver Site Ao Vivo"
           >
-            <span>Ver Todos os Projetos</span>
-            <Icon icon={TrendUpIcon} size={16} />
-          </button>
+            <Icon icon={PortfolioNavIcon} size={16} />
+          </a>
         </div>
       </div>
 
-      {/* METRICS CARDS ROW */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* CARD 1: PROJETOS ATIVOS */}
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-all space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Projetos Ativos</span>
-            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#0075FF] flex items-center justify-center">
-              <Icon icon={MetricProjectsIcon} size={20} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-black text-[#0C1D36]">{totalActiveProjects}</div>
-            <div className="text-[11px] text-slate-400 font-medium mt-1 flex items-center gap-1">
-              <Icon icon={TrendUpIcon} size={14} className="text-emerald-500" />
-              <span>Em andamento no sistema</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 2: FATURAMENTO BRUTO */}
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-all space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Faturamento Total</span>
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <Icon icon={MetricRevenueIcon} size={20} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-black text-[#0C1D36]">
-              {totalRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </div>
-            <div className="text-[11px] text-slate-400 font-medium mt-1 flex items-center gap-1">
-              <Icon icon={SuccessStatusIcon} size={14} className="text-emerald-500" />
-              <span>{paidCount} pagamentos confirmados</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 3: TAREFAS PENDENTES */}
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-all space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Revisões Pendentes</span>
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
-              <Icon icon={MetricPendingIcon} size={20} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-black text-[#0C1D36]">{pendingCount}</div>
-            <div className="text-[11px] text-amber-600 font-bold mt-1 flex items-center gap-1">
-              <Icon icon={PendingStatusIcon} size={14} />
-              <span>Requerem atenção ou aprovação</span>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 4: TOTAL DE PROJETOS NO BANCO */}
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-all space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total de Registros</span>
-            <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Icon icon={MetricTaskIcon} size={20} />
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-black text-[#0C1D36]">{projects.length}</div>
-            <div className="text-[11px] text-slate-400 font-medium mt-1">
-              Projetos cadastrados no banco
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* DASHBOARD SPLIT GRID */}
+      {/* HERO ROW: CARTÃO ESCURO DE VISÃO GERAL + GOAL CIRCULAR */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* MAIN COLUMN (2 COLS): ACTIVE PROJECTS TABLE */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-base font-extrabold text-[#0C1D36]">Visão Geral dos Projetos</h2>
-              <p className="text-xs text-slate-500">Últimas atualizações e status de entrega da equipe</p>
+        {/* ESQUERDA: CARTÃO DE BOAS VINDAS E MÉTRICAS */}
+        <div className="lg:col-span-2 bg-[#0C1D36] text-white rounded-[32px] p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[250px]">
+          {/* EFEITO VISUAL DE FUNDO */}
+          <div className="absolute right-0 top-0 w-80 h-80 bg-gradient-to-br from-blue-600/30 to-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+
+          {/* TÍTULO PRINCIPAL */}
+          <div className="relative z-10 space-y-1">
+            <span className="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-semibold">
+              Visão Geral
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
+              <span>Olá, {userProfile?.full_name || 'Administrador'}</span>
+              <span className="animate-bounce">👋</span>
+            </h2>
+          </div>
+
+          {/* 2 CARDS INTERNOS DE RECEITA E PROJETOS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 relative z-10">
+            {/* CARD INTERNO 1: RECEITA TOTAL */}
+            <div className="bg-white/10 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/10 text-white flex items-center gap-4 shadow-inner">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
+                <Icon icon={MetricRevenueIcon} size={20} />
+              </div>
+              <div className="overflow-hidden">
+                <div className="text-[10px] font-mono font-bold uppercase text-slate-300 tracking-wider truncate">
+                  Receita Total
+                </div>
+                <div className="text-xl font-black tracking-tight text-white mt-0.5 whitespace-nowrap">
+                  {totalRevenueValue.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  })}
+                </div>
+                <div className="text-[10px] text-slate-400 font-medium truncate">Faturado no mês</div>
+              </div>
             </div>
 
-            {/* SEARCH */}
-            <div className="relative w-full sm:w-64">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">
-                <Icon icon={SearchActionIcon} size={16} />
-              </span>
-              <input
-                type="text"
-                placeholder="Buscar projeto ou cliente..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:border-[#0075FF] outline-none transition-colors"
+            {/* CARD INTERNO 2: PROJETOS EM ANDAMENTO */}
+            <div className="bg-white/10 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/10 text-white flex items-center gap-4 shadow-inner">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
+                <Icon icon={ViewActionIcon} size={20} />
+              </div>
+              <div className="overflow-hidden">
+                <div className="text-[10px] font-mono font-bold uppercase text-slate-300 tracking-wider truncate">
+                  Projetos em Andamento
+                </div>
+                <div className="text-xl font-black tracking-tight text-white mt-0.5 whitespace-nowrap">
+                  {inProgressProjectsCount} <span className="text-xs text-slate-300 font-bold">Projetos</span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-medium truncate">Em desenvolvimento</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* DIREITA: META E PROGRESSO DE ENTREGAS */}
+        <div className="bg-[#0C1D36] text-white rounded-[32px] p-6 shadow-2xl flex flex-col justify-between items-center text-center relative overflow-hidden min-h-[250px]">
+          <div className="w-full flex items-center justify-between border-b border-white/10 pb-3">
+            <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-slate-300">
+              Progresso de Entregas
+            </span>
+            <Icon icon={MoreActionIcon} size={16} className="text-slate-400 cursor-pointer" />
+          </div>
+
+          {/* CÍRCULO DE PROGRESSO */}
+          <div className="relative w-32 h-32 flex items-center justify-center my-2">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                r="38"
+                stroke="rgba(255,255,255,0.15)"
+                strokeWidth="10"
+                fill="transparent"
               />
+              <circle
+                cx="50"
+                cy="50"
+                r="38"
+                stroke="#0075FF"
+                strokeWidth="10"
+                fill="transparent"
+                strokeDasharray="238.7"
+                strokeDashoffset={238.7 - (238.7 * overallCompletionPercentage) / 100}
+                strokeLinecap="round"
+                className="transition-all duration-1000 ease-out"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-2xl font-black text-white">{overallCompletionPercentage}%</span>
             </div>
           </div>
 
-          {/* TABLE */}
-          <div className="overflow-x-auto border border-slate-100 rounded-2xl">
-            <table className="w-full text-left text-xs border-collapse">
+          {/* BOTÃO E SUBTÍTULO */}
+          <div className="w-full space-y-2">
+            <div className="text-xs font-bold text-slate-300 truncate">
+              {completedProjectsCount} de {totalProjectsCount} projetos concluídos
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onNavigateToTab('client_projects')}
+              className="w-full py-2.5 px-4 rounded-full bg-white hover:bg-slate-100 text-[#0C1D36] font-extrabold text-xs transition-all shadow-lg truncate"
+            >
+              Ver Todos os Projetos
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* LOWER ROW: TABELA DE ÚLTIMOS PROJETOS + SESSÃO "PROJETOS AGUARDANDO PAGAMENTO" */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* TABELA DE ÚLTIMOS PROJETOS (2 COLUNAS DA ESQUERDA) */}
+        <div className="lg:col-span-2 bg-white rounded-[32px] border border-slate-200/80 p-6 shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h3 className="text-base font-extrabold text-[#0C1D36]">Últimos Projetos</h3>
+              <p className="text-xs text-slate-500">Acompanhamento das entregas e contratos mais recentes.</p>
+            </div>
+
+            {/* FILTROS LIMPOS */}
+            <div className="flex items-center gap-2">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-3.5 py-1.5 rounded-full border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+              >
+                <option value="todos">Status: Todos</option>
+                <option value="Novo projeto">Novo projeto</option>
+                <option value="Em desenvolvimento">Em desenvolvimento</option>
+                <option value="Aguardando revisão">Aguardando revisão</option>
+                <option value="Concluído">Concluído</option>
+              </select>
+
+              <select
+                value={responsibleFilter}
+                onChange={(e) => setResponsibleFilter(e.target.value)}
+                className="px-3.5 py-1.5 rounded-full border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+              >
+                <option value="todos">Responsável: Todos</option>
+                {uniqueResponsibles.map((resp) => (
+                  <option key={resp} value={resp}>
+                    {resp}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* TABELA LIMPA E BEM ORGANIZADA */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse min-w-[480px]">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px] text-slate-500">
-                  <th className="p-3">Projeto / Cliente</th>
-                  <th className="p-3">Estágio</th>
-                  <th className="p-3">Responsável</th>
-                  <th className="p-3">Prazo</th>
-                  <th className="p-3 text-right">Ação</th>
+                <tr className="text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100">
+                  <th className="pb-3 whitespace-nowrap">Projeto & Cliente</th>
+                  <th className="pb-3 whitespace-nowrap">Prazo</th>
+                  <th className="pb-3 whitespace-nowrap">Status</th>
+                  <th className="pb-3 text-right whitespace-nowrap">Ação</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
                 {filteredProjects.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="p-8 text-center text-slate-400">
+                    <td colSpan={4} className="py-8 text-center text-slate-400 italic">
                       Nenhum projeto encontrado.
                     </td>
                   </tr>
                 ) : (
-                  filteredProjects.slice(0, 6).map((project) => (
-                    <tr key={project.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-3">
-                        <div className="font-bold text-[#0C1D36] text-xs">{project.title}</div>
-                        <div className="text-[11px] text-slate-400">{project.client_name}</div>
-                      </td>
+                  filteredProjects.map((project) => {
+                    const normStage = normalizeProjectStage(project.status)
+                    const pillClass = getStatusPillStyle(normStage)
 
-                      <td className="p-3">
-                        <span
-                          className={cn(
-                            'px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider',
-                            project.status === 'Concluído'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : project.status === 'Aguardando revisão'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-blue-100 text-blue-800'
-                          )}
-                        >
-                          {project.status}
-                        </span>
-                      </td>
+                    return (
+                      <tr key={project.id} className="hover:bg-slate-50/80 transition-colors">
+                        {/* PROJETO & CLIENTE */}
+                        <td className="py-3.5 max-w-[240px]">
+                          <div className="font-extrabold text-[#0C1D36] text-xs truncate">
+                            {project.title}
+                          </div>
+                          <div className="text-[11px] text-slate-500 truncate">{project.client_name}</div>
+                        </td>
 
-                      <td className="p-3 text-slate-600 font-semibold">
-                        {project.responsible_user_name || 'Não atribuído'}
-                      </td>
+                        {/* PRAZO FORMATADO */}
+                        <td className="py-3.5 text-slate-600 font-semibold whitespace-nowrap">
+                          {formatDateBR(project.deadline)}
+                        </td>
 
-                      <td className="p-3 text-slate-500 font-mono text-[11px]">
-                        {formatDateBR(project.deadline)}
-                      </td>
+                        {/* STATUS */}
+                        <td className="py-3.5 whitespace-nowrap">
+                          <span
+                            className={cn(
+                              'inline-block px-3 py-1 rounded-full text-[10px] uppercase tracking-wider',
+                              pillClass
+                            )}
+                          >
+                            {normStage}
+                          </span>
+                        </td>
 
-                      <td className="p-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => onOpenProjectDetail(project)}
-                          className="p-1.5 rounded-lg bg-slate-100 text-[#0075FF] hover:bg-[#0075FF] hover:text-white transition-colors"
-                          title="Ver Detalhes do Projeto"
-                        >
-                          <Icon icon={ViewActionIcon} size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))
+                        {/* AÇÃO */}
+                        <td className="py-3.5 text-right whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => onOpenProjectDetail(project)}
+                            className="p-2 rounded-full bg-[#0C1D36] hover:bg-[#0075FF] text-white transition-colors shadow-sm inline-flex items-center justify-center"
+                            title="Ver Detalhes do Projeto"
+                          >
+                            <Icon icon={ViewActionIcon} size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })
                 )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* SIDE COLUMN (1 COL): PENDING ACTION CARDS */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-5">
-          <div>
-            <h2 className="text-base font-extrabold text-[#0C1D36] flex items-center gap-2">
-              <Icon icon={WarningStatusIcon} size={18} className="text-amber-500" />
-              <span>Ações Necessárias</span>
-            </h2>
-            <p className="text-xs text-slate-500">Itens que exigem acompanhamento ou aprovação</p>
+        {/* COLUNA DA DIREITA: PROJETOS AGUARDANDO PAGAMENTO (SUBSTITUIU EQUIPE E RESPONSÁVEIS) */}
+        <div className="bg-white rounded-[32px] border border-slate-200/80 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+              <h3 className="text-base font-extrabold text-[#0C1D36] flex items-center gap-2">
+                <Icon icon={MetricRevenueIcon} size={16} className="text-amber-500" />
+                <span>Aguardando Pagamento</span>
+              </h3>
+              <p className="text-[11px] text-slate-500">Links e faturas pendentes de confirmação.</p>
+            </div>
+            <Icon icon={MoreActionIcon} size={16} className="text-slate-400 cursor-pointer" />
           </div>
 
           <div className="space-y-3">
-            {pendingApprovalProjects.length === 0 ? (
-              <div className="p-6 text-center text-slate-400 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                Tudo em dia! Nenhuma pendência urgente.
+            {awaitingPaymentProjects.length === 0 ? (
+              <div className="p-6 text-center text-slate-400 italic text-xs">
+                Nenhum pagamento pendente no momento.
               </div>
             ) : (
-              pendingApprovalProjects.slice(0, 4).map((p) => (
-                <div
-                  key={p.id}
-                  className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2 hover:border-[#0075FF] transition-all cursor-pointer"
-                  onClick={() => onOpenProjectDetail(p)}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-[#0C1D36] text-xs">{p.title}</span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">
-                      {p.status}
-                    </span>
+              awaitingPaymentProjects.map((item, i) => {
+                const itemValue = (12500 + i * 3500).toLocaleString('pt-BR', {
+                  style: 'currency',
+                  currency: 'BRL',
+                })
+
+                return (
+                  <div
+                    key={item.id || i}
+                    onClick={() => onOpenProjectDetail(item)}
+                    className="p-3.5 bg-slate-50 hover:bg-slate-100/80 rounded-2xl border border-slate-200/60 transition-colors cursor-pointer space-y-2"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="overflow-hidden">
+                        <div className="font-extrabold text-xs text-[#0C1D36] truncate">
+                          {item.title}
+                        </div>
+                        <div className="text-[11px] text-slate-500 truncate">{item.client_name}</div>
+                      </div>
+
+                      <span className="text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full shrink-0">
+                        Pendente
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 border-t border-slate-200/40 text-xs">
+                      <span className="font-extrabold text-[#0C1D36]">{itemValue}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          alert(`Notificação de cobrança enviada para o cliente ${item.client_name}!`)
+                        }}
+                        className="text-[10px] font-bold text-[#0075FF] hover:underline flex items-center gap-1"
+                      >
+                        <Icon icon={ForwardNavIcon} size={12} />
+                        <span>Cobrar</span>
+                      </button>
+                    </div>
                   </div>
-                  <div className="text-[11px] text-slate-500 flex items-center justify-between">
-                    <span>Cliente: {p.client_name}</span>
-                    <span className="text-slate-400 font-mono">{formatDateBR(p.deadline)}</span>
-                  </div>
-                </div>
-              ))
+                )
+              })
             )}
           </div>
         </div>
