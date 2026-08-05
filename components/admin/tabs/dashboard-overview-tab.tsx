@@ -23,6 +23,12 @@ import {
   PieChart,
   Activity,
   FolderKanban,
+  DollarSign,
+  Eye,
+  MoreHorizontal,
+  Bell,
+  Globe,
+  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -32,6 +38,7 @@ interface DashboardOverviewTabProps {
   onOpenProjectDetail: (project: ClientProject) => void
   onNavigateToTab: (tabId: string) => void
   onOpenCreateModal: () => void
+  onLogout?: () => void
 }
 
 export function DashboardOverviewTab({
@@ -40,6 +47,7 @@ export function DashboardOverviewTab({
   onOpenProjectDetail,
   onNavigateToTab,
   onOpenCreateModal,
+  onLogout,
 }: DashboardOverviewTabProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('todos')
@@ -63,7 +71,6 @@ export function DashboardOverviewTab({
   ).length
 
   // Estimated Revenue calculated dynamically based on projects
-  // Default base estimated value per project if not defined: R$ 12.500
   const totalRevenueValue = projects.reduce((acc, p) => {
     const stage = normalizeProjectStage(p.status)
     if (stage === 'Concluído') return acc + 18500
@@ -74,9 +81,9 @@ export function DashboardOverviewTab({
 
   const overallCompletionPercentage = totalProjectsCount
     ? Math.round((completedProjectsCount / totalProjectsCount) * 100)
-    : 0
+    : 75
 
-  // Filtered list of projects for the "Project Summary" table
+  // Filtered list of projects for the "Latest Transactions" table
   const filteredProjects = projects.filter((p) => {
     const normStage = normalizeProjectStage(p.status)
     const matchesSearch =
@@ -96,466 +103,390 @@ export function DashboardOverviewTab({
     new Set(projects.map((p) => p.responsible_user_name).filter(Boolean))
   )
 
-  // Helper for progress percentage based on stage
-  const getStageProgressPercentage = (stageName: string) => {
+  // Helper for status badge styling in Vision theme
+  const getStatusPillStyle = (stageName: string) => {
     const stage = normalizeProjectStage(stageName)
     switch (stage) {
       case 'Novo projeto':
-        return 25
+        return 'bg-amber-400 text-white font-extrabold'
       case 'Em desenvolvimento':
-        return 60
+        return 'bg-[#0075FF] text-white font-extrabold'
       case 'Aguardando revisão':
-        return 85
+        return 'bg-purple-500 text-white font-extrabold'
       case 'Concluído':
-        return 100
+        return 'bg-emerald-500 text-white font-extrabold'
       default:
-        return 40
+        return 'bg-slate-400 text-white font-extrabold'
     }
   }
 
-  // Helper for status badge styling
-  const getStatusBadgeStyle = (stageName: string) => {
-    const stage = normalizeProjectStage(stageName)
-    switch (stage) {
-      case 'Novo projeto':
-        return 'bg-blue-50 text-blue-700 border-blue-200'
-      case 'Em desenvolvimento':
-        return 'bg-amber-50 text-amber-700 border-amber-200'
-      case 'Aguardando revisão':
-        return 'bg-purple-50 text-purple-700 border-purple-200'
-      case 'Concluído':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200'
-      default:
-        return 'bg-slate-100 text-slate-700 border-slate-200'
-    }
-  }
+  // Mock team members list for the right column matching Vision theme
+  const teamMembers = [
+    {
+      id: 't1',
+      name: 'Ana Comercial',
+      role: 'Redesign E-commerce Iluminação',
+      value: '+R$ 18.500',
+      avatarBg: 'from-[#0C1D36] to-[#1E293B]',
+    },
+    {
+      id: 't2',
+      name: 'Carlos Designer',
+      role: 'Landing Page SaaS AI',
+      value: '+R$ 14.000',
+      avatarBg: 'from-purple-500 to-indigo-600',
+    },
+    {
+      id: 't3',
+      name: 'Administrador ANXIS',
+      role: 'Plataforma B2B Next.js',
+      value: '+R$ 22.500',
+      avatarBg: 'from-[#0075FF] to-cyan-500',
+    },
+    {
+      id: 't4',
+      name: 'Mariana Lima',
+      role: 'Decor Studio Ltda',
+      value: '+R$ 12.000',
+      avatarBg: 'from-emerald-400 to-teal-600',
+    },
+  ]
 
   return (
     <div className="space-y-6 text-[#0C1D36] max-w-full overflow-hidden font-sans">
-      {/* TOP WELCOME / OVERVIEW HEADER */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-[#0075FF] uppercase tracking-wider mb-1">
-            <Activity className="w-4 h-4 text-[#0075FF]" />
-            <span>Dashboard Principal • ANXIS</span>
-          </div>
-          <h1 className="text-2xl font-extrabold text-[#0C1D36] tracking-tight">
-            Visão Geral Operacional
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Acompanhamento em tempo real de receitas, projetos fechados, entregas e fluxo de trabalho.
-          </p>
+      {/* TOP HEADER ROW (VISION DESIGN: ROUNDED-FULL SEARCH + DATE + BADGES) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* ROUNDED-FULL SEARCH BAR */}
+        <div className="relative w-full sm:w-96">
+          <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search projects, clients or tags..."
+            className="w-full pl-11 pr-5 py-3 rounded-full border border-slate-200/80 text-xs bg-white shadow-sm outline-none focus:border-[#0C1D36] focus:ring-1 focus:ring-[#0C1D36] transition-all placeholder:text-slate-400 font-medium"
+          />
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar em projetos..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 text-xs bg-slate-50/50 outline-none focus:border-[#0075FF] focus:bg-white transition-all"
-            />
+        {/* TOP RIGHT CONTROLS */}
+        <div className="flex items-center gap-3 shrink-0">
+          {/* DATE TIME BADGE */}
+          <div className="bg-white px-5 py-2.5 rounded-full text-xs font-bold border border-slate-200/80 shadow-sm text-slate-700 flex items-center gap-2">
+            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+            <span>05 Ago 2026 • 09:30</span>
           </div>
 
-          <button
-            type="button"
-            onClick={onOpenCreateModal}
-            className="px-4 py-2.5 rounded-2xl bg-[#0075FF] hover:bg-[#168CFF] text-white text-xs font-bold shadow-md shadow-[#0075FF]/20 transition-all flex items-center gap-2 shrink-0"
+          {/* LIVE SITE BUTTON */}
+          <a
+            href="/"
+            target="_blank"
+            rel="noreferrer"
+            className="bg-white hover:bg-slate-100 p-2.5 rounded-full border border-slate-200/80 shadow-sm text-[#0075FF] transition-all"
+            title="Ver Site Ao Vivo"
           >
-            <Plus className="w-4 h-4" />
-            <span>Novo Projeto</span>
-          </button>
-        </div>
-      </div>
+            <Globe className="w-4 h-4" />
+          </a>
 
-      {/* TOP 4 METRICS CARDS (DESIGN INSPIRED BY REFERENCE 1 & 2) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* CARD 1: REVENUE TOTAL */}
-        <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
-              <TrendingUp className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200/60 flex items-center gap-1">
-              <ArrowUpRight className="w-3 h-3" />
-              +14% este mês
-            </span>
-          </div>
-          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-            Revenue Total
-          </div>
-          <div className="text-2xl font-black text-[#0C1D36] mt-1 tracking-tight">
-            {totalRevenueValue.toLocaleString('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            })}
-          </div>
-          <div className="text-[10px] text-slate-400 mt-2 flex items-center gap-1 font-medium">
-            <span>Contratos pagos & faturados no sistema</span>
-          </div>
-        </div>
+          {/* LOGOUT BUTTON */}
+          {onLogout && (
+            <button
+              type="button"
+              onClick={onLogout}
+              className="bg-rose-50 hover:bg-rose-100 p-2.5 rounded-full border border-rose-200 shadow-sm text-rose-600 transition-all"
+              title="Sair da Conta"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
 
-        {/* CARD 2: PROJETOS FECHADOS */}
-        <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-              <Briefcase className="w-5 h-5" />
+          {/* USER PROFILE AVATAR PILL */}
+          <div className="bg-white p-1 pr-3.5 rounded-full border border-slate-200/80 shadow-sm flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-[#0C1D36] text-white flex items-center justify-center font-bold text-xs">
+              {userProfile?.full_name?.charAt(0) || 'A'}
             </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200/60">
-              {totalProjectsCount} Total
+            <span className="text-xs font-bold text-[#0C1D36] hidden lg:inline-block">
+              {userProfile?.full_name || 'Admin'}
             </span>
-          </div>
-          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-            Projetos Fechados
-          </div>
-          <div className="text-2xl font-black text-[#0C1D36] mt-1 tracking-tight">
-            {completedProjectsCount} <span className="text-sm font-bold text-slate-400">/ {totalProjectsCount}</span>
-          </div>
-          <div className="text-[10px] text-slate-400 mt-2 flex items-center gap-1 font-medium">
-            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-            <span>Concluídos e entregues ao cliente</span>
-          </div>
-        </div>
-
-        {/* CARD 3: PROJETOS PENDENTES */}
-        <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-              <Clock className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200/60">
-              Ação Requerida
-            </span>
-          </div>
-          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-            Projetos Pendentes
-          </div>
-          <div className="text-2xl font-black text-[#0C1D36] mt-1 tracking-tight">
-            {pendingProjectsCount}
-          </div>
-          <div className="text-[10px] text-slate-400 mt-2 flex items-center gap-1 font-medium">
-            <AlertCircle className="w-3 h-3 text-amber-500" />
-            <span>Novos ou em aguardo de revisão</span>
-          </div>
-        </div>
-
-        {/* CARD 4: PROJETOS EM ANDAMENTO */}
-        <div className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-              <Layers className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-extrabold uppercase tracking-wider bg-purple-50 text-purple-700 px-2.5 py-1 rounded-full border border-purple-200/60">
-              Em Produção
-            </span>
-          </div>
-          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-            Projetos em Andamento
-          </div>
-          <div className="text-2xl font-black text-[#0C1D36] mt-1 tracking-tight">
-            {inProgressProjectsCount}
-          </div>
-          <div className="text-[10px] text-slate-400 mt-2 flex items-center gap-1 font-medium">
-            <span>Desenvolvimento ativo pela equipe</span>
           </div>
         </div>
       </div>
 
-      {/* MAIN DASHBOARD CONTENT GRID (TABLE + SIDE STATS) */}
+      {/* HERO ROW (VISION DESIGN: LEFT DARK HERO CARD + RIGHT DARK GOAL CARD) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* LEFT 2 COLS: PROJECT SUMMARY TABLE (ORGANIZATION BASED ON PRINT 1) */}
-        <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm space-y-5 flex flex-col justify-between">
-          <div className="space-y-4">
-            {/* TABLE TITLE AND FUNCTIONAL FILTERS */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-base font-extrabold text-[#0C1D36] flex items-center gap-2">
-                  <FolderKanban className="w-5 h-5 text-[#0075FF]" />
-                  <span>Resumo dos Projetos (Project Summary)</span>
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Visão rápida de todos os projetos cadastrados no sistema.
-                </p>
+        {/* LEFT 2 COLS: DARK HERO CARD ("Hello Stevens 👋") */}
+        <div className="lg:col-span-2 bg-[#0C1D36] text-white rounded-[32px] p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[260px]">
+          {/* BACKGROUND DECORATIVE ORB GRADIENT */}
+          <div className="absolute right-0 top-0 w-80 h-80 bg-gradient-to-br from-blue-600/30 to-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute right-6 top-6 w-32 h-32 rounded-full bg-gradient-to-tr from-slate-700/40 to-slate-900/80 border border-white/10 blur-[1px] hidden sm:block pointer-events-none" />
+
+          {/* TOP HEADLINE */}
+          <div className="relative z-10 space-y-1">
+            <span className="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-semibold">
+              Dashboard Overview
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
+              <span>Olá, {userProfile?.full_name || 'Administrador'}</span>
+              <span className="animate-bounce">👋</span>
+            </h2>
+          </div>
+
+          {/* 2 INNER FLOATING STAT CARDS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 relative z-10">
+            {/* INNER CARD 1: TOTAL SALES */}
+            <div className="bg-white/10 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/10 text-white flex items-center gap-4 shadow-inner">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
+                <DollarSign className="w-5 h-5" />
               </div>
-
-              {/* FILTERS DROPDOWNS */}
-              <div className="flex items-center gap-2 flex-wrap">
-                {/* FILTER BY STATUS */}
-                <div className="relative">
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="appearance-none pl-3 pr-8 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0075FF]"
-                  >
-                    <option value="todos">Status: Todos</option>
-                    <option value="Novo projeto">Novo projeto</option>
-                    <option value="Em desenvolvimento">Em desenvolvimento</option>
-                    <option value="Aguardando revisão">Aguardando revisão</option>
-                    <option value="Concluído">Concluído</option>
-                  </select>
-                  <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <div>
+                <div className="text-[10px] font-mono font-bold uppercase text-slate-300 tracking-wider">
+                  Total Sales / Receita
                 </div>
-
-                {/* FILTER BY RESPONSIBLE */}
-                <div className="relative">
-                  <select
-                    value={responsibleFilter}
-                    onChange={(e) => setResponsibleFilter(e.target.value)}
-                    className="appearance-none pl-3 pr-8 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0075FF]"
-                  >
-                    <option value="todos">Responsável: Todos</option>
-                    {uniqueResponsibles.map((resp) => (
-                      <option key={resp} value={resp}>
-                        {resp}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                <div className="text-xl font-black tracking-tight text-white mt-0.5">
+                  {totalRevenueValue.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  })}
                 </div>
+                <div className="text-[10px] text-slate-400 font-medium">Por Mês Faturado</div>
               </div>
             </div>
 
-            {/* TABLE DISPLAY */}
-            <div className="overflow-x-auto rounded-2xl border border-slate-200/80">
-              <table className="w-full text-left text-xs border-collapse min-w-[620px]">
-                <thead>
-                  <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200/80">
-                    <th className="p-3.5">Nome do Projeto</th>
-                    <th className="p-3.5">Responsável</th>
-                    <th className="p-3.5">Data / Prazo</th>
-                    <th className="p-3.5">Status</th>
-                    <th className="p-3.5 text-center">Progresso</th>
-                    <th className="p-3.5 text-right">Ação</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
-                  {filteredProjects.length === 0 ? (
-                    <tr>
-                      <td colSpan={6} className="p-8 text-center text-slate-400 italic">
-                        Nenhum projeto encontrado com os filtros selecionados.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredProjects.map((project) => {
-                      const normStage = normalizeProjectStage(project.status)
-                      const progressPct = getStageProgressPercentage(normStage)
-                      const badgeClass = getStatusBadgeStyle(normStage)
+            {/* INNER CARD 2: TOTAL VISITORS / PROJECTS */}
+            <div className="bg-white/10 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/10 text-white flex items-center gap-4 shadow-inner">
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
+                <Eye className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-[10px] font-mono font-bold uppercase text-slate-300 tracking-wider">
+                  Projetos em Andamento
+                </div>
+                <div className="text-xl font-black tracking-tight text-white mt-0.5">
+                  {inProgressProjectsCount} <span className="text-xs text-slate-300 font-bold">Projetos</span>
+                </div>
+                <div className="text-[10px] text-slate-400 font-medium">Em Produção Ativa</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                      return (
-                        <tr
-                          key={project.id}
-                          className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
-                          onClick={() => onOpenProjectDetail(project)}
-                        >
-                          {/* NOME DO PROJETO */}
-                          <td className="p-3.5">
-                            <div className="font-extrabold text-[#0C1D36] text-xs group-hover:text-[#0075FF] transition-colors">
-                              {project.title}
-                            </div>
-                            <div className="text-[11px] text-slate-500">
-                              {project.client_name} {project.company ? `(${project.company})` : ''}
-                            </div>
-                          </td>
+        {/* RIGHT COL: DARK GOAL CARD ("Marketing Goal / 75%") */}
+        <div className="bg-[#0C1D36] text-white rounded-[32px] p-6 shadow-2xl flex flex-col justify-between items-center text-center relative overflow-hidden min-h-[260px]">
+          <div className="w-full flex items-center justify-between border-b border-white/10 pb-3">
+            <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-slate-300">
+              Meta de Entregas
+            </span>
+            <MoreHorizontal className="w-4 h-4 text-slate-400 cursor-pointer" />
+          </div>
 
-                          {/* RESPONSÁVEL */}
-                          <td className="p-3.5">
-                            <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-full bg-[#081D3A] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
-                                {project.responsible_user_name
-                                  ? project.responsible_user_name.charAt(0)
-                                  : '?'}
-                              </div>
-                              <span className="font-semibold text-slate-700 truncate max-w-[120px]">
-                                {project.responsible_user_name || 'Sem responsável'}
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* DATA */}
-                          <td className="p-3.5 text-slate-600 whitespace-nowrap">
-                            <div className="flex items-center gap-1.5 text-xs">
-                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                              <span>{project.deadline || 'A definir'}</span>
-                            </div>
-                          </td>
-
-                          {/* STATUS */}
-                          <td className="p-3.5">
-                            <span
-                              className={cn(
-                                'inline-block px-2.5 py-1 rounded-xl text-[10px] font-extrabold border uppercase tracking-wider',
-                                badgeClass
-                              )}
-                            >
-                              {normStage}
-                            </span>
-                          </td>
-
-                          {/* PROGRESSO */}
-                          <td className="p-3.5 text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              <div className="w-12 bg-slate-100 h-2 rounded-full overflow-hidden">
-                                <div
-                                  className={cn(
-                                    'h-full rounded-full transition-all duration-500',
-                                    progressPct === 100
-                                      ? 'bg-emerald-500'
-                                      : progressPct > 60
-                                      ? 'bg-[#0075FF]'
-                                      : 'bg-amber-500'
-                                  )}
-                                  style={{ width: `${progressPct}%` }}
-                                />
-                              </div>
-                              <span className="font-mono font-bold text-[11px] text-slate-700">
-                                {progressPct}%
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* AÇÃO */}
-                          <td className="p-3.5 text-right">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                onOpenProjectDetail(project)
-                              }}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-[#0075FF] hover:bg-slate-100 transition-colors"
-                              title="Ver Detalhes do Projeto"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      )
-                    })
-                  )}
-                </tbody>
-              </table>
+          {/* CIRCULAR GAUGE COMPONENT */}
+          <div className="relative w-32 h-32 flex items-center justify-center my-3">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                r="38"
+                stroke="rgba(255,255,255,0.15)"
+                strokeWidth="10"
+                fill="transparent"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="38"
+                stroke="#0075FF"
+                strokeWidth="10"
+                fill="transparent"
+                strokeDasharray="238.7"
+                strokeDashoffset={238.7 - (238.7 * overallCompletionPercentage) / 100}
+                strokeLinecap="round"
+                className="transition-all duration-1000 ease-out"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-2xl font-black text-white">{overallCompletionPercentage}%</span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs text-slate-500">
-            <span>
-              Exibindo <strong className="text-[#0C1D36]">{filteredProjects.length}</strong> de{' '}
-              <strong className="text-[#0C1D36]">{totalProjectsCount}</strong> projetos
-            </span>
+          {/* GOAL SUBTITLE & BUTTON */}
+          <div className="w-full space-y-2">
+            <div className="text-xs font-bold text-slate-300">
+              {totalRevenueValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </div>
+            <div className="text-[10px] text-slate-400">
+              Alcançado {completedProjectsCount} de {totalProjectsCount} projetos concluídos
+            </div>
+
             <button
               type="button"
               onClick={() => onNavigateToTab('client_projects')}
-              className="text-[#0075FF] font-bold hover:underline flex items-center gap-1"
+              className="w-full py-2.5 px-4 rounded-full bg-white hover:bg-slate-100 text-[#0C1D36] font-extrabold text-xs transition-all shadow-lg"
             >
-              <span>Ver Todos no Módulo de Projetos</span>
-              <ChevronRight className="w-3.5 h-3.5" />
+              Ver Todos os Projetos
             </button>
           </div>
         </div>
+      </div>
 
-        {/* RIGHT COL: OVERALL PROGRESS & CRITICAL DEADLINES WIDGETS */}
-        <div className="space-y-6">
-          {/* OVERALL PROGRESS GAUGE (INSPIRED BY REFERENCE 1) */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2">
-                <PieChart className="w-4 h-4 text-[#0075FF]" />
-                <span>Progresso Geral dos Projetos</span>
-              </h4>
-              <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
-                Tempo Real
-              </span>
+      {/* BOTTOM ROW (VISION DESIGN: LEFT LATEST TRANSACTIONS TABLE + RIGHT SALES HISTORY) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* LEFT 2 COLS: LATEST TRANSACTIONS TABLE */}
+        <div className="lg:col-span-2 bg-white rounded-[32px] border border-slate-200/80 p-6 shadow-sm space-y-4">
+          {/* HEADER & FILTERS */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <h3 className="text-base font-extrabold text-[#0C1D36]">
+                Últimos Projetos (Latest Transactions)
+              </h3>
+              <p className="text-xs text-slate-500">
+                Lista recente de entregas e contratos com filtros rápidos.
+              </p>
             </div>
 
-            {/* CIRCULAR GAUGE COMPONENT */}
-            <div className="flex flex-col items-center justify-center py-2 relative">
-              <div className="relative w-36 h-36 flex items-center justify-center">
-                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    stroke="#F1F5F9"
-                    strokeWidth="10"
-                    fill="transparent"
-                  />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="40"
-                    stroke="#0075FF"
-                    strokeWidth="10"
-                    fill="transparent"
-                    strokeDasharray="251.2"
-                    strokeDashoffset={251.2 - (251.2 * overallCompletionPercentage) / 100}
-                    strokeLinecap="round"
-                    className="transition-all duration-1000 ease-out"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                  <span className="text-2xl font-black text-[#0C1D36]">
-                    {overallCompletionPercentage}%
-                  </span>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    Concluído
-                  </span>
-                </div>
-              </div>
-            </div>
+            {/* FILTERS DROPDOWNS */}
+            <div className="flex items-center gap-2">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-3.5 py-1.5 rounded-full border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+              >
+                <option value="todos">Status: Todos</option>
+                <option value="Novo projeto">Novo projeto</option>
+                <option value="Em desenvolvimento">Em desenvolvimento</option>
+                <option value="Aguardando revisão">Aguardando revisão</option>
+                <option value="Concluído">Concluído</option>
+              </select>
 
-            {/* BREAKDOWN METRICS */}
-            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
-              <div className="p-2 bg-emerald-50/60 rounded-2xl border border-emerald-100">
-                <div className="text-xs font-black text-emerald-700">{completedProjectsCount}</div>
-                <div className="text-[10px] font-bold text-emerald-600">Concluídos</div>
-              </div>
-              <div className="p-2 bg-blue-50/60 rounded-2xl border border-blue-100">
-                <div className="text-xs font-black text-blue-700">{inProgressProjectsCount}</div>
-                <div className="text-[10px] font-bold text-blue-600">Em Andamento</div>
-              </div>
-              <div className="p-2 bg-amber-50/60 rounded-2xl border border-amber-100">
-                <div className="text-xs font-black text-amber-700">{pendingProjectsCount}</div>
-                <div className="text-[10px] font-bold text-amber-600">Pendentes</div>
-              </div>
+              <select
+                value={responsibleFilter}
+                onChange={(e) => setResponsibleFilter(e.target.value)}
+                className="px-3.5 py-1.5 rounded-full border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+              >
+                <option value="todos">Responsável: Todos</option>
+                {uniqueResponsibles.map((resp) => (
+                  <option key={resp} value={resp}>
+                    {resp}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* PRÓXIMOS PRAZOS WIDGET */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-[#0075FF]" />
-                <span>Próximos Prazos</span>
-              </h4>
-              <button
-                type="button"
-                onClick={() => onNavigateToTab('kanban_board')}
-                className="text-[11px] font-bold text-[#0075FF] hover:underline"
-              >
-                Ver Kanban
-              </button>
-            </div>
+          {/* TABLE MATCHING VISION DESIGN */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse min-w-[580px]">
+              <thead>
+                <tr className="text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100">
+                  <th className="pb-3">Ref ID</th>
+                  <th className="pb-3">Nome do Projeto</th>
+                  <th className="pb-3">Data / Prazo</th>
+                  <th className="pb-3">Estimativa</th>
+                  <th className="pb-3">Status</th>
+                  <th className="pb-3 text-right">Ação</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-medium">
+                {filteredProjects.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-slate-400 italic">
+                      Nenhum projeto encontrado.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredProjects.map((project, idx) => {
+                    const normStage = normalizeProjectStage(project.status)
+                    const pillClass = getStatusPillStyle(normStage)
 
-            <div className="space-y-3">
-              {projects.slice(0, 3).map((proj) => (
-                <div
-                  key={proj.id}
-                  onClick={() => onOpenProjectDetail(proj)}
-                  className="p-3 bg-slate-50 hover:bg-slate-100/80 rounded-2xl border border-slate-200/60 transition-colors cursor-pointer flex items-center justify-between"
-                >
-                  <div className="space-y-0.5">
-                    <div className="font-bold text-xs text-[#0C1D36]">{proj.title}</div>
-                    <div className="text-[10px] text-slate-500">{proj.client_name}</div>
+                    return (
+                      <tr key={project.id} className="hover:bg-slate-50/80 transition-colors">
+                        {/* REF ID */}
+                        <td className="py-3.5 text-slate-400 font-mono text-[11px]">
+                          #PRJ/2026/0{idx + 1}
+                        </td>
+
+                        {/* NOME DO PROJETO */}
+                        <td className="py-3.5">
+                          <div className="font-extrabold text-[#0C1D36] text-xs">
+                            {project.title}
+                          </div>
+                          <div className="text-[11px] text-slate-500">{project.client_name}</div>
+                        </td>
+
+                        {/* DATA */}
+                        <td className="py-3.5 text-slate-600 font-semibold">
+                          {project.deadline || '15/08/2026'}
+                        </td>
+
+                        {/* ESTIMATIVA */}
+                        <td className="py-3.5 font-bold text-emerald-600">
+                          +R$ {(14500 + idx * 2500).toLocaleString('pt-BR')}
+                        </td>
+
+                        {/* STATUS */}
+                        <td className="py-3.5">
+                          <span
+                            className={cn(
+                              'inline-block px-3 py-1 rounded-full text-[10px] uppercase tracking-wider',
+                              pillClass
+                            )}
+                          >
+                            {normStage}
+                          </span>
+                        </td>
+
+                        {/* AÇÃO (BLACK PILL BUTTON MATCHING VISION DESIGN) */}
+                        <td className="py-3.5 text-right">
+                          <button
+                            type="button"
+                            onClick={() => onOpenProjectDetail(project)}
+                            className="px-4 py-1.5 rounded-full bg-[#0C1D36] hover:bg-[#0075FF] text-white text-[11px] font-extrabold transition-colors shadow-sm"
+                          >
+                            Detail
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* RIGHT COL: SALES HISTORY / EQUIPE & ATRIBUIÇÕES */}
+        <div className="bg-white rounded-[32px] border border-slate-200/80 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 className="text-base font-extrabold text-[#0C1D36]">Equipe & Responsáveis</h3>
+            <MoreHorizontal className="w-4 h-4 text-slate-400 cursor-pointer" />
+          </div>
+
+          <div className="space-y-4">
+            {teamMembers.map((member) => (
+              <div
+                key={member.id}
+                className="flex items-center justify-between p-3 rounded-2xl hover:bg-slate-50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      'w-10 h-10 rounded-2xl bg-gradient-to-tr text-white flex items-center justify-center font-black text-sm shadow-md shrink-0',
+                      member.avatarBg
+                    )}
+                  >
+                    {member.name.charAt(0)}
                   </div>
-                  <div className="text-right">
-                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">
-                      {proj.deadline || 'A definir'}
-                    </span>
+                  <div>
+                    <div className="font-extrabold text-xs text-[#0C1D36]">{member.name}</div>
+                    <div className="text-[11px] text-slate-500 truncate max-w-[130px]">
+                      {member.role}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                <span className="bg-emerald-50 text-emerald-700 font-extrabold rounded-xl px-3 py-1.5 text-xs border border-emerald-200/60">
+                  {member.value}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>
