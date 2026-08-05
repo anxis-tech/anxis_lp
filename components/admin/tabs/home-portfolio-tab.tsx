@@ -5,6 +5,7 @@ import { Project } from '@/types/database.types'
 import { INITIAL_PROJECTS } from '@/lib/constants/initial-data'
 import { Plus, Search, Edit, Trash2, Eye, EyeOff, Star, Sparkles, Globe } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { saveHomeProjectAction, deleteHomeProjectAction } from '@/lib/actions/projects'
 
 interface HomePortfolioTabProps {
   projects: Project[]
@@ -46,16 +47,19 @@ export function HomePortfolioTab({
     onUpdateProjects(updated)
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!canDelete) return
     if (confirm('Tem certeza que deseja remover este projeto da landing page?')) {
       const updated = projects.filter((p) => p.id !== id)
       onUpdateProjects(updated)
+      await deleteHomeProjectAction(id)
     }
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!editingProject?.title || !canEdit) return
+
+    let targetProj: any = editingProject
 
     if (editingProject.id) {
       const updated = projects.map((p) =>
@@ -82,8 +86,17 @@ export function HomePortfolioTab({
         is_visible: editingProject.is_visible ?? true,
         display_order: projects.length + 1,
       }
+      targetProj = newP
       onUpdateProjects([...projects, newP])
     }
+
+    await saveHomeProjectAction({
+      ...targetProj,
+      image_url: targetProj.desktop_image_url || targetProj.image_url,
+      description: targetProj.short_description || targetProj.description,
+      live_url: targetProj.project_url || targetProj.live_url,
+      is_published: targetProj.is_visible ?? targetProj.is_published ?? true,
+    })
 
     setIsModalOpen(false)
     setEditingProject(null)

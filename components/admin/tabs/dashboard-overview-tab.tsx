@@ -41,7 +41,7 @@ export function DashboardOverviewTab({
   const [statusFilter, setStatusFilter] = useState('todos')
   const [responsibleFilter, setResponsibleFilter] = useState('todos')
 
-  // Metrics
+  // Real Database Metrics
   const totalProjectsCount = projects.length
 
   const completedProjectsCount = projects.filter(
@@ -54,22 +54,23 @@ export function DashboardOverviewTab({
 
   const pendingProjectsCount = projects.filter(
     (p) =>
+      p.payment_status === 'Pendente' ||
       normalizeProjectStage(p.status) === 'Novo projeto' ||
       normalizeProjectStage(p.status) === 'Aguardando revisão'
   ).length
 
-  // Estimated Revenue calculated dynamically based on projects
+  // Real Revenue calculated dynamically from actual project contract values
   const totalRevenueValue = projects.reduce((acc, p) => {
-    const stage = normalizeProjectStage(p.status)
-    if (stage === 'Concluído') return acc + 18500
-    if (stage === 'Em desenvolvimento') return acc + 14000
-    if (stage === 'Aguardando revisão') return acc + 12000
-    return acc + 8500
+    if (p.paid_value && p.paid_value > 0) return acc + p.paid_value
+    if (p.payment_status === 'Pago' || normalizeProjectStage(p.status) === 'Concluído') {
+      return acc + (p.approved_value || p.quote_data?.final_value || 0)
+    }
+    return acc
   }, 0)
 
-  const overallCompletionPercentage = totalProjectsCount
+  const overallCompletionPercentage = totalProjectsCount > 0
     ? Math.round((completedProjectsCount / totalProjectsCount) * 100)
-    : 75
+    : 0
 
   // Filtered list of projects for the "Últimos Projetos" table
   const filteredProjects = projects.filter((p) => {

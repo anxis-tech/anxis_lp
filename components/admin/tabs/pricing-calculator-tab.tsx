@@ -10,6 +10,7 @@ import {
   DEFAULT_PRICING_CONFIG,
   calculateProjectQuote,
 } from '@/lib/utils/pricing-calculator'
+import { saveQuoteAction, savePricingSettingsAction } from '@/lib/actions/quotes'
 import {
   STRICT_PROJECT_TYPES,
   CONTENT_COPY_OPTIONS,
@@ -126,12 +127,13 @@ export function PricingCalculatorTab({
   // Live Calculation Breakdown
   const breakdown = calculateProjectQuote(formData, pricingConfig)
 
-  const handleSaveConfig = () => {
+  const handleSaveConfig = async () => {
     setConfigSaveFeedback(true)
+    await savePricingSettingsAction(pricingConfig)
     setTimeout(() => setConfigSaveFeedback(false), 3000)
   }
 
-  const handleSaveQuote = (andConvert: boolean = false) => {
+  const handleSaveQuote = async (andConvert: boolean = false) => {
     setValidationError(null)
 
     // Zod validation check
@@ -163,6 +165,8 @@ export function PricingCalculatorTab({
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }
+
+    await saveQuoteAction(newQuote)
 
     if (onSaveQuote) onSaveQuote(newQuote)
 

@@ -113,6 +113,14 @@ export interface ClientProject {
   description?: string
   internal_notes?: string
 
+  // Financial & Payment Fields
+  payment_status?: string
+  approved_value?: number
+  paid_value?: number
+  payment_link?: string
+  payment_method?: string
+  paid_at?: string
+
   // Contact Details Section
   client_contact_json?: {
     contact_name?: string

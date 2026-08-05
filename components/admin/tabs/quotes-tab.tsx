@@ -5,6 +5,7 @@ import { SavedQuote } from '@/types/pricing.types'
 import { UserProfileWithRole } from '@/lib/auth/permissions'
 import { formatDateBR } from '@/components/admin/tabs/kanban-board-tab'
 import { STRICT_PROJECT_TYPES, QUOTE_STATUSES, QuoteStatus } from '@/lib/validations/quote-schema'
+import { deleteQuoteAction, saveQuoteAction } from '@/lib/actions/quotes'
 import {
   FileText,
   Search,
@@ -167,7 +168,7 @@ export function QuotesTab({
     new Set(quotes.map((q) => q.created_by_name).filter(Boolean))
   )
 
-  const handleDuplicateQuote = (quote: SavedQuote) => {
+  const handleDuplicateQuote = async (quote: SavedQuote) => {
     const duplicated: SavedQuote = {
       ...quote,
       id: `quote-${Date.now()}`,
@@ -177,16 +178,18 @@ export function QuotesTab({
       updated_at: new Date().toISOString(),
     }
     onUpdateQuotes([duplicated, ...quotes])
+    await saveQuoteAction(duplicated)
     alert(`Orçamento para "${quote.client_name}" duplicado com sucesso como Rascunho!`)
   }
 
-  const handleDeleteQuote = (quoteId: string, projectName: string) => {
+  const handleDeleteQuote = async (quoteId: string, projectName: string) => {
     const confirmDelete = window.confirm(
       `Tem certeza de que deseja excluir permanentemente o orçamento "${projectName}"?`
     )
     if (confirmDelete) {
       onUpdateQuotes(quotes.filter((q) => q.id !== quoteId))
       if (selectedQuoteDetail?.id === quoteId) setSelectedQuoteDetail(null)
+      await deleteQuoteAction(quoteId)
     }
   }
 

@@ -21,6 +21,9 @@ import { KanbanBoardTab } from '@/components/admin/tabs/kanban-board-tab'
 import { PricingCalculatorTab } from '@/components/admin/tabs/pricing-calculator-tab'
 import { QuotesTab, MOCK_SAVED_QUOTES } from '@/components/admin/tabs/quotes-tab'
 import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-tab'
+import { saveClientProjectAction, deleteClientProjectAction } from '@/lib/actions/client-projects'
+import { saveQuoteAction } from '@/lib/actions/quotes'
+import { saveHomeProjectAction, deleteHomeProjectAction } from '@/lib/actions/projects'
 import {
   LayoutDashboard,
   Globe,
@@ -92,6 +95,13 @@ export default function AdminDashboardPage() {
           .single()
 
         if (profile) {
+          // Block inactive users from accessing admin shell
+          if (profile.is_active === false) {
+            await supabase.auth.signOut()
+            router.push('/admin/login?error=inactive')
+            return
+          }
+
           setUserProfile({
             id: profile.id,
             user_id: user.id,
@@ -100,6 +110,12 @@ export default function AdminDashboardPage() {
             role_slug: (profile as any).roles?.slug || 'admin',
             is_active: profile.is_active ?? true,
           })
+
+          // Update last access timestamp in Supabase
+          await supabase
+            .from('profiles')
+            .update({ last_access_at: new Date().toISOString() })
+            .eq('user_id', user.id)
         } else {
           setUserProfile({
             id: 'admin-fallback-id',
@@ -122,17 +138,20 @@ export default function AdminDashboardPage() {
         })
       }
 
-      // Fetch live home projects & client projects
+      // Fetch live home projects, client projects & saved quotes from Supabase
       const [
         { data: pData },
-        { data: cpData }
+        { data: cpData },
+        { data: qData }
       ] = await Promise.all([
         supabase.from('projects').select('*').order('display_order', { ascending: true }),
         supabase.from('client_projects').select('*').order('updated_at', { ascending: false }),
+        supabase.from('quotes').select('*').order('created_at', { ascending: false }),
       ])
 
       if (pData && pData.length > 0) setHomeProjects(pData)
       if (cpData && cpData.length > 0) setClientProjects(cpData as any)
+      if (qData && qData.length > 0) setSavedQuotes(qData as any)
     } catch (e) {
       console.warn('Running admin in offline/demo mode.')
       setUserProfile({
@@ -154,7 +173,7 @@ export default function AdminDashboardPage() {
     router.push('/admin/login')
   }
 
-  const handleDeleteProjectFromDrawer = (projectId: string, projectTitle: string) => {
+  const handleDeleteProjectFromDrawer = async (projectId: string, projectTitle: string) => {
     const canDelete = isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)
     if (!canDelete) {
       alert('Você não possui permissão para excluir projetos.')
@@ -168,12 +187,13 @@ export default function AdminDashboardPage() {
     if (confirmDelete) {
       setClientProjects((prev) => prev.filter((p) => p.id !== projectId))
       setSelectedDetailProject(null)
+      await deleteClientProjectAction(projectId)
       alert(`Projeto "${projectTitle}" excluído com sucesso!`)
     }
   }
 
-  // Convert Quote into a Client Project
-  const handleConvertQuoteToProject = (quote: SavedQuote) => {
+  // Convert Quote into a Client Project & Persist to Supabase
+  const handleConvertQuoteToProject = async (quote: SavedQuote) => {
     const newProject: ClientProject = {
       id: `cp-converted-${Date.now()}`,
       title: quote.project_name,
@@ -211,17 +231,22 @@ export default function AdminDashboardPage() {
       updated_at: new Date().toISOString(),
     }
 
-    // Add to project list
+    // Add to project list locally
     setClientProjects((prev) => [newProject, ...prev])
 
-    // Update quote status
+    // Update quote status locally & in Supabase
+    const updatedQuote = { ...quote, status: 'Convertido em Projeto' as const }
     setSavedQuotes((prev) =>
-      prev.map((q) =>
-        q.id === quote.id ? { ...q, status: 'Convertido em Projeto', linked_project_id: newProject.id } : q
-      )
+      prev.map((q) => (q.id === quote.id ? updatedQuote : q))
     )
 
-    alert(`Projeto "${quote.project_name}" criado com sucesso a partir do orçamento! Redirecionando para os Projetos.`)
+    // Save project and updated quote to Supabase
+    await Promise.all([
+      saveClientProjectAction(newProject),
+      saveQuoteAction(updatedQuote),
+    ])
+
+    alert(`Projeto "${quote.project_name}" criado com sucesso e salvo no banco de dados! Redirecionando para os Projetos.`)
     setActiveTab('client_projects')
   }
 
