@@ -586,9 +586,10 @@ export function ClientProjectsTab({
                       <button
                         type="button"
                         onClick={() => onOpenProjectDetail(project)}
-                        className="px-3 py-1.5 rounded-lg bg-[#081D3A] text-white text-xs font-bold hover:bg-[#0075FF] transition-colors"
+                        className="p-2 rounded-lg bg-[#081D3A] text-white hover:bg-[#0075FF] transition-colors inline-flex items-center justify-center"
+                        title="Ver Detalhes do Projeto"
                       >
-                        Ver Detalhes
+                        <Eye className="w-3.5 h-3.5" />
                       </button>
 
                       {canEdit && (

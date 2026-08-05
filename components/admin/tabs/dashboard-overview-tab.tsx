@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ClientProject } from '@/types/client-project.types'
 import { UserProfileWithRole } from '@/lib/auth/permissions'
-import { normalizeProjectStage } from '@/components/admin/tabs/kanban-board-tab'
+import { normalizeProjectStage, formatDateBR } from '@/components/admin/tabs/kanban-board-tab'
 import {
   Search,
   Calendar,
@@ -300,15 +300,13 @@ export function DashboardOverviewTab({
             </div>
           </div>
 
-          {/* TABELA SEM QUEBRA DE LINHA E TEXTOS CONCISOS */}
+          {/* TABELA LIMPA E BEM ORGANIZADA */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse min-w-[560px]">
+            <table className="w-full text-left text-xs border-collapse min-w-[480px]">
               <thead>
                 <tr className="text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100">
-                  <th className="pb-3 whitespace-nowrap">Código</th>
                   <th className="pb-3 whitespace-nowrap">Projeto & Cliente</th>
                   <th className="pb-3 whitespace-nowrap">Prazo</th>
-                  <th className="pb-3 whitespace-nowrap">Valor Contratado</th>
                   <th className="pb-3 whitespace-nowrap">Status</th>
                   <th className="pb-3 text-right whitespace-nowrap">Ação</th>
                 </tr>
@@ -316,38 +314,28 @@ export function DashboardOverviewTab({
               <tbody className="divide-y divide-slate-100 font-medium">
                 {filteredProjects.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-400 italic">
+                    <td colSpan={4} className="py-8 text-center text-slate-400 italic">
                       Nenhum projeto encontrado.
                     </td>
                   </tr>
                 ) : (
-                  filteredProjects.map((project, idx) => {
+                  filteredProjects.map((project) => {
                     const normStage = normalizeProjectStage(project.status)
                     const pillClass = getStatusPillStyle(normStage)
 
                     return (
                       <tr key={project.id} className="hover:bg-slate-50/80 transition-colors">
-                        {/* CÓDIGO */}
-                        <td className="py-3.5 text-slate-400 font-mono text-[11px] whitespace-nowrap">
-                          #PRJ-0{idx + 1}
-                        </td>
-
                         {/* PROJETO & CLIENTE */}
-                        <td className="py-3.5 max-w-[200px]">
+                        <td className="py-3.5 max-w-[240px]">
                           <div className="font-extrabold text-[#0C1D36] text-xs truncate">
                             {project.title}
                           </div>
                           <div className="text-[11px] text-slate-500 truncate">{project.client_name}</div>
                         </td>
 
-                        {/* PRAZO */}
+                        {/* PRAZO FORMATADO */}
                         <td className="py-3.5 text-slate-600 font-semibold whitespace-nowrap">
-                          {project.deadline || 'A definir'}
-                        </td>
-
-                        {/* VALOR */}
-                        <td className="py-3.5 font-bold text-emerald-600 whitespace-nowrap">
-                          R$ {(14500 + idx * 2500).toLocaleString('pt-BR')}
+                          {formatDateBR(project.deadline)}
                         </td>
 
                         {/* STATUS */}
@@ -367,9 +355,10 @@ export function DashboardOverviewTab({
                           <button
                             type="button"
                             onClick={() => onOpenProjectDetail(project)}
-                            className="px-4 py-1.5 rounded-full bg-[#0C1D36] hover:bg-[#0075FF] text-white text-[11px] font-extrabold transition-colors shadow-sm"
+                            className="p-2 rounded-full bg-[#0C1D36] hover:bg-[#0075FF] text-white transition-colors shadow-sm inline-flex items-center justify-center"
+                            title="Ver Detalhes do Projeto"
                           >
-                            Detalhes
+                            <Eye className="w-3.5 h-3.5" />
                           </button>
                         </td>
                       </tr>
