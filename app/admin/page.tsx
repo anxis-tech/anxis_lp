@@ -436,9 +436,9 @@ export default function AdminDashboardPage() {
               title={isSidebarCollapsed ? 'Expandir Menu' : 'Recolher Menu'}
             >
               {isSidebarCollapsed ? (
-                <HugeiconsIcon icon={PanelLeftOpenIcon} className="w-4 h-4 text-[#0C1D36]" strokeWidth={1.5} />
+                <HugeiconsIcon icon={PanelLeftOpenIcon} className="w-5 h-5 text-[#0C1D36]" strokeWidth={1.5} />
               ) : (
-                <HugeiconsIcon icon={PanelLeftCloseIcon} className="w-4 h-4 text-slate-400" strokeWidth={1.5} />
+                <HugeiconsIcon icon={PanelLeftCloseIcon} className="w-5 h-5 text-slate-400" strokeWidth={1.5} />
               )}
             </button>
           </div>
@@ -480,7 +480,7 @@ export default function AdminDashboardPage() {
                               icon={tabIcon}
                               strokeWidth={1.5}
                               className={cn(
-                                'w-4 h-4 shrink-0',
+                                'w-5 h-5 shrink-0',
                                 isActive ? 'text-white' : 'text-slate-400 group-hover:text-[#0C1D36]'
                               )}
                             />
@@ -520,7 +520,7 @@ export default function AdminDashboardPage() {
                 className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                 title="Sair da Conta"
               >
-                <HugeiconsIcon icon={Logout01Icon} className="w-4 h-4" strokeWidth={1.5} />
+                <HugeiconsIcon icon={Logout01Icon} className="w-5 h-5" strokeWidth={1.5} />
               </button>
             </div>
           ) : (
@@ -530,7 +530,7 @@ export default function AdminDashboardPage() {
               className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs mx-auto border border-rose-100 hover:bg-rose-100 transition-colors cursor-pointer"
               title="Sair da Conta"
             >
-              <HugeiconsIcon icon={Logout01Icon} className="w-4 h-4" strokeWidth={1.5} />
+              <HugeiconsIcon icon={Logout01Icon} className="w-5 h-5" strokeWidth={1.5} />
             </button>
           )}
         </div>

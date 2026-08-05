@@ -14,6 +14,7 @@ import {
   normalizeProjectStage,
   formatDateBR,
 } from '@/components/admin/tabs/kanban-board-tab'
+import { saveClientProjectAction, deleteClientProjectAction } from '@/lib/actions/client-projects'
 import { Icon } from '@/components/ui/icon'
 import {
   ProjectsNavIcon,
@@ -167,66 +168,62 @@ export function ClientProjectsTab({
     setIsEditModalOpen(true)
   }
 
-  const handleSaveProjectForm = () => {
+  const [isSaving, setIsSaving] = useState(false)
+
+  const handleSaveProjectForm = async () => {
     if (!editingProject?.title || !editingProject?.client_name) {
       alert('Por favor, preencha pelo menos o Nome do Projeto e o Nome do Cliente.')
       return
     }
 
-    const normStatus = normalizeProjectStage(editingProject.status)
+    const isEdit = !!editingProject.id && !editingProject.id.startsWith('cp-temp-') && !editingProject.id.startsWith('temp-') && !editingProject.id.startsWith('cp-')
 
-    if (editingProject.id) {
-      const updated = projects.map((p) =>
-        p.id === editingProject.id
-          ? ({
-              ...p,
-              ...editingProject,
-              status: normStatus,
-              kanban_stage_name: normStatus,
-              updated_at: new Date().toISOString(),
-            } as ClientProject)
-          : p
-      )
-      onUpdateProjects(updated)
-    } else {
-      const newProj: ClientProject = {
-        id: `cp-${Date.now()}`,
-        title: editingProject.title || 'Novo Projeto',
-        client_name: editingProject.client_name || 'Cliente',
-        company: editingProject.company,
-        email: editingProject.email,
-        phone: editingProject.phone,
-        whatsapp: editingProject.whatsapp,
-        project_type: editingProject.project_type || 'Site institucional',
-        platform: editingProject.platform || 'Next.js',
-        status: normStatus as ClientProjectStatus,
-        kanban_stage_name: normStatus,
-        priority: editingProject.priority || 'Normal',
-        responsible_user_id: editingProject.responsible_user_id,
-        responsible_user_name: editingProject.responsible_user_name,
-        responsible_user_email: editingProject.responsible_user_email,
-        start_date: editingProject.start_date,
-        deadline: editingProject.deadline,
-        description: editingProject.description,
-        internal_notes: editingProject.internal_notes,
-        client_contact_json: editingProject.client_contact_json || {},
-        scope_briefing_json: editingProject.scope_briefing_json || {},
-        files: editingProject.files || [],
-        links: editingProject.links || [],
-        tasks: editingProject.tasks || [],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }
-      onUpdateProjects([newProj, ...projects])
+    if (isEdit && !canEdit) {
+      alert('Você não possui permissão para editar projetos de clientes.')
+      return
     }
 
+    if (!isEdit && !canCreate) {
+      alert('Você não possui permissão para criar novos projetos de clientes.')
+      return
+    }
+
+    setIsSaving(true)
+
+    const normStatus = normalizeProjectStage(editingProject.status)
+
+    const projectToSave = {
+      ...editingProject,
+      status: normStatus,
+      kanban_stage_name: normStatus,
+    }
+
+    const res = await saveClientProjectAction(projectToSave)
+
+    if (!res.success || !res.project) {
+      setIsSaving(false)
+      alert(`Erro ao salvar no banco de dados: ${res.message || 'Falha na gravação.'}`)
+      return
+    }
+
+    const savedProject = res.project as ClientProject
+
+    if (isEdit) {
+      const updated = projects.map((p) => (p.id === savedProject.id ? savedProject : p))
+      onUpdateProjects(updated)
+      alert('Projeto atualizado com sucesso')
+    } else {
+      onUpdateProjects([savedProject, ...projects])
+      alert('Projeto criado com sucesso')
+    }
+
+    setIsSaving(false)
     setIsEditModalOpen(false)
     setEditingProject(null)
-    alert('Projeto salvo com sucesso no banco de dados!')
   }
 
   // DELETE PROJECT HANDLER
-  const handleDeleteProject = (projectId: string, projectTitle: string) => {
+  const handleDeleteProject = async (projectId: string, projectTitle: string) => {
     if (!canDelete) {
       alert('Você não possui permissão para excluir projetos de clientes.')
       return
@@ -236,17 +233,24 @@ export function ClientProjectsTab({
       `Tem certeza de que deseja excluir permanentemente o projeto "${projectTitle}"?\n\nEsta ação removerá todos os arquivos, links e pendências vinculadas ao projeto.`
     )
 
-    if (confirmDelete) {
-      const updated = projects.filter((p) => p.id !== projectId)
-      onUpdateProjects(updated)
+    if (!confirmDelete) return
 
-      if (editingProject?.id === projectId) {
-        setIsEditModalOpen(false)
-        setEditingProject(null)
-      }
+    const res = await deleteClientProjectAction(projectId)
 
-      alert(`Projeto "${projectTitle}" excluído com sucesso!`)
+    if (!res.success) {
+      alert(`Erro ao excluir projeto: ${res.message}`)
+      return
     }
+
+    const updated = projects.filter((p) => p.id !== projectId)
+    onUpdateProjects(updated)
+
+    if (editingProject?.id === projectId) {
+      setIsEditModalOpen(false)
+      setEditingProject(null)
+    }
+
+    alert(`Projeto "${projectTitle}" excluído com sucesso!`)
   }
 
   // LINK MANAGEMENT
@@ -1291,11 +1295,12 @@ export function ClientProjectsTab({
 
                 <button
                   type="button"
+                  disabled={isSaving}
                   onClick={handleSaveProjectForm}
-                  className="px-6 py-2.5 rounded-xl bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF] shadow-md flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF] shadow-md flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   <Icon icon={SuccessStatusIcon} size={16} />
-                  <span>Salvar Projeto</span>
+                  <span>{isSaving ? 'Salvando no banco...' : 'Salvar Projeto'}</span>
                 </button>
               </div>
             </div>

@@ -30,9 +30,9 @@ export async function saveClientProjectAction(projectData: any) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) return { success: false, message: 'Não autenticado.' }
+  if (!user) return { success: false, message: 'Usuário não autenticado.' }
 
-  const isEdit = !!projectData.id && !projectData.id.startsWith('cp-temp-')
+  const isEdit = !!projectData.id && !projectData.id.startsWith('cp-temp-') && !projectData.id.startsWith('temp-') && !projectData.id.startsWith('cp-')
 
   const payload = {
     title: projectData.title,
@@ -68,39 +68,122 @@ export async function saveClientProjectAction(projectData: any) {
     updated_at: new Date().toISOString(),
   }
 
+  let savedProjectId: string
+
   if (isEdit) {
-    const { error } = await supabase
+    savedProjectId = projectData.id
+    const { error: updateError } = await supabase
       .from('client_projects')
       .update(payload)
-      .eq('id', projectData.id)
+      .eq('id', savedProjectId)
 
-    if (error) return { success: false, message: error.message }
+    if (updateError) {
+      console.error('Error updating client project:', updateError)
+      return { success: false, message: updateError.message }
+    }
 
     await logAuditEventAction({
       action: 'edit_client_project',
       module: 'client_projects',
-      recordId: projectData.id,
+      recordId: savedProjectId,
       newData: payload,
     })
   } else {
-    const { data: newProj, error } = await supabase
+    const { data: newProj, error: insertError } = await supabase
       .from('client_projects')
       .insert({ ...payload, created_by: user.id })
       .select('id')
       .single()
 
-    if (error) return { success: false, message: error.message }
+    if (insertError || !newProj) {
+      console.error('Error inserting client project:', insertError)
+      return { success: false, message: insertError?.message || 'Falha ao inserir o projeto no banco de dados.' }
+    }
+
+    savedProjectId = newProj.id
 
     await logAuditEventAction({
       action: 'create_client_project',
       module: 'client_projects',
-      recordId: newProj.id,
+      recordId: savedProjectId,
       newData: payload,
     })
   }
 
+  // SYNC RELATED LINKS
+  if (Array.isArray(projectData.links)) {
+    // Delete existing links for this project
+    await supabase.from('client_project_links').delete().eq('project_id', savedProjectId)
+
+    if (projectData.links.length > 0) {
+      const linksToInsert = projectData.links.map((link: any) => ({
+        project_id: savedProjectId,
+        label: link.label || 'Link sem título',
+        url: link.url || '',
+        category: link.category || 'Outro',
+        description: link.description || null,
+        created_by: user.id,
+      }))
+
+      const { error: linksError } = await supabase.from('client_project_links').insert(linksToInsert)
+      if (linksError) {
+        console.error('Error syncing client project links:', linksError)
+        return { success: false, message: `Erro ao salvar links: ${linksError.message}` }
+      }
+    }
+  }
+
+  // SYNC RELATED FILES
+  if (Array.isArray(projectData.files)) {
+    // Delete existing files for this project
+    await supabase.from('client_project_files').delete().eq('project_id', savedProjectId)
+
+    if (projectData.files.length > 0) {
+      const filesToInsert = projectData.files.map((file: any) => ({
+        project_id: savedProjectId,
+        file_name: file.file_name || 'Arquivo sem nome',
+        storage_path: file.storage_path || `projects/${savedProjectId}/${file.file_name}`,
+        file_type: file.file_type || 'application/octet-stream',
+        file_size: file.file_size || 0,
+        category: file.category || 'Geral',
+        description: file.description || null,
+        uploaded_by: user.id,
+      }))
+
+      const { error: filesError } = await supabase.from('client_project_files').insert(filesToInsert)
+      if (filesError) {
+        console.error('Error syncing client project files:', filesError)
+        return { success: false, message: `Erro ao salvar arquivos: ${filesError.message}` }
+      }
+    }
+  }
+
+  // QUERY BACK FROM SUPABASE TO CONFIRM PERSISTENCE
+  const { data: verifiedProject, error: fetchError } = await supabase
+    .from('client_projects')
+    .select(`
+      *,
+      files:client_project_files(*),
+      links:client_project_links(*),
+      tasks:client_project_tasks(*)
+    `)
+    .eq('id', savedProjectId)
+    .single()
+
+  if (fetchError || !verifiedProject) {
+    console.error('Error verifying persisted client project:', fetchError)
+    return {
+      success: false,
+      message: fetchError?.message || 'Falha ao confirmar a persistência do projeto no banco de dados.',
+    }
+  }
+
   revalidatePath('/admin')
-  return { success: true, message: 'Projeto salvo com sucesso!' }
+  return {
+    success: true,
+    isEdit,
+    project: verifiedProject,
+  }
 }
 
 export async function moveKanbanStageAction(
@@ -178,5 +261,5 @@ export async function deleteClientProjectAction(id: string) {
   })
 
   revalidatePath('/admin')
-  return { success: true, message: 'Projeto excluído.' }
+  return { success: true, message: 'Projeto excluído com sucesso.' }
 }
