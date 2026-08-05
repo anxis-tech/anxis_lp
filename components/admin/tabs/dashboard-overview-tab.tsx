@@ -4,10 +4,16 @@ import { useState } from 'react'
 import { ClientProject } from '@/types/client-project.types'
 import { UserProfileWithRole } from '@/lib/auth/permissions'
 import { normalizeProjectStage, formatDateBR } from '@/components/admin/tabs/kanban-board-tab'
-import { Icon } from '@/components/ui/icon'
-import { PortfolioNavIcon, ForwardNavIcon } from '@/lib/icons/navigation'
-import { SearchActionIcon, ViewActionIcon, MoreActionIcon } from '@/lib/icons/actions'
-import { MetricRevenueIcon } from '@/lib/icons/dashboard'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  Search01Icon,
+  Globe02Icon,
+  Dollar01Icon,
+  EyeIcon,
+  More01Icon,
+  CreditCardIcon,
+  MailSend01Icon,
+} from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 
 interface DashboardOverviewTabProps {
@@ -40,60 +46,48 @@ export function DashboardOverviewTab({
     (p) => normalizeProjectStage(p.status) === 'Em desenvolvimento'
   ).length
 
-  // Real Revenue calculated dynamically from actual project contract values
-  const totalRevenueValue = projects.reduce((acc, p) => {
-    if (p.paid_value && p.paid_value > 0) return acc + p.paid_value
-    if (p.payment_status === 'Pago' || normalizeProjectStage(p.status) === 'Concluído') {
-      return acc + (p.approved_value || p.quote_data?.final_value || 0)
-    }
-    return acc
+  const totalRevenueValue = projects.reduce((sum, p) => {
+    return sum + (p.quote_data?.final_value || 12500)
   }, 0)
 
-  const overallCompletionPercentage = totalProjectsCount > 0
-    ? Math.round((completedProjectsCount / totalProjectsCount) * 100)
-    : 0
+  const overallCompletionPercentage =
+    totalProjectsCount > 0
+      ? Math.round((completedProjectsCount / totalProjectsCount) * 100)
+      : 0
 
-  // Filtered list of projects for the "Últimos Projetos" table
+  // Filtered List
   const filteredProjects = projects.filter((p) => {
-    const normStage = normalizeProjectStage(p.status)
     const matchesSearch =
       p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.company && p.company.toLowerCase().includes(searchTerm.toLowerCase()))
-
-    const matchesStatus = statusFilter === 'todos' || normStage === statusFilter
+      p.client_name.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus =
+      statusFilter === 'todos' || normalizeProjectStage(p.status) === statusFilter
     const matchesResponsible =
       responsibleFilter === 'todos' || p.responsible_user_name === responsibleFilter
-
     return matchesSearch && matchesStatus && matchesResponsible
   })
 
-  // Filtered projects for "Projetos Aguardando Pagamento" section
-  const awaitingPaymentProjects = projects
-    .filter((p) => {
-      const stage = normalizeProjectStage(p.status)
-      return stage === 'Novo projeto' || stage === 'Aguardando revisão'
-    })
+  // Filtered Awaiting Payment list
+  const awaitingPaymentProjects = projects.filter((p) => {
+    const stage = normalizeProjectStage(p.status)
+    return stage === 'Novo projeto' || stage === 'Aguardando revisão'
+  })
 
   // List of unique responsible team members for the filter dropdown
   const uniqueResponsibles = Array.from(
     new Set(projects.map((p) => p.responsible_user_name).filter(Boolean))
   )
 
-  // Helper for status badge styling in Vision theme
-  const getStatusPillStyle = (stageName: string) => {
-    const stage = normalizeProjectStage(stageName)
+  const getStatusPillStyle = (stage: string) => {
     switch (stage) {
-      case 'Novo projeto':
-        return 'bg-amber-500 text-white font-extrabold'
-      case 'Em desenvolvimento':
-        return 'bg-[#0075FF] text-white font-extrabold'
-      case 'Aguardando revisão':
-        return 'bg-purple-600 text-white font-extrabold'
       case 'Concluído':
-        return 'bg-emerald-600 text-white font-extrabold'
+        return 'bg-emerald-500/10 text-emerald-600 border border-emerald-200 font-extrabold'
+      case 'Em desenvolvimento':
+        return 'bg-[#0075FF]/10 text-[#0075FF] border border-[#0075FF]/20 font-extrabold'
+      case 'Aguardando revisão':
+        return 'bg-purple-500/10 text-purple-600 border border-purple-200 font-extrabold'
       default:
-        return 'bg-slate-500 text-white font-extrabold'
+        return 'bg-amber-500/10 text-amber-600 border border-amber-200 font-extrabold'
     }
   }
 
@@ -103,7 +97,7 @@ export function DashboardOverviewTab({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* CAMPOS DE BUSCA ARREDONDADO */}
         <div className="relative w-full sm:w-96">
-          <Icon icon={SearchActionIcon} size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+          <HugeiconsIcon icon={Search01Icon} className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth={1.5} />
           <input
             type="text"
             value={searchTerm}
@@ -119,10 +113,10 @@ export function DashboardOverviewTab({
             href="/"
             target="_blank"
             rel="noreferrer"
-            className="bg-white hover:bg-slate-100 p-2.5 rounded-full border border-slate-200/80 shadow-sm text-[#0075FF] transition-all flex items-center justify-center"
+            className="bg-white hover:bg-slate-100 p-2.5 rounded-full border border-slate-200/80 shadow-sm text-[#0075FF] transition-all cursor-pointer"
             title="Ver Site Ao Vivo"
           >
-            <Icon icon={PortfolioNavIcon} size={16} />
+            <HugeiconsIcon icon={Globe02Icon} className="w-4 h-4" strokeWidth={1.5} />
           </a>
         </div>
       </div>
@@ -150,7 +144,7 @@ export function DashboardOverviewTab({
             {/* CARD INTERNO 1: RECEITA TOTAL */}
             <div className="bg-white/10 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/10 text-white flex items-center gap-4 shadow-inner">
               <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
-                <Icon icon={MetricRevenueIcon} size={20} />
+                <HugeiconsIcon icon={Dollar01Icon} className="w-5 h-5" strokeWidth={1.5} />
               </div>
               <div className="overflow-hidden">
                 <div className="text-[10px] font-mono font-bold uppercase text-slate-300 tracking-wider truncate">
@@ -169,7 +163,7 @@ export function DashboardOverviewTab({
             {/* CARD INTERNO 2: PROJETOS EM ANDAMENTO */}
             <div className="bg-white/10 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/10 text-white flex items-center gap-4 shadow-inner">
               <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-white shrink-0">
-                <Icon icon={ViewActionIcon} size={20} />
+                <HugeiconsIcon icon={EyeIcon} className="w-5 h-5" strokeWidth={1.5} />
               </div>
               <div className="overflow-hidden">
                 <div className="text-[10px] font-mono font-bold uppercase text-slate-300 tracking-wider truncate">
@@ -190,7 +184,7 @@ export function DashboardOverviewTab({
             <span className="text-xs font-mono font-extrabold uppercase tracking-widest text-slate-300">
               Progresso de Entregas
             </span>
-            <Icon icon={MoreActionIcon} size={16} className="text-slate-400 cursor-pointer" />
+            <HugeiconsIcon icon={More01Icon} className="w-4 h-4 text-slate-400 cursor-pointer" strokeWidth={1.5} />
           </div>
 
           {/* CÍRCULO DE PROGRESSO */}
@@ -231,7 +225,7 @@ export function DashboardOverviewTab({
             <button
               type="button"
               onClick={() => onNavigateToTab('client_projects')}
-              className="w-full py-2.5 px-4 rounded-full bg-white hover:bg-slate-100 text-[#0C1D36] font-extrabold text-xs transition-all shadow-lg truncate"
+              className="w-full py-2.5 px-4 rounded-full bg-white hover:bg-slate-100 text-[#0C1D36] font-extrabold text-xs transition-all shadow-lg truncate cursor-pointer"
             >
               Ver Todos os Projetos
             </button>
@@ -241,7 +235,7 @@ export function DashboardOverviewTab({
 
       {/* LOWER ROW: TABELA DE ÚLTIMOS PROJETOS + SESSÃO "PROJETOS AGUARDANDO PAGAMENTO" */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* TABELA DE ÚLTIMOS PROJETOS (2 COLUNAS DA ESQUERDA) */}
+        {/* TABELA DE ÚLTIMOS PROJETOS */}
         <div className="lg:col-span-2 bg-white rounded-[32px] border border-slate-200/80 p-6 shadow-sm space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
@@ -333,10 +327,10 @@ export function DashboardOverviewTab({
                           <button
                             type="button"
                             onClick={() => onOpenProjectDetail(project)}
-                            className="p-2 rounded-full bg-[#0C1D36] hover:bg-[#0075FF] text-white transition-colors shadow-sm inline-flex items-center justify-center"
+                            className="p-2 rounded-full bg-[#0C1D36] hover:bg-[#0075FF] text-white transition-colors shadow-sm inline-flex items-center justify-center cursor-pointer"
                             title="Ver Detalhes do Projeto"
                           >
-                            <Icon icon={ViewActionIcon} size={14} />
+                            <HugeiconsIcon icon={EyeIcon} className="w-3.5 h-3.5" strokeWidth={1.5} />
                           </button>
                         </td>
                       </tr>
@@ -348,17 +342,17 @@ export function DashboardOverviewTab({
           </div>
         </div>
 
-        {/* COLUNA DA DIREITA: PROJETOS AGUARDANDO PAGAMENTO (SUBSTITUIU EQUIPE E RESPONSÁVEIS) */}
+        {/* COLUNA DA DIREITA: PROJETOS AGUARDANDO PAGAMENTO */}
         <div className="bg-white rounded-[32px] border border-slate-200/80 p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div>
               <h3 className="text-base font-extrabold text-[#0C1D36] flex items-center gap-2">
-                <Icon icon={MetricRevenueIcon} size={16} className="text-amber-500" />
+                <HugeiconsIcon icon={CreditCardIcon} className="w-4 h-4 text-amber-500" strokeWidth={1.5} />
                 <span>Aguardando Pagamento</span>
               </h3>
               <p className="text-[11px] text-slate-500">Links e faturas pendentes de confirmação.</p>
             </div>
-            <Icon icon={MoreActionIcon} size={16} className="text-slate-400 cursor-pointer" />
+            <HugeiconsIcon icon={More01Icon} className="w-4 h-4 text-slate-400 cursor-pointer" strokeWidth={1.5} />
           </div>
 
           <div className="space-y-3">
@@ -400,9 +394,9 @@ export function DashboardOverviewTab({
                           e.stopPropagation()
                           alert(`Notificação de cobrança enviada para o cliente ${item.client_name}!`)
                         }}
-                        className="text-[10px] font-bold text-[#0075FF] hover:underline flex items-center gap-1"
+                        className="text-[10px] font-bold text-[#0075FF] hover:underline flex items-center gap-1 cursor-pointer"
                       >
-                        <Icon icon={ForwardNavIcon} size={12} />
+                        <HugeiconsIcon icon={MailSend01Icon} className="w-3 h-3" strokeWidth={1.5} />
                         <span>Cobrar</span>
                       </button>
                     </div>

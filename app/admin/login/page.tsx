@@ -4,10 +4,15 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
-import { Icon } from '@/components/ui/icon'
-import { LockActionIcon, MailActionIcon } from '@/lib/icons/actions'
-import { ForwardNavIcon } from '@/lib/icons/navigation'
-import { ShieldStatusIcon, SuccessStatusIcon, SpinnerStatusIcon } from '@/lib/icons/status'
+import { HugeiconsIcon } from '@hugeicons/react'
+import {
+  LockIcon,
+  Mail01Icon,
+  Loading01Icon,
+  ArrowRight01Icon,
+  Shield01Icon,
+  CheckmarkCircle01Icon,
+} from '@hugeicons/core-free-icons'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -65,11 +70,11 @@ export default function AdminLoginPage() {
 
         <div className="flex flex-col items-center gap-3 bg-[#0B2F63]/80 border border-[#BBC4D1]/20 p-6 rounded-3xl shadow-2xl backdrop-blur-md max-w-sm w-full text-center">
           <div className="w-12 h-12 rounded-full bg-[#0075FF]/20 border border-[#0075FF]/40 flex items-center justify-center text-[#168CFF]">
-            <Icon icon={SpinnerStatusIcon} size={24} className="animate-spin text-[#0075FF]" />
+            <HugeiconsIcon icon={Loading01Icon} className="w-6 h-6 animate-spin text-[#0075FF]" strokeWidth={1.5} />
           </div>
           <div>
             <h3 className="text-sm font-extrabold text-white flex items-center justify-center gap-1.5">
-              <Icon icon={SuccessStatusIcon} size={18} className="text-emerald-400" />
+              <HugeiconsIcon icon={CheckmarkCircle01Icon} className="w-4 h-4 text-emerald-400" strokeWidth={1.5} />
               <span>Login efetuado com sucesso!</span>
             </h3>
             <p className="text-xs text-slate-300 mt-1">Carregando permissões e dados do painel...</p>
@@ -101,7 +106,7 @@ export default function AdminLoginPage() {
             />
           </div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0075FF]/20 text-[#168CFF] text-[11px] font-bold">
-            <Icon icon={ShieldStatusIcon} size={14} />
+            <HugeiconsIcon icon={Shield01Icon} className="w-3.5 h-3.5" strokeWidth={1.5} />
             <span>PAINEL ADMINISTRATIVO RESTRITO</span>
           </div>
         </div>
@@ -113,9 +118,7 @@ export default function AdminLoginPage() {
               E-mail de Acesso
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400">
-                <Icon icon={MailActionIcon} size={18} />
-              </span>
+              <HugeiconsIcon icon={Mail01Icon} className="w-5 h-5 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400" strokeWidth={1.5} />
               <input
                 type="email"
                 required
@@ -132,9 +135,7 @@ export default function AdminLoginPage() {
               Senha de Acesso
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400">
-                <Icon icon={LockActionIcon} size={18} />
-              </span>
+              <HugeiconsIcon icon={LockIcon} className="w-5 h-5 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400" strokeWidth={1.5} />
               <input
                 type="password"
                 required
@@ -155,18 +156,18 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-sm font-bold text-white bg-[#0075FF] hover:bg-[#168CFF] shadow-lg transition-all duration-200 disabled:opacity-50"
+            className="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-xl text-sm font-bold text-white bg-[#0075FF] hover:bg-[#168CFF] shadow-lg transition-all duration-200 disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
-              <div className="flex items-center gap-2">
-                <Icon icon={SpinnerStatusIcon} size={18} className="animate-spin" />
+              <>
+                <HugeiconsIcon icon={Loading01Icon} className="w-4 h-4 mr-2 animate-spin" strokeWidth={1.5} />
                 <span>Autenticando...</span>
-              </div>
+              </>
             ) : (
-              <div className="flex items-center gap-2">
+              <>
                 <span>Acessar Painel</span>
-                <Icon icon={ForwardNavIcon} size={18} />
-              </div>
+                <HugeiconsIcon icon={ArrowRight01Icon} className="w-4 h-4 ml-2" strokeWidth={1.5} />
+              </>
             )}
           </button>
         </form>

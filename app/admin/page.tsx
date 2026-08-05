@@ -23,36 +23,33 @@ import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-t
 import { saveClientProjectAction, deleteClientProjectAction } from '@/lib/actions/client-projects'
 import { saveQuoteAction } from '@/lib/actions/quotes'
 import { saveHomeProjectAction, deleteHomeProjectAction } from '@/lib/actions/projects'
-import { Icon } from '@/components/ui/icon'
+import { HugeiconsIcon } from '@hugeicons/react'
 import {
-  DashboardNavIcon,
-  ProjectsNavIcon,
-  KanbanNavIcon,
-  PricingNavIcon,
-  QuotesNavIcon,
-  PortfolioNavIcon,
-  PermissionsNavIcon,
-  CollapseSidebarIcon,
-  ExpandSidebarIcon,
-  LogoutNavIcon,
-} from '@/lib/icons/navigation'
-import {
-  DeleteActionIcon,
-  DownloadActionIcon,
-  LinkActionIcon,
-  ExternalLinkActionIcon,
-  CancelActionIcon,
-} from '@/lib/icons/actions'
-import {
-  MetricRevenueIcon,
-  MetricPendingIcon,
-  MetricQuoteIcon,
-} from '@/lib/icons/dashboard'
-import {
-  SpinnerStatusIcon,
-  RestrictedStatusIcon,
-  FileAttachmentStatusIcon,
-} from '@/lib/icons/status'
+  DashboardSquare01Icon,
+  Globe02Icon,
+  FolderKanbanIcon,
+  KanbanIcon,
+  Calculator01Icon,
+  Shield01Icon,
+  Logout01Icon,
+  ExternalLinkIcon,
+  AlertCircleIcon,
+  Loading01Icon,
+  Cancel01Icon,
+  File01Icon,
+  Attachment01Icon,
+  Link01Icon,
+  Download01Icon,
+  Mail01Icon,
+  UserIcon,
+  Calendar01Icon,
+  Task01Icon,
+  Delete02Icon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
+  Dollar01Icon,
+  Briefcase01Icon,
+} from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 
 export default function AdminDashboardPage() {
@@ -62,7 +59,6 @@ export default function AdminDashboardPage() {
   const [authResolved, setAuthResolved] = useState<boolean>(false)
   const [userProfile, setUserProfile] = useState<UserProfileWithRole | null>(null)
   const [activeTab, setActiveTab] = useState<string>('dashboard')
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
 
   // Live state from Supabase DB
   const [homeProjects, setHomeProjects] = useState<Project[]>([])
@@ -74,6 +70,7 @@ export default function AdminDashboardPage() {
   // Project Modal & Detail Drawer State
   const [selectedDetailProject, setSelectedDetailProject] = useState<ClientProject | null>(null)
   const [drawerTab, setDrawerTab] = useState<'geral' | 'contato' | 'escopo' | 'orcamento_escopo' | 'links_arquivos'>('geral')
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
 
   useEffect(() => {
     initAdminSession()
@@ -234,26 +231,38 @@ export default function AdminDashboardPage() {
     }
 
     const confirmDelete = window.confirm(
-      `Tem certeza de que deseja excluir permanentemente o projeto "${projectTitle}"?\n\nEsta ação removerá todos os arquivos, links e pendências vinculadas ao projeto.`
+      `Tem certeza que deseja excluir o projeto "${projectTitle}"? Esta ação não pode ser desfeita.`
     )
+    if (!confirmDelete) return
 
-    if (confirmDelete) {
-      setClientProjects((prev) => prev.filter((p) => p.id !== projectId))
-      setSelectedDetailProject(null)
-      await deleteClientProjectAction(projectId)
+    setClientProjects((prev) => prev.filter((p) => p.id !== projectId))
+    setSelectedDetailProject(null)
+    const res = await deleteClientProjectAction(projectId)
+    if (res.success) {
       alert(`Projeto "${projectTitle}" excluído com sucesso!`)
+    } else {
+      alert(`Erro: ${res.message}`)
+      initAdminSession()
     }
   }
 
-  // Convert Quote into a Client Project & Persist to Supabase
   const handleConvertQuoteToProject = async (quote: SavedQuote) => {
-    const newProject: ClientProject = {
-      id: `cp-converted-${Date.now()}`,
-      title: quote.project_name,
-      client_name: quote.client_name,
-      company: quote.company,
-      project_type: quote.project_type,
-      platform: quote.platform || 'Next.js',
+    const canCreate = isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_CREATE)
+    if (!canCreate) {
+      alert('Você não possui permissão para criar novos projetos.')
+      return
+    }
+
+    const newProjectData: Partial<ClientProject> = {
+      title: quote.client_name || quote.form_data?.clientName
+        ? `Projeto: ${quote.client_name || quote.form_data?.clientName}`
+        : `Projeto a partir do Orçamento #${quote.id}`,
+      client_name: quote.client_name || quote.form_data?.clientName || 'Cliente a Definir',
+      company: quote.company || quote.form_data?.company || 'N/A',
+      email: '',
+      whatsapp: '',
+      project_type: quote.project_type || quote.form_data?.projectType || 'Website Institucional',
+      platform: quote.platform || quote.form_data?.platform || 'Next.js + Code',
       status: 'Novo projeto',
       kanban_stage_name: 'Novo projeto',
       priority: 'Normal',
@@ -264,43 +273,40 @@ export default function AdminDashboardPage() {
       quote_id: quote.id,
       quote_data: {
         quote_id: quote.id,
-        project_type: quote.project_type,
-        page_count: quote.form_data.pageCount,
-        additional_page_count: quote.form_data.additionalPageCount,
-        content_option: quote.form_data.contentOption,
-        urgency: quote.form_data.urgency,
-        base_value: quote.calculation_breakdown.baseValue,
-        discount_amount: quote.discount,
-        additional_costs: quote.additional_costs,
-        tax_amount: quote.taxes,
-        final_value: quote.final_value,
-        notes: quote.notes,
-        created_at: quote.created_at,
+        project_type: quote.project_type || quote.form_data?.projectType || '',
+        page_count: quote.form_data?.pageCount || 1,
+        additional_page_count: quote.form_data?.additionalPageCount || 0,
+        content_option: quote.form_data?.contentOption || '',
+        urgency: quote.form_data?.urgency || '',
+        base_value: quote.calculation_breakdown?.baseValue || quote.subtotal || 0,
+        discount_amount: quote.discount || 0,
+        final_value: quote.final_value || 0,
+        additional_costs: quote.additional_costs || 0,
+        tax_amount: quote.taxes || 0,
+        notes: quote.notes || quote.form_data?.notes || '',
       },
-      files: [],
       links: [],
-      tasks: [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      files: [],
     }
 
-    // Add to project list locally
-    setClientProjects((prev) => [newProject, ...prev])
+    const tempProject = {
+      ...newProjectData,
+      id: `temp-${Date.now()}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as ClientProject
 
-    // Update quote status locally & in Supabase
-    const updatedQuote = { ...quote, status: 'Convertido em Projeto' as const }
-    setSavedQuotes((prev) =>
-      prev.map((q) => (q.id === quote.id ? updatedQuote : q))
-    )
-
-    // Save project and updated quote to Supabase
-    await Promise.all([
-      saveClientProjectAction(newProject),
-      saveQuoteAction(updatedQuote),
-    ])
-
-    alert(`Projeto "${quote.project_name}" criado com sucesso e salvo no banco de dados! Redirecionando para os Projetos.`)
+    setClientProjects((prev) => [tempProject, ...prev])
     setActiveTab('client_projects')
+    setSelectedDetailProject(tempProject)
+    setDrawerTab('orcamento_escopo')
+
+    const res = await saveClientProjectAction(newProjectData)
+    if (res.success) {
+      alert(`Orçamento #${quote.id} convertido em Projeto com sucesso!`)
+    } else {
+      alert(`Aviso ao salvar no banco de dados: ${res.message}`)
+    }
   }
 
   // SKELETON SCREEN DURING AUTH RESOLUTION
@@ -312,7 +318,7 @@ export default function AdminDashboardPage() {
           <Image src="/images/logo-transparente.png" alt="ANXIS Logo" fill className="object-contain" priority />
         </div>
         <div className="flex items-center gap-2.5 text-slate-300 text-xs font-semibold bg-white/10 px-5 py-2.5 rounded-full border border-white/10 shadow-lg backdrop-blur-md">
-          <Icon icon={SpinnerStatusIcon} size={18} className="animate-spin text-[#0075FF]" />
+          <HugeiconsIcon icon={Loading01Icon} className="w-4 h-4 animate-spin text-[#0075FF]" strokeWidth={1.5} />
           <span>Verificando autenticação e permissões do sistema...</span>
         </div>
       </div>
@@ -328,7 +334,7 @@ export default function AdminDashboardPage() {
         {
           id: 'dashboard',
           label: 'Dashboard',
-          icon: DashboardNavIcon,
+          icon: DashboardSquare01Icon,
           allowed: true,
         },
       ],
@@ -339,13 +345,13 @@ export default function AdminDashboardPage() {
         {
           id: 'client_projects',
           label: 'Projetos',
-          icon: ProjectsNavIcon,
+          icon: FolderKanbanIcon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
         },
         {
           id: 'kanban_board',
           label: 'Kanban',
-          icon: KanbanNavIcon,
+          icon: KanbanIcon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
         },
       ],
@@ -356,13 +362,13 @@ export default function AdminDashboardPage() {
         {
           id: 'pricing_calculator',
           label: 'Precificação',
-          icon: PricingNavIcon,
+          icon: Calculator01Icon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
         },
         {
           id: 'quotes_history',
           label: 'Histórico',
-          icon: QuotesNavIcon,
+          icon: File01Icon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
         },
       ],
@@ -373,7 +379,7 @@ export default function AdminDashboardPage() {
         {
           id: 'portfolio_home',
           label: 'Portfólio',
-          icon: PortfolioNavIcon,
+          icon: Globe02Icon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_VIEW),
         },
       ],
@@ -384,7 +390,7 @@ export default function AdminDashboardPage() {
         {
           id: 'users_permissions',
           label: 'Permissões',
-          icon: PermissionsNavIcon,
+          icon: Shield01Icon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_VIEW),
         },
       ],
@@ -424,15 +430,15 @@ export default function AdminDashboardPage() {
               type="button"
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               className={cn(
-                'p-2 rounded-xl text-slate-400 hover:text-[#0C1D36] hover:bg-slate-100 transition-all border border-slate-200/60 flex items-center justify-center',
+                'p-2 rounded-xl text-slate-400 hover:text-[#0C1D36] hover:bg-slate-100 transition-all border border-slate-200/60 cursor-pointer',
                 isSidebarCollapsed && 'mt-3 mx-auto'
               )}
               title={isSidebarCollapsed ? 'Expandir Menu' : 'Recolher Menu'}
             >
               {isSidebarCollapsed ? (
-                <Icon icon={ExpandSidebarIcon} size={18} className="text-[#0C1D36]" />
+                <HugeiconsIcon icon={PanelLeftOpenIcon} className="w-4 h-4 text-[#0C1D36]" strokeWidth={1.5} />
               ) : (
-                <Icon icon={CollapseSidebarIcon} size={18} className="text-slate-400" />
+                <HugeiconsIcon icon={PanelLeftCloseIcon} className="w-4 h-4 text-slate-400" strokeWidth={1.5} />
               )}
             </button>
           </div>
@@ -453,7 +459,7 @@ export default function AdminDashboardPage() {
 
                   <div className="space-y-1">
                     {allowedItems.map((tab) => {
-                      const IconRaw = tab.icon
+                      const tabIcon = tab.icon
                       const isActive = activeTab === tab.id
                       return (
                         <button
@@ -462,7 +468,7 @@ export default function AdminDashboardPage() {
                           onClick={() => setActiveTab(tab.id)}
                           title={isSidebarCollapsed ? `${section.title}: ${tab.label}` : undefined}
                           className={cn(
-                            'w-full flex items-center rounded-2xl text-xs font-bold transition-all text-left group',
+                            'w-full flex items-center rounded-2xl text-xs font-bold transition-all text-left group cursor-pointer',
                             isSidebarCollapsed ? 'justify-center p-3.5' : 'justify-between px-4 py-3',
                             isActive
                               ? 'bg-[#0C1D36] text-white shadow-lg shadow-[#0C1D36]/20 font-extrabold'
@@ -470,10 +476,11 @@ export default function AdminDashboardPage() {
                           )}
                         >
                           <div className="flex items-center gap-3">
-                            <Icon
-                              icon={IconRaw}
-                              size={20}
+                            <HugeiconsIcon
+                              icon={tabIcon}
+                              strokeWidth={1.5}
                               className={cn(
+                                'w-4 h-4 shrink-0',
                                 isActive ? 'text-white' : 'text-slate-400 group-hover:text-[#0C1D36]'
                               )}
                             />
@@ -503,27 +510,27 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="overflow-hidden text-xs">
                   <div className="font-bold text-[#0C1D36] truncate">{userProfile?.full_name}</div>
-                  <div className="text-[10px] text-slate-400 capitalize">{userProfile?.role_slug || 'Sem cargo'}</div>
+                  <div className="text-[10px] text-slate-400 capitalize">{userProfile?.role_slug || 'Usuário'}</div>
                 </div>
               </div>
 
               <button
                 type="button"
                 onClick={handleLogout}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                 title="Sair da Conta"
               >
-                <Icon icon={LogoutNavIcon} size={18} />
+                <HugeiconsIcon icon={Logout01Icon} className="w-4 h-4" strokeWidth={1.5} />
               </button>
             </div>
           ) : (
             <button
               type="button"
               onClick={handleLogout}
-              className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs mx-auto border border-rose-100 hover:bg-rose-100 transition-colors"
+              className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs mx-auto border border-rose-100 hover:bg-rose-100 transition-colors cursor-pointer"
               title="Sair da Conta"
             >
-              <Icon icon={LogoutNavIcon} size={18} />
+              <HugeiconsIcon icon={Logout01Icon} className="w-4 h-4" strokeWidth={1.5} />
             </button>
           )}
         </div>
@@ -540,7 +547,7 @@ export default function AdminDashboardPage() {
         <main className="flex-1 space-y-6 max-w-full">
           {!currentTabObj ? (
             <div className="bg-white rounded-[32px] border border-rose-200 p-8 text-center space-y-4 shadow-sm">
-              <Icon icon={RestrictedStatusIcon} size={48} className="text-rose-500 mx-auto" />
+              <HugeiconsIcon icon={AlertCircleIcon} className="w-12 h-12 text-rose-500 mx-auto" strokeWidth={1.5} />
               <h3 className="text-xl font-bold text-rose-700">Acesso Negado (HTTP 403)</h3>
               <p className="text-xs text-slate-600 max-w-md mx-auto">
                 Você não possui permissão suficiente para acessar este módulo.
@@ -610,7 +617,7 @@ export default function AdminDashboardPage() {
                 />
               )}
 
-              {/* TAB 4: HISTÓRICO DE ORÇAMENTOS (NOVA ABA) */}
+              {/* TAB 4: HISTÓRICO DE ORÇAMENTOS */}
               {activeTab === 'quotes_history' && (
                 <QuotesTab
                   quotes={savedQuotes}
@@ -647,9 +654,10 @@ export default function AdminDashboardPage() {
               {/* TAB 6: USUÁRIOS E PERMISSÕES */}
               {activeTab === 'users_permissions' && (
                 <UsersPermissionsTab
-                  users={teamUsers}
-                  onUpdateUsers={setTeamUsers}
-                  userProfile={userProfile}
+                  currentUserId={userProfile?.user_id}
+                  canEditUser={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_EDIT)}
+                  canManageRoles={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_ROLES)}
+                  canManagePermissions={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_PERMISSIONS)}
                 />
               )}
             </>
@@ -657,7 +665,7 @@ export default function AdminDashboardPage() {
         </main>
       </div>
 
-      {/* PROJECT DETAIL DRAWER (WITH ORÇAMENTO E ESCOPO SUB-TAB) */}
+      {/* PROJECT DETAIL DRAWER */}
       {selectedDetailProject && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end font-sans">
           <div className="bg-white w-full max-w-2xl h-full shadow-2xl overflow-y-auto flex flex-col justify-between animate-in slide-in-from-right duration-300">
@@ -674,9 +682,9 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedDetailProject(null)}
-                  className="p-2 rounded-full hover:bg-slate-100 text-slate-500 flex items-center justify-center"
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-500 cursor-pointer"
                 >
-                  <Icon icon={CancelActionIcon} size={20} />
+                  <HugeiconsIcon icon={Cancel01Icon} className="w-5 h-5" strokeWidth={1.5} />
                 </button>
               </div>
 
@@ -694,7 +702,7 @@ export default function AdminDashboardPage() {
                     type="button"
                     onClick={() => setDrawerTab(t.id as any)}
                     className={cn(
-                      'px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap',
+                      'px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer',
                       drawerTab === t.id ? 'bg-[#0C1D36] text-white' : 'text-slate-600 hover:bg-slate-100'
                     )}
                   >
@@ -774,14 +782,14 @@ export default function AdminDashboardPage() {
                 </div>
               )}
 
-              {/* DRAWER TAB 4: ORÇAMENTO E ESCOPO (NOVA ABA DE DETALHES) */}
+              {/* DRAWER TAB 4: ORÇAMENTO E ESCOPO */}
               {drawerTab === 'orcamento_escopo' && (
                 <div className="space-y-4 text-xs">
                   {selectedDetailProject.quote_data ? (
                     <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
                       <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                         <h4 className="font-extrabold text-sm text-[#0C1D36] flex items-center gap-1.5">
-                          <Icon icon={MetricRevenueIcon} size={18} className="text-emerald-600" />
+                          <HugeiconsIcon icon={Dollar01Icon} className="w-4 h-4 text-emerald-600" strokeWidth={1.5} />
                           <span>Resumo Financeiro & Escopo Aprovado</span>
                         </h4>
                         <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
@@ -846,7 +854,7 @@ export default function AdminDashboardPage() {
                     </div>
                   ) : (
                     <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-2">
-                      <Icon icon={MetricQuoteIcon} size={32} className="text-slate-400 mx-auto" />
+                      <HugeiconsIcon icon={File01Icon} className="w-8 h-8 text-slate-400 mx-auto" strokeWidth={1.5} />
                       <p className="text-sm font-bold text-slate-600">Nenhum orçamento vinculado a este projeto.</p>
                       <p className="text-xs text-slate-400">
                         Você pode vincular ou criar um orçamento na aba "Orçamentos".
@@ -861,7 +869,7 @@ export default function AdminDashboardPage() {
                 <div className="space-y-4 text-xs">
                   <div className="space-y-2">
                     <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-1.5">
-                      <Icon icon={LinkActionIcon} size={18} />
+                      <HugeiconsIcon icon={Link01Icon} className="w-4 h-4" strokeWidth={1.5} />
                       <span>Links Cadastrados</span>
                     </h4>
                     {selectedDetailProject.links?.length === 0 ? (
@@ -877,7 +885,7 @@ export default function AdminDashboardPage() {
                               {link.category}
                             </span>
                           </div>
-                          <Icon icon={ExternalLinkActionIcon} size={16} className="text-slate-400" />
+                          <HugeiconsIcon icon={ExternalLinkIcon} className="w-4 h-4 text-slate-400" strokeWidth={1.5} />
                         </div>
                       ))
                     )}
@@ -885,7 +893,7 @@ export default function AdminDashboardPage() {
 
                   <div className="space-y-2 pt-2 border-t border-slate-100">
                     <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-1.5">
-                      <Icon icon={FileAttachmentStatusIcon} size={18} />
+                      <HugeiconsIcon icon={Attachment01Icon} className="w-4 h-4" strokeWidth={1.5} />
                       <span>Arquivos Privados</span>
                     </h4>
                     {selectedDetailProject.files?.length === 0 ? (
@@ -902,9 +910,9 @@ export default function AdminDashboardPage() {
                           <button
                             type="button"
                             onClick={() => alert(`Baixando arquivo privado ${file.file_name} via URL assinada segura.`)}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF]"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF] cursor-pointer"
                           >
-                            <Icon icon={DownloadActionIcon} size={14} />
+                            <HugeiconsIcon icon={Download01Icon} className="w-3.5 h-3.5" strokeWidth={1.5} />
                             Baixar
                           </button>
                         </div>
@@ -921,9 +929,9 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => handleDeleteProjectFromDrawer(selectedDetailProject.id, selectedDetailProject.title)}
-                  className="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 font-bold text-xs hover:bg-rose-100 flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 font-bold text-xs hover:bg-rose-100 flex items-center gap-1.5 cursor-pointer"
                 >
-                  <Icon icon={DeleteActionIcon} size={16} />
+                  <HugeiconsIcon icon={Delete02Icon} className="w-4 h-4" strokeWidth={1.5} />
                   <span>Excluir Projeto</span>
                 </button>
               )}
@@ -931,7 +939,7 @@ export default function AdminDashboardPage() {
               <button
                 type="button"
                 onClick={() => setSelectedDetailProject(null)}
-                className="px-4 py-2 rounded-xl bg-[#0C1D36] text-white text-xs font-bold hover:bg-[#0075FF]"
+                className="px-4 py-2 rounded-xl bg-[#0C1D36] text-white text-xs font-bold hover:bg-[#0075FF] cursor-pointer"
               >
                 Fechar
               </button>
