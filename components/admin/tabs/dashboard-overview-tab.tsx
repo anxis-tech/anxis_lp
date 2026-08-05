@@ -180,18 +180,6 @@ export function DashboardOverviewTab({
           >
             <Globe className="w-4 h-4" />
           </a>
-
-          {/* LOGOUT BUTTON */}
-          {onLogout && (
-            <button
-              type="button"
-              onClick={onLogout}
-              className="bg-rose-50 hover:bg-rose-100 p-2.5 rounded-full border border-rose-200 shadow-sm text-rose-600 transition-all"
-              title="Sair da Conta"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          )}
         </div>
       </div>
 
