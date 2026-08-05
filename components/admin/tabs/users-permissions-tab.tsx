@@ -125,21 +125,14 @@ export function UsersPermissionsTab({
   return (
     <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-6 font-sans text-[#0C1D36]">
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-        <div>
-          <h2 className="text-xl font-extrabold text-[#0C1D36] flex items-center gap-2">
-            <Shield className="w-5 h-5 text-[#0075FF]" />
-            <span>Gestão de Permissões de Acesso por Usuário</span>
-          </h2>
-          <p className="text-xs text-[#596579]">
-            Configure as permissões de visualização de cada aba do painel para os usuários cadastrados no banco de dados.
-          </p>
-        </div>
-
-        <div className="bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl text-[11px] text-slate-500 font-semibold flex items-center gap-2">
-          <Info className="w-4 h-4 text-[#0075FF]" />
-          <span>Criação de novos usuários realizada via Banco de Dados (Supabase Auth).</span>
-        </div>
+      <div className="border-b border-slate-100 pb-4">
+        <h2 className="text-xl font-extrabold text-[#0C1D36] flex items-center gap-2">
+          <Shield className="w-5 h-5 text-[#0075FF]" />
+          <span>Gestão de Permissões de Acesso por Usuário</span>
+        </h2>
+        <p className="text-xs text-[#596579] mt-1">
+          Configure as permissões de visualização de cada aba do painel para os usuários da equipe.
+        </p>
       </div>
 
       {/* SEARCH & CARGO FILTERS */}
