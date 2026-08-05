@@ -242,63 +242,90 @@ export default function AdminDashboardPage() {
 
   const isAdmin = userProfile?.role_slug === 'admin'
 
-  const navTabs = [
+  const navSections = [
     {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      allowed: true,
+      title: 'Visão Geral',
+      items: [
+        {
+          id: 'dashboard',
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+          allowed: true,
+        },
+      ],
     },
     {
-      id: 'client_projects',
-      label: 'Projetos',
-      icon: FolderKanban,
-      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
+      title: 'Gestão de Projetos',
+      items: [
+        {
+          id: 'client_projects',
+          label: 'Projetos',
+          icon: FolderKanban,
+          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
+        },
+        {
+          id: 'kanban_board',
+          label: 'Kanban',
+          icon: Kanban,
+          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
+        },
+      ],
     },
     {
-      id: 'kanban_board',
-      label: 'Kanban',
-      icon: Kanban,
-      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
+      title: 'Orçamentos',
+      items: [
+        {
+          id: 'pricing_calculator',
+          label: 'Precificação',
+          icon: Calculator,
+          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
+        },
+        {
+          id: 'quotes_history',
+          label: 'Histórico',
+          icon: FileText,
+          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
+        },
+      ],
     },
     {
-      id: 'quotes_history',
-      label: 'Orçamentos',
-      icon: FileText,
-      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
+      title: 'Conteúdo & Website',
+      items: [
+        {
+          id: 'portfolio_home',
+          label: 'Portfólio',
+          icon: Globe,
+          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_VIEW),
+        },
+      ],
     },
     {
-      id: 'portfolio_home',
-      label: 'Portfólio',
-      icon: Globe,
-      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_VIEW),
+      title: 'Configurações',
+      items: [
+        {
+          id: 'users_permissions',
+          label: 'Permissões',
+          icon: Shield,
+          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_VIEW),
+        },
+      ],
     },
-    {
-      id: 'pricing_calculator',
-      label: 'Precificação',
-      icon: Calculator,
-      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
-    },
-    {
-      id: 'users_permissions',
-      label: 'Permissões',
-      icon: Shield,
-      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_VIEW),
-    },
-  ].filter((t) => t.allowed)
+  ]
 
-  const currentTabObj = navTabs.find((t) => t.id === activeTab) || navTabs[0]
+  // Flattened allowed tabs for active check
+  const allAllowedTabs = navSections.flatMap((s) => s.items).filter((t) => t.allowed)
+  const currentTabObj = allAllowedTabs.find((t) => t.id === activeTab) || allAllowedTabs[0]
 
   return (
     <div className="min-h-screen bg-[#F0F3F7] text-[#0C1D36] flex font-sans max-w-full overflow-x-hidden p-4 sm:p-6 lg:p-8">
       {/* FLOATING LIGHT SIDEBAR */}
       <aside
         className={cn(
-          'bg-white text-[#0C1D36] rounded-[32px] border border-slate-200/80 shadow-md flex flex-col justify-between transition-all duration-300 ease-in-out z-40 fixed top-6 left-6 bottom-6 h-[calc(100vh-48px)] hidden md:flex',
+          'bg-white text-[#0C1D36] rounded-[32px] border border-slate-200/80 shadow-md flex flex-col justify-between transition-all duration-300 ease-in-out z-40 fixed top-6 left-6 bottom-6 h-[calc(100vh-48px)] hidden md:flex overflow-y-auto',
           isSidebarCollapsed ? 'w-20 p-3.5' : 'w-64 p-6'
         )}
       >
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* BRAND LOGO & COLLAPSE TOGGLE */}
           <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             {!isSidebarCollapsed ? (
@@ -335,40 +362,56 @@ export default function AdminDashboardPage() {
             </button>
           </div>
 
-          {/* NAV ITEMS */}
-          <nav className="space-y-2">
-            {!isSidebarCollapsed && (
-              <div className="text-[10px] font-mono font-extrabold uppercase tracking-widest text-slate-400 px-3 pb-1">
-                Módulos
-              </div>
-            )}
+          {/* CATEGORIZED NAV SECTIONS */}
+          <nav className="space-y-4">
+            {navSections.map((section) => {
+              const allowedItems = section.items.filter((i) => i.allowed)
+              if (allowedItems.length === 0) return null
 
-            {navTabs.map((tab) => {
-              const Icon = tab.icon
-              const isActive = activeTab === tab.id
               return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  title={isSidebarCollapsed ? tab.label : undefined}
-                  className={cn(
-                    'w-full flex items-center rounded-2xl text-xs font-bold transition-all text-left group',
-                    isSidebarCollapsed ? 'justify-center p-3.5' : 'justify-between px-4 py-3.5',
-                    isActive
-                      ? 'bg-[#0C1D36] text-white shadow-lg shadow-[#0C1D36]/20 font-extrabold'
-                      : 'text-slate-500 hover:bg-slate-100 hover:text-[#0C1D36]'
+                <div key={section.title} className="space-y-1.5">
+                  {!isSidebarCollapsed && (
+                    <div className="text-[10px] font-mono font-extrabold uppercase tracking-wider text-slate-400 px-3 pt-2">
+                      {section.title}
+                    </div>
                   )}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-white' : 'text-slate-400 group-hover:text-[#0C1D36]')} />
-                    {!isSidebarCollapsed && <span>{tab.label}</span>}
-                  </div>
 
-                  {!isSidebarCollapsed && isActive && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                  )}
-                </button>
+                  <div className="space-y-1">
+                    {allowedItems.map((tab) => {
+                      const Icon = tab.icon
+                      const isActive = activeTab === tab.id
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setActiveTab(tab.id)}
+                          title={isSidebarCollapsed ? `${section.title}: ${tab.label}` : undefined}
+                          className={cn(
+                            'w-full flex items-center rounded-2xl text-xs font-bold transition-all text-left group',
+                            isSidebarCollapsed ? 'justify-center p-3.5' : 'justify-between px-4 py-3',
+                            isActive
+                              ? 'bg-[#0C1D36] text-white shadow-lg shadow-[#0C1D36]/20 font-extrabold'
+                              : 'text-slate-500 hover:bg-slate-100 hover:text-[#0C1D36]'
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Icon
+                              className={cn(
+                                'w-4 h-4 shrink-0',
+                                isActive ? 'text-white' : 'text-slate-400 group-hover:text-[#0C1D36]'
+                              )}
+                            />
+                            {!isSidebarCollapsed && <span>{tab.label}</span>}
+                          </div>
+
+                          {!isSidebarCollapsed && isActive && (
+                            <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
               )
             })}
           </nav>
