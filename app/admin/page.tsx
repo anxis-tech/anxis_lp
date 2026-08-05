@@ -12,12 +12,14 @@ import {
 } from '@/lib/auth/permissions'
 import { Project } from '@/types/database.types'
 import { ClientProject } from '@/types/client-project.types'
+import { SavedQuote, QuoteFormData } from '@/types/pricing.types'
 import { INITIAL_PROJECTS } from '@/lib/constants/initial-data'
 import { DashboardOverviewTab } from '@/components/admin/tabs/dashboard-overview-tab'
 import { HomePortfolioTab } from '@/components/admin/tabs/home-portfolio-tab'
 import { ClientProjectsTab, MOCK_CLIENT_PROJECTS_FULL } from '@/components/admin/tabs/client-projects-tab'
 import { KanbanBoardTab } from '@/components/admin/tabs/kanban-board-tab'
 import { PricingCalculatorTab } from '@/components/admin/tabs/pricing-calculator-tab'
+import { QuotesTab, MOCK_SAVED_QUOTES } from '@/components/admin/tabs/quotes-tab'
 import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-tab'
 import {
   LayoutDashboard,
@@ -42,13 +44,15 @@ import {
   Trash2,
   PanelLeftClose,
   PanelLeftOpen,
+  DollarSign,
+  Briefcase,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export default function AdminDashboardPage() {
   const router = useRouter()
 
-  // Unified Auth & Permission Loading Guard (Prevents flicker & premature tab disappearance)
+  // Unified Auth & Permission Loading Guard
   const [authResolved, setAuthResolved] = useState<boolean>(false)
   const [userProfile, setUserProfile] = useState<UserProfileWithRole | null>(null)
   const [activeTab, setActiveTab] = useState<string>('dashboard')
@@ -57,10 +61,12 @@ export default function AdminDashboardPage() {
   // Live state
   const [homeProjects, setHomeProjects] = useState<Project[]>(INITIAL_PROJECTS)
   const [clientProjects, setClientProjects] = useState<ClientProject[]>(MOCK_CLIENT_PROJECTS_FULL)
+  const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>(MOCK_SAVED_QUOTES)
+  const [calculatorInitialData, setCalculatorInitialData] = useState<QuoteFormData | undefined>()
 
   // Project Modal & Detail Drawer State
   const [selectedDetailProject, setSelectedDetailProject] = useState<ClientProject | null>(null)
-  const [drawerTab, setDrawerTab] = useState<'geral' | 'contato' | 'escopo' | 'links_arquivos'>('geral')
+  const [drawerTab, setDrawerTab] = useState<'geral' | 'contato' | 'escopo' | 'orcamento_escopo' | 'links_arquivos'>('geral')
 
   useEffect(() => {
     initAdminSession()
@@ -166,7 +172,60 @@ export default function AdminDashboardPage() {
     }
   }
 
-  // SKELETON SCREEN DURING AUTH RESOLUTION (ZERO FLICKER)
+  // Convert Quote into a Client Project
+  const handleConvertQuoteToProject = (quote: SavedQuote) => {
+    const newProject: ClientProject = {
+      id: `cp-converted-${Date.now()}`,
+      title: quote.project_name,
+      client_name: quote.client_name,
+      company: quote.company,
+      project_type: quote.project_type,
+      platform: quote.platform || 'Next.js',
+      status: 'Novo projeto',
+      kanban_stage_name: 'Novo projeto',
+      priority: 'Normal',
+      responsible_user_name: userProfile?.full_name || 'Admin',
+      responsible_user_email: userProfile?.email || 'admin@anxis.com.br',
+      deadline: 'A definir',
+      description: `Projeto convertido a partir do Orçamento #${quote.id}.`,
+      quote_id: quote.id,
+      quote_data: {
+        quote_id: quote.id,
+        project_type: quote.project_type,
+        page_count: quote.form_data.pageCount,
+        additional_page_count: quote.form_data.additionalPageCount,
+        content_option: quote.form_data.contentOption,
+        urgency: quote.form_data.urgency,
+        base_value: quote.calculation_breakdown.baseValue,
+        discount_amount: quote.discount,
+        additional_costs: quote.additional_costs,
+        tax_amount: quote.taxes,
+        final_value: quote.final_value,
+        notes: quote.notes,
+        created_at: quote.created_at,
+      },
+      files: [],
+      links: [],
+      tasks: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }
+
+    // Add to project list
+    setClientProjects((prev) => [newProject, ...prev])
+
+    // Update quote status
+    setSavedQuotes((prev) =>
+      prev.map((q) =>
+        q.id === quote.id ? { ...q, status: 'Convertido em Projeto', linked_project_id: newProject.id } : q
+      )
+    )
+
+    alert(`Projeto "${quote.project_name}" criado com sucesso a partir do orçamento! Redirecionando para os Projetos.`)
+    setActiveTab('client_projects')
+  }
+
+  // SKELETON SCREEN DURING AUTH RESOLUTION
   if (!authResolved) {
     return (
       <div className="min-h-screen bg-[#0C1D36] text-white flex flex-col items-center justify-center p-6 space-y-4 font-sans">
@@ -203,6 +262,12 @@ export default function AdminDashboardPage() {
       allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
     },
     {
+      id: 'quotes_history',
+      label: 'Orçamentos',
+      icon: FileText,
+      allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
+    },
+    {
       id: 'portfolio_home',
       label: 'Portfólio',
       icon: Globe,
@@ -226,7 +291,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#F0F3F7] text-[#0C1D36] flex font-sans max-w-full overflow-x-hidden p-4 sm:p-6 lg:p-8">
-      {/* FLOATING LIGHT SIDEBAR (VISION DESIGN: WHITE CARD WITH ROUNDED-3XL CORNERS) */}
+      {/* FLOATING LIGHT SIDEBAR */}
       <aside
         className={cn(
           'bg-white text-[#0C1D36] rounded-[32px] border border-slate-200/80 shadow-md flex flex-col justify-between transition-all duration-300 ease-in-out z-40 fixed top-6 left-6 bottom-6 h-[calc(100vh-48px)] hidden md:flex',
@@ -270,7 +335,7 @@ export default function AdminDashboardPage() {
             </button>
           </div>
 
-          {/* NAV ITEMS MATCHING VISION DESIGN */}
+          {/* NAV ITEMS */}
           <nav className="space-y-2">
             {!isSidebarCollapsed && (
               <div className="text-[10px] font-mono font-extrabold uppercase tracking-widest text-slate-400 px-3 pb-1">
@@ -345,44 +410,13 @@ export default function AdminDashboardPage() {
         </div>
       </aside>
 
-      {/* RIGHT SIDE MAIN CONTAINER (ADJUSTED MARGIN FOR FLOATING SIDEBAR) */}
+      {/* RIGHT SIDE MAIN CONTAINER */}
       <div
         className={cn(
           'flex-1 flex flex-col transition-all duration-300 ease-in-out max-w-full overflow-hidden',
           isSidebarCollapsed ? 'md:pl-24' : 'md:pl-72'
         )}
       >
-        {/* MOBILE NAV BAR */}
-        <div className="md:hidden flex items-center justify-between gap-2 bg-white p-4 rounded-3xl border border-slate-200/80 shadow-sm mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-[#0C1D36] text-white flex items-center justify-center font-bold text-xs">
-              A
-            </div>
-            <span className="font-extrabold text-sm text-[#0C1D36]">ANXIS</span>
-          </div>
-
-          <div className="flex items-center gap-2 overflow-x-auto">
-            {navTabs.map((tab) => {
-              const Icon = tab.icon
-              const isActive = activeTab === tab.id
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap',
-                    isActive ? 'bg-[#0C1D36] text-white' : 'bg-slate-100 text-slate-700'
-                  )}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{tab.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
         {/* MAIN MODULE CONTENT */}
         <main className="flex-1 space-y-6 max-w-full">
           {!currentTabObj ? (
@@ -456,15 +490,41 @@ export default function AdminDashboardPage() {
                 />
               )}
 
-              {/* TAB 4: CALCULADORA DE PRECIFICAÇÃO */}
+              {/* TAB 4: HISTÓRICO DE ORÇAMENTOS (NOVA ABA) */}
+              {activeTab === 'quotes_history' && (
+                <QuotesTab
+                  quotes={savedQuotes}
+                  userProfile={userProfile}
+                  onUpdateQuotes={setSavedQuotes}
+                  onEditQuoteInCalculator={(quote) => {
+                    setCalculatorInitialData(quote.form_data)
+                    setActiveTab('pricing_calculator')
+                  }}
+                  onConvertToProject={handleConvertQuoteToProject}
+                  onOpenCreateQuote={() => {
+                    setCalculatorInitialData(undefined)
+                    setActiveTab('pricing_calculator')
+                  }}
+                />
+              )}
+
+              {/* TAB 5: CALCULADORA DE PRECIFICAÇÃO */}
               {activeTab === 'pricing_calculator' && (
                 <PricingCalculatorTab
                   canManageSettings={isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_MANAGE_SETTINGS)}
                   canSaveQuote={isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_SAVE_QUOTE)}
+                  onSaveQuote={(newQuote) => {
+                    setSavedQuotes((prev) => [newQuote, ...prev])
+                  }}
+                  onConvertToProject={(newQuote) => {
+                    setSavedQuotes((prev) => [newQuote, ...prev])
+                    handleConvertQuoteToProject(newQuote)
+                  }}
+                  initialData={calculatorInitialData}
                 />
               )}
 
-              {/* TAB 5: USUÁRIOS E PERMISSÕES */}
+              {/* TAB 6: USUÁRIOS E PERMISSÕES */}
               {activeTab === 'users_permissions' && (
                 <UsersPermissionsTab
                   currentUserId={userProfile?.user_id}
@@ -479,9 +539,9 @@ export default function AdminDashboardPage() {
         </main>
       </div>
 
-      {/* ENHANCED KANBAN PROJECT DETAIL DRAWER */}
+      {/* PROJECT DETAIL DRAWER (WITH ORÇAMENTO E ESCOPO SUB-TAB) */}
       {selectedDetailProject && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end font-sans">
           <div className="bg-white w-full max-w-2xl h-full shadow-2xl overflow-y-auto flex flex-col justify-between animate-in slide-in-from-right duration-300">
             <div className="p-6 space-y-6 flex-1">
               {/* DRAWER HEADER */}
@@ -503,11 +563,12 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* DRAWER SUB-NAVIGATION TABS */}
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-2 text-xs font-bold">
+              <div className="flex items-center gap-2 border-b border-slate-200 pb-2 text-xs font-bold overflow-x-auto">
                 {[
                   { id: 'geral', label: 'Geral' },
                   { id: 'contato', label: 'Contato' },
                   { id: 'escopo', label: 'Escopo & Briefing' },
+                  { id: 'orcamento_escopo', label: 'Orçamento e Escopo' },
                   { id: 'links_arquivos', label: 'Links & Arquivos' },
                 ].map((t) => (
                   <button
@@ -515,7 +576,7 @@ export default function AdminDashboardPage() {
                     type="button"
                     onClick={() => setDrawerTab(t.id as any)}
                     className={cn(
-                      'px-3 py-1.5 rounded-lg transition-colors',
+                      'px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap',
                       drawerTab === t.id ? 'bg-[#0C1D36] text-white' : 'text-slate-600 hover:bg-slate-100'
                     )}
                   >
@@ -576,10 +637,6 @@ export default function AdminDashboardPage() {
                       <span className="text-slate-500 block">WhatsApp:</span>
                       <span className="font-bold">{selectedDetailProject.client_contact_json?.whatsapp || selectedDetailProject.whatsapp || 'N/A'}</span>
                     </div>
-                    <div>
-                      <span className="text-slate-500 block">Canal Preferencial:</span>
-                      <span className="font-[#0075FF]">{selectedDetailProject.client_contact_json?.preferred_channel || 'WhatsApp'}</span>
-                    </div>
                   </div>
                 </div>
               )}
@@ -596,14 +653,92 @@ export default function AdminDashboardPage() {
                     <span className="text-slate-500 block">Público-Alvo:</span>
                     <p className="font-semibold text-slate-700">{selectedDetailProject.scope_briefing_json?.target_audience || 'N/A'}</p>
                   </div>
-                  <div>
-                    <span className="text-slate-500 block">Requisitos Técnicos:</span>
-                    <p className="font-semibold text-slate-700">{selectedDetailProject.scope_briefing_json?.technical_requirements || 'N/A'}</p>
-                  </div>
                 </div>
               )}
 
-              {/* DRAWER TAB 4: LINKS & ARQUIVOS */}
+              {/* DRAWER TAB 4: ORÇAMENTO E ESCOPO (NOVA ABA DE DETALHES) */}
+              {drawerTab === 'orcamento_escopo' && (
+                <div className="space-y-4 text-xs">
+                  {selectedDetailProject.quote_data ? (
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                        <h4 className="font-extrabold text-sm text-[#0C1D36] flex items-center gap-1.5">
+                          <DollarSign className="w-4 h-4 text-emerald-600" />
+                          <span>Resumo Financeiro & Escopo Aprovado</span>
+                        </h4>
+                        <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
+                          Orçamento Vinculado #{selectedDetailProject.quote_data.quote_id}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 text-slate-700">
+                        <div>
+                          <span className="text-slate-500 block">Tipo de Projeto:</span>
+                          <span className="font-bold text-[#0C1D36]">{selectedDetailProject.quote_data.project_type}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block">Páginas Padrão:</span>
+                          <span className="font-bold">{selectedDetailProject.quote_data.page_count} pág.</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block">Páginas Adicionais:</span>
+                          <span className="font-bold">{selectedDetailProject.quote_data.additional_page_count} pág.</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block">Conteúdo & Copy:</span>
+                          <span className="font-bold">{selectedDetailProject.quote_data.content_option}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block">Nível de Urgência:</span>
+                          <span className="font-bold">{selectedDetailProject.quote_data.urgency}</span>
+                        </div>
+                      </div>
+
+                      {/* DETALHAMENTO FINANCEIRO */}
+                      <div className="pt-3 border-t border-slate-200 space-y-1.5 text-xs">
+                        <div className="flex justify-between text-slate-600">
+                          <span>Valor Base:</span>
+                          <span>R$ {selectedDetailProject.quote_data.base_value?.toLocaleString('pt-BR')}</span>
+                        </div>
+                        {selectedDetailProject.quote_data.discount_amount > 0 && (
+                          <div className="flex justify-between text-emerald-600 font-bold">
+                            <span>Desconto Aplicado:</span>
+                            <span>- R$ {selectedDetailProject.quote_data.discount_amount?.toLocaleString('pt-BR')}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-[#0C1D36] text-sm font-extrabold pt-2 border-t border-slate-200">
+                          <span>Valor Final Aprovado:</span>
+                          <span className="text-[#0075FF]">
+                            {selectedDetailProject.quote_data.final_value?.toLocaleString('pt-BR', {
+                              style: 'currency',
+                              currency: 'BRL',
+                            })}
+                          </span>
+                        </div>
+                      </div>
+
+                      {selectedDetailProject.quote_data.notes && (
+                        <div className="pt-2 border-t border-slate-200/80">
+                          <span className="text-slate-500 block mb-1">Observações do Orçamento:</span>
+                          <p className="text-slate-600 bg-white p-3 rounded-xl border border-slate-200 italic">
+                            {selectedDetailProject.quote_data.notes}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-2">
+                      <FileText className="w-8 h-8 text-slate-400 mx-auto" />
+                      <p className="text-sm font-bold text-slate-600">Nenhum orçamento vinculado a este projeto.</p>
+                      <p className="text-xs text-slate-400">
+                        Você pode vincular ou criar um orçamento na aba "Orçamentos".
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* DRAWER TAB 5: LINKS & ARQUIVOS */}
               {drawerTab === 'links_arquivos' && (
                 <div className="space-y-4 text-xs">
                   <div className="space-y-2">
@@ -633,7 +768,7 @@ export default function AdminDashboardPage() {
                   <div className="space-y-2 pt-2 border-t border-slate-100">
                     <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-1.5">
                       <Paperclip className="w-4 h-4" />
-                      <span>Arquivos Privados (Bucket client-project-files)</span>
+                      <span>Arquivos Privados</span>
                     </h4>
                     {selectedDetailProject.files?.length === 0 ? (
                       <p className="text-slate-400 italic">Nenhum arquivo enviado.</p>
@@ -662,7 +797,7 @@ export default function AdminDashboardPage() {
               )}
             </div>
 
-            {/* DRAWER FOOTER WITH DELETE BUTTON */}
+            {/* DRAWER FOOTER */}
             <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
               {(isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)) && (
                 <button

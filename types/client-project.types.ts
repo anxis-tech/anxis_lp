@@ -158,6 +158,25 @@ export interface ClientProject {
     content_status?: ContentStatus
   }
 
+  // Linked Quote & Scope Section
+  quote_id?: string
+  quote_data?: {
+    quote_id: string
+    project_type: string
+    page_count: number
+    additional_page_count: number
+    content_option: string
+    urgency: string
+    contracted_items?: string[]
+    base_value: number
+    discount_amount: number
+    additional_costs: number
+    tax_amount: number
+    final_value: number
+    notes?: string
+    created_at?: string
+  }
+
   files?: ClientProjectFile[]
   links?: ClientProjectLink[]
   tasks?: ClientProjectTask[]
