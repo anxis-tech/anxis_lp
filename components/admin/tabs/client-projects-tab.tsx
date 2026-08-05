@@ -14,38 +14,41 @@ import {
   normalizeProjectStage,
   formatDateBR,
 } from '@/components/admin/tabs/kanban-board-tab'
+import { Icon } from '@/components/ui/icon'
 import {
-  FolderKanban,
-  Search,
-  Plus,
-  Paperclip,
-  User,
-  Calendar,
-  X,
-  UserCheck,
-  ChevronDown,
-  Upload,
-  Link as LinkIcon,
-  Download,
-  Trash2,
-  Eye,
-  Edit,
-  FileText,
-  CheckCircle2,
-  Building,
-  Mail,
-  Phone,
-  MessageSquare,
-  Globe,
-  Clock,
-  Layers,
-  Info,
-  Check,
-  XCircle,
-  FileCheck,
-  HardDriveUpload,
-  AlertTriangle,
-} from 'lucide-react'
+  ProjectsNavIcon,
+  DownNavIcon,
+  BackNavIcon,
+} from '@/lib/icons/navigation'
+import {
+  AddActionIcon,
+  EditActionIcon,
+  DeleteActionIcon,
+  ViewActionIcon,
+  SaveActionIcon,
+  CancelActionIcon,
+  UploadActionIcon,
+  DownloadActionIcon,
+  LinkActionIcon,
+  ExternalLinkActionIcon,
+  SearchActionIcon,
+  FilterActionIcon,
+  MailActionIcon,
+} from '@/lib/icons/actions'
+import {
+  MetricUserIcon,
+  MetricTeamIcon,
+  MetricQuoteIcon,
+} from '@/lib/icons/dashboard'
+import {
+  SuccessStatusIcon,
+  ErrorStatusIcon,
+  WarningStatusIcon,
+  PendingStatusIcon,
+  InfoStatusIcon,
+  FileAttachmentStatusIcon,
+  DateStatusIcon,
+} from '@/lib/icons/status'
 import { cn } from '@/lib/utils'
 
 
@@ -196,7 +199,7 @@ export function ClientProjectsTab({
         whatsapp: editingProject.whatsapp,
         project_type: editingProject.project_type || 'Site institucional',
         platform: editingProject.platform || 'Next.js',
-        status: normStatus,
+        status: normStatus as ClientProjectStatus,
         kanban_stage_name: normStatus,
         priority: editingProject.priority || 'Normal',
         responsible_user_id: editingProject.responsible_user_id,
@@ -345,7 +348,7 @@ export function ClientProjectsTab({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
           <h2 className="text-xl font-extrabold text-[#0C1D36] flex items-center gap-2">
-            <FolderKanban className="w-5 h-5 text-[#0075FF]" />
+            <Icon icon={ProjectsNavIcon} size={20} className="text-[#0075FF]" />
             <span>Projetos de Clientes</span>
           </h2>
           <p className="text-xs text-[#596579]">
@@ -359,7 +362,7 @@ export function ClientProjectsTab({
             onClick={handleOpenCreateModal}
             className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#0075FF] hover:bg-[#168CFF] shadow-md transition-all shrink-0"
           >
-            <Plus className="w-4 h-4 mr-1.5" />
+            <Icon icon={AddActionIcon} size={16} className="mr-1.5" />
             <span>Novo Projeto de Cliente</span>
           </button>
         )}
@@ -368,7 +371,9 @@ export function ClientProjectsTab({
       {/* FILTERS & SEARCH */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="relative">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400" />
+          <span className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400">
+            <Icon icon={SearchActionIcon} size={16} />
+          </span>
           <input
             type="text"
             value={searchTerm}
@@ -412,7 +417,7 @@ export function ClientProjectsTab({
       {/* PROJECTS LIST TABLE */}
       {filteredProjects.length === 0 && !canViewAll ? (
         <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200 space-y-2">
-          <UserCheck className="w-8 h-8 text-slate-400 mx-auto" />
+          <Icon icon={MetricUserIcon} size={32} className="text-slate-400 mx-auto" />
           <p className="text-sm font-semibold text-[#596579]">Você não possui projetos atribuídos no momento.</p>
         </div>
       ) : (
@@ -460,7 +465,7 @@ export function ClientProjectsTab({
                     </td>
                     <td className="p-3.5 text-slate-600 whitespace-nowrap">
                       <div className="flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                        <Icon icon={DateStatusIcon} size={14} className="text-slate-400" />
                         <span>{formatDateBR(project.deadline)}</span>
                       </div>
                     </td>
@@ -473,7 +478,7 @@ export function ClientProjectsTab({
                           className="w-8 h-8 rounded-xl bg-[#0C1D36] text-white hover:bg-[#0075FF] transition-all flex items-center justify-center shadow-sm"
                           title="Ver Detalhes do Projeto"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Icon icon={ViewActionIcon} size={16} />
                         </button>
 
                         {/* EDITAR */}
@@ -487,7 +492,7 @@ export function ClientProjectsTab({
                             className="w-8 h-8 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-[#0075FF] hover:border-[#0075FF] hover:bg-slate-50 transition-all flex items-center justify-center shadow-sm"
                             title="Editar Projeto"
                           >
-                            <Edit className="w-4 h-4" />
+                            <Icon icon={EditActionIcon} size={16} />
                           </button>
                         )}
 
@@ -499,7 +504,7 @@ export function ClientProjectsTab({
                             className="w-8 h-8 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:border-rose-300 transition-all flex items-center justify-center shadow-sm"
                             title="Excluir Projeto"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Icon icon={DeleteActionIcon} size={16} />
                           </button>
                         )}
                       </div>
@@ -515,11 +520,11 @@ export function ClientProjectsTab({
       {/* OVERHAULED SPACIOUS DIALOG (90% WIDTH / 90% HEIGHT) */}
       {isEditModalOpen && editingProject && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
-          <div className="bg-white rounded-3xl w-[94vw] max-w-6xl h-[92vh] shadow-2xl flex flex-col justify-between overflow-hidden animate-in zoom-in-95 border border-slate-200">
+          <div className="bg-white rounded-3xl w-[94vw] max-w-6xl h-[92vh] shadow-2xl flex flex-col justify-between overflow-hidden animate-in zoom-in-95 border">
             {/* MODAL HEADER */}
-            <div className="bg-[#081D3A] text-white px-6 py-4 flex items-center justify-between shrink-0">
+            <div className="bg-[#081D3A] text-white p-5 border-b border-slate-800 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
-                <FolderKanban className="w-6 h-6 text-[#0075FF]" />
+                <Icon icon={ProjectsNavIcon} size={24} className="text-[#0075FF]" />
                 <div>
                   <h3 className="text-base sm:text-lg font-extrabold">
                     {editingProject.id ? `Editar Projeto: ${editingProject.title}` : 'Cadastrar Novo Projeto de Cliente'}
@@ -533,24 +538,24 @@ export function ClientProjectsTab({
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors flex items-center justify-center"
               >
-                <X className="w-6 h-6" />
+                <Icon icon={CancelActionIcon} size={20} />
               </button>
             </div>
 
             {/* SPACIOUS TABS BAR */}
             <div className="bg-slate-100 px-6 py-2 border-b border-slate-200 flex items-center gap-2 overflow-x-auto shrink-0 text-xs font-bold">
               {[
-                { id: 'geral', label: '1. Informações Gerais', icon: Building },
-                { id: 'contato', label: '2. Contato do Cliente', icon: Mail },
-                { id: 'escopo', label: '3. Escopo & Briefing', icon: FileText },
-                { id: 'links_arquivos', label: '4. Links & Arquivos', icon: LinkIcon },
-                { id: 'responsavel', label: '5. Responsáveis', icon: UserCheck },
-                { id: 'planejamento', label: '6. Planejamento & Prazo', icon: Calendar },
-                { id: 'observacoes', label: '7. Observações Internas', icon: Info },
+                { id: 'geral', label: '1. Informações Gerais', icon: ProjectsNavIcon },
+                { id: 'contato', label: '2. Contato do Cliente', icon: MetricUserIcon },
+                { id: 'escopo', label: '3. Escopo & Briefing', icon: MetricQuoteIcon },
+                { id: 'links_arquivos', label: '4. Links & Arquivos', icon: LinkActionIcon },
+                { id: 'responsavel', label: '5. Responsáveis', icon: MetricTeamIcon },
+                { id: 'planejamento', label: '6. Planejamento & Prazo', icon: DateStatusIcon },
+                { id: 'observacoes', label: '7. Observações Internas', icon: InfoStatusIcon },
               ].map((tab) => {
-                const Icon = tab.icon
+                const IconRaw = tab.icon
                 const isActive = activeFormTab === tab.id
                 return (
                   <button
@@ -564,7 +569,7 @@ export function ClientProjectsTab({
                         : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'
                     )}
                   >
-                    <Icon className="w-3.5 h-3.5" />
+                    <Icon icon={IconRaw} size={16} />
                     <span>{tab.label}</span>
                   </button>
                 )
@@ -681,7 +686,7 @@ export function ClientProjectsTab({
               {activeFormTab === 'contato' && (
                 <div className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
                   <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-2">
-                    <Mail className="w-4 h-4" />
+                    <Icon icon={MailActionIcon} size={16} />
                     <span>Informações de Contato do Cliente</span>
                   </h4>
 
@@ -832,7 +837,7 @@ export function ClientProjectsTab({
                           },
                         })
                       }
-                      placeholder="Horários preferenciais para reuniões, observações de atendimento..."
+                      placeholder="Horários preferenciais para reuniões, observações..."
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
                     />
                   </div>
@@ -843,7 +848,7 @@ export function ClientProjectsTab({
               {activeFormTab === 'escopo' && (
                 <div className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
                   <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
+                    <Icon icon={MetricQuoteIcon} size={16} />
                     <span>Definição de Escopo e Briefing do Projeto</span>
                   </h4>
 
@@ -862,7 +867,7 @@ export function ClientProjectsTab({
                             },
                           })
                         }
-                        placeholder="Ex: Aumentar vendas em 30%"
+                        placeholder="Ex: Aumentar conversões em 40%"
                         className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
                       />
                     </div>
@@ -881,13 +886,13 @@ export function ClientProjectsTab({
                             },
                           })
                         }
-                        placeholder="Ex: Clientes B2B e arquitetos"
+                        placeholder="Ex: Arquitetos e Designers B2B"
                         className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="block font-bold mb-1">Segmento de Atuação</label>
+                      <label className="block font-bold mb-1">Segmento do Mercado</label>
                       <input
                         type="text"
                         value={editingProject.scope_briefing_json?.segment || ''}
@@ -900,29 +905,10 @@ export function ClientProjectsTab({
                             },
                           })
                         }
-                        placeholder="Ex: Decoração de Alto Padrão"
+                        placeholder="Ex: Decoração de Interiores"
                         className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Requisitos Técnicos e Especificações</label>
-                    <textarea
-                      rows={4}
-                      value={editingProject.scope_briefing_json?.technical_requirements || ''}
-                      onChange={(e) =>
-                        setEditingProject({
-                          ...editingProject,
-                          scope_briefing_json: {
-                            ...editingProject.scope_briefing_json,
-                            technical_requirements: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder="Descreva requisitos de SEO, velocidade, integrações com sistemas externos..."
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                    />
                   </div>
                 </div>
               )}
@@ -933,7 +919,7 @@ export function ClientProjectsTab({
                   {/* LINKS SECTION */}
                   <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
                     <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-2">
-                      <LinkIcon className="w-4 h-4" />
+                      <Icon icon={LinkActionIcon} size={16} />
                       <span>Links do Projeto (Figma, Drive, Repositórios, Homologação)</span>
                     </h4>
 
@@ -983,7 +969,7 @@ export function ClientProjectsTab({
                         editingProject.links?.map((link) => (
                           <div key={link.id} className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200">
                             <div className="flex items-center gap-3">
-                              <LinkIcon className="w-4 h-4 text-[#0075FF]" />
+                              <Icon icon={LinkActionIcon} size={16} className="text-[#0075FF]" />
                               <div>
                                 <a href={link.url} target="_blank" rel="noreferrer" className="font-bold text-[#0075FF] hover:underline">
                                   {link.label}
@@ -996,9 +982,9 @@ export function ClientProjectsTab({
                             <button
                               type="button"
                               onClick={() => handleRemoveLink(link.id)}
-                              className="text-rose-500 hover:text-rose-700"
+                              className="text-rose-500 hover:text-rose-700 flex items-center justify-center"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Icon icon={DeleteActionIcon} size={16} />
                             </button>
                           </div>
                         ))
@@ -1010,7 +996,7 @@ export function ClientProjectsTab({
                   <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
                       <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-2">
-                        <Paperclip className="w-4 h-4" />
+                        <Icon icon={FileAttachmentStatusIcon} size={16} />
                         <span>Arquivos Privados do Projeto (Upload Drag & Drop)</span>
                       </h4>
 
@@ -1055,7 +1041,7 @@ export function ClientProjectsTab({
                       />
 
                       <div className="w-12 h-12 rounded-full bg-[#0075FF]/10 text-[#0075FF] flex items-center justify-center">
-                        <HardDriveUpload className="w-6 h-6 animate-bounce" />
+                        <Icon icon={UploadActionIcon} size={24} className="animate-bounce text-[#0075FF]" />
                       </div>
 
                       <div className="space-y-1">
@@ -1082,7 +1068,7 @@ export function ClientProjectsTab({
                           <div key={file.id} className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
                             <div className="flex items-center gap-3">
                               <div className="p-2 rounded-lg bg-[#0075FF]/10 text-[#0075FF]">
-                                <FileCheck className="w-4 h-4" />
+                                <Icon icon={SuccessStatusIcon} size={16} />
                               </div>
                               <div>
                                 <span className="font-bold text-[#0C1D36] block">{file.file_name}</span>
@@ -1107,15 +1093,15 @@ export function ClientProjectsTab({
                                 onClick={() => alert(`Baixando arquivo privado ${file.file_name} via URL assinada segura.`)}
                                 className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 font-bold hover:bg-slate-200 text-xs text-[#0075FF]"
                               >
-                                <Download className="w-3.5 h-3.5 text-[#0075FF]" />
+                                <Icon icon={DownloadActionIcon} size={14} className="text-[#0075FF]" />
                                 Baixar
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleRemoveFile(file.id)}
-                                className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50"
+                                className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 flex items-center justify-center"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <Icon icon={DeleteActionIcon} size={16} />
                               </button>
                             </div>
                           </div>
@@ -1130,7 +1116,7 @@ export function ClientProjectsTab({
               {activeFormTab === 'responsavel' && (
                 <div className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
                   <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-2">
-                    <UserCheck className="w-4 h-4" />
+                    <Icon icon={MetricUserIcon} size={18} />
                     <span>Selecione o Profissional Responsável Principal pelo Projeto</span>
                   </h4>
 
@@ -1178,7 +1164,7 @@ export function ClientProjectsTab({
                       className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white text-left flex items-center justify-between text-xs font-bold shadow-sm"
                     >
                       <span>Clique para pesquisar ou alterar o responsável...</span>
-                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                      <Icon icon={DownNavIcon} size={16} className="text-slate-400" />
                     </button>
 
                     {isComboboxOpen && (
@@ -1285,7 +1271,7 @@ export function ClientProjectsTab({
                   onClick={() => handleDeleteProject(editingProject.id!, editingProject.title || 'Projeto')}
                   className="px-4 py-2.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 font-bold hover:bg-rose-100 transition-colors text-xs flex items-center gap-1.5"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Icon icon={DeleteActionIcon} size={16} />
                   <span>Excluir Projeto</span>
                 </button>
               ) : (
@@ -1308,7 +1294,7 @@ export function ClientProjectsTab({
                   onClick={handleSaveProjectForm}
                   className="px-6 py-2.5 rounded-xl bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF] shadow-md flex items-center gap-2"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
+                  <Icon icon={SuccessStatusIcon} size={16} />
                   <span>Salvar Projeto</span>
                 </button>
               </div>

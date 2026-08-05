@@ -3,20 +3,15 @@
 import { useState } from 'react'
 import { ClientProject, ClientProjectStatus, KanbanStage } from '@/types/client-project.types'
 import { UserProfileWithRole } from '@/lib/auth/permissions'
+import { Icon } from '@/components/ui/icon'
+import { KanbanNavIcon, PermissionsNavIcon } from '@/lib/icons/navigation'
+import { SearchActionIcon } from '@/lib/icons/actions'
+import { MetricUserIcon } from '@/lib/icons/dashboard'
 import {
-  Kanban,
-  Search,
-  User,
-  Calendar,
-  Paperclip,
-  CheckSquare,
-  Clock,
-  UserCheck,
-  Shield,
-  Layers,
-  ArrowRightLeft,
-  CheckCircle2,
-} from 'lucide-react'
+  DateStatusIcon,
+  FileAttachmentStatusIcon,
+  CheckedSquareStatusIcon,
+} from '@/lib/icons/status'
 import { cn } from '@/lib/utils'
 
 // Date Formatter Helper (converts 2026-08-30 to 30/08/2026)
@@ -38,25 +33,13 @@ export const INITIAL_KANBAN_STAGES: KanbanStage[] = [
   { id: 'ks-4', name: 'Concluído', slug: 'concluido', color: '#10B981', display_order: 4, is_active: true, is_completed: true },
 ]
 
-// MAPPING HELPER FOR LEGACY / MIGRATED STAGES
-export function normalizeProjectStage(rawStatus?: string): ClientProjectStatus {
-  if (!rawStatus) return 'Novo projeto'
-
-  const s = rawStatus.toLowerCase().trim()
-
-  if (s.includes('novo') || s.includes('briefing') || s.includes('informações') || s.includes('planejamento')) {
-    return 'Novo projeto'
-  }
-  if (s.includes('design') || s.includes('desenvolvimento') || s.includes('ajuste')) {
-    return 'Em desenvolvimento'
-  }
-  if (s.includes('revisão') || s.includes('aprovação') || s.includes('cliente')) {
-    return 'Aguardando revisão'
-  }
-  if (s.includes('aprovado') || s.includes('publicação') || s.includes('concluído') || s.includes('pausado') || s.includes('cancelado')) {
-    return 'Concluído'
-  }
-
+export function normalizeProjectStage(statusString?: string): string {
+  if (!statusString) return 'Novo projeto'
+  const lower = statusString.toLowerCase().trim()
+  if (lower.includes('novo') || lower.includes('briefing') || lower.includes('início') || lower.includes('aberto')) return 'Novo projeto'
+  if (lower.includes('desenvolv') || lower.includes('produção') || lower.includes('andamento') || lower.includes('design') || lower.includes('wireframe')) return 'Em desenvolvimento'
+  if (lower.includes('revis') || lower.includes('aprov') || lower.includes('test') || lower.includes('homolog')) return 'Aguardando revisão'
+  if (lower.includes('conclu') || lower.includes('entreg') || lower.includes('finaliz') || lower.includes('publicad')) return 'Concluído'
   return 'Novo projeto'
 }
 
@@ -64,34 +47,34 @@ interface KanbanBoardTabProps {
   projects: ClientProject[]
   onUpdateProjects: (updated: ClientProject[]) => void
   userProfile: UserProfileWithRole | null
-  canMoveKanban: boolean
-  canViewAll: boolean
-  onOpenProjectDetail: (project: ClientProject) => void
+  teamUsers?: UserProfileWithRole[]
+  canMoveKanban?: boolean
+  canViewAll?: boolean
+  onOpenProjectDetail?: (project: ClientProject) => void
 }
 
 export function KanbanBoardTab({
-  projects,
+  projects = [],
   onUpdateProjects,
   userProfile,
+  teamUsers = [],
   canMoveKanban = true,
   canViewAll = true,
   onOpenProjectDetail,
 }: KanbanBoardTabProps) {
   const [searchTerm, setSearchTerm] = useState('')
-  const [quickFilter, setQuickFilter] = useState<string>('todos')
+  const [quickFilter, setQuickFilter] = useState('todos')
   const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null)
 
-  // FILTER BY USER PERMISSIONS:
-  const visibleProjects = projects.filter((p) => {
-    if (canViewAll) return true
-    if (!userProfile) return false
-    const isAssigned = p.responsible_user_id === userProfile.user_id
-    const isParticipant = p.participants?.some((part) => part.user_id === userProfile.user_id)
-    return isAssigned || isParticipant
-  })
+  const currentUserId = userProfile?.user_id
 
-  // APPLY SEARCH & QUICK FILTERS
-  const filteredProjects = visibleProjects.filter((p) => {
+  // Base list depending on view scope
+  const scopedProjects = canViewAll
+    ? projects
+    : projects.filter((p) => p.responsible_user_id === currentUserId)
+
+  // Filtered projects by search and quick filter presets
+  const filteredProjects = scopedProjects.filter((p) => {
     const matchesSearch =
       p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       p.client_name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -99,21 +82,22 @@ export function KanbanBoardTab({
     if (!matchesSearch) return false
 
     if (quickFilter === 'meus') {
-      return p.responsible_user_id === userProfile?.user_id
+      return p.responsible_user_id === currentUserId
     }
     if (quickFilter === 'sem_responsavel') {
-      return !p.responsible_user_id
+      return !p.responsible_user_name || p.responsible_user_name.trim() === ''
     }
     if (quickFilter === 'atrasados') {
-      return p.deadline_status === 'Atrasado'
+      if (!p.deadline) return false
+      const deadlineDate = new Date(p.deadline)
+      const now = new Date()
+      return deadlineDate < now && p.status !== 'Concluído'
     }
     if (quickFilter === 'em_andamento') {
-      const normalized = normalizeProjectStage(p.status)
-      return normalized !== 'Concluído'
+      return p.status === 'Em desenvolvimento' || p.status === 'Aguardando revisão'
     }
     if (quickFilter === 'concluidos') {
-      const normalized = normalizeProjectStage(p.status)
-      return normalized === 'Concluído'
+      return p.status === 'Concluído'
     }
 
     return true
@@ -127,20 +111,25 @@ export function KanbanBoardTab({
   }
 
   const handleDragOver = (e: React.DragEvent) => {
+    if (!canMoveKanban) return
     e.preventDefault()
   }
 
-  const handleDropStage = (e: React.DragEvent, stage: KanbanStage) => {
+  const handleDropOnStage = (e: React.DragEvent, stageName: string) => {
+    if (!canMoveKanban) return
     e.preventDefault()
-    if (!draggedProjectId || !canMoveKanban) return
+    const projectId = e.dataTransfer.getData('text/plain') || draggedProjectId
+    if (!projectId) return
+
+    const stageObj = INITIAL_KANBAN_STAGES.find((s) => s.name === stageName)
 
     const updated = projects.map((p) => {
-      if (p.id === draggedProjectId) {
+      if (p.id === projectId) {
         return {
           ...p,
-          kanban_stage_id: stage.id,
-          kanban_stage_name: stage.name,
-          status: stage.name as ClientProjectStatus,
+          kanban_stage_id: stageObj?.id || p.kanban_stage_id,
+          kanban_stage_name: stageName,
+          status: stageName as ClientProjectStatus,
           updated_at: new Date().toISOString(),
         }
       }
@@ -172,12 +161,12 @@ export function KanbanBoardTab({
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-sm space-y-6 max-w-full overflow-hidden">
+    <div className="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-sm space-y-6 max-w-full overflow-hidden font-sans">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
           <h2 className="text-xl font-extrabold text-[#0C1D36] flex items-center gap-2">
-            <Kanban className="w-5 h-5 text-[#0075FF]" />
+            <Icon icon={KanbanNavIcon} size={20} className="text-[#0075FF]" />
             <span>Kanban de Projetos</span>
           </h2>
           <p className="text-xs text-[#596579]">
@@ -186,7 +175,7 @@ export function KanbanBoardTab({
         </div>
 
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl shrink-0">
-          <Shield className="w-4 h-4 text-[#0075FF]" />
+          <Icon icon={PermissionsNavIcon} size={16} className="text-[#0075FF]" />
           <span>{canViewAll ? 'Visão Geral' : 'Seus Projetos Atribuídos'}</span>
         </div>
       </div>
@@ -194,7 +183,9 @@ export function KanbanBoardTab({
       {/* FILTERS & SEARCH */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         <div className="relative w-full lg:w-80">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400" />
+          <span className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400">
+            <Icon icon={SearchActionIcon} size={16} />
+          </span>
           <input
             type="text"
             value={searchTerm}
@@ -234,7 +225,7 @@ export function KanbanBoardTab({
       {/* KANBAN BOARD CONTAINER WITH STRICT INTERNAL SCROLL ONLY */}
       {filteredProjects.length === 0 && !canViewAll ? (
         <div className="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-3">
-          <UserCheck className="w-10 h-10 text-slate-400 mx-auto" />
+          <Icon icon={MetricUserIcon} size={40} className="text-slate-400 mx-auto" />
           <h3 className="text-base font-bold text-[#0C1D36]">Nenhum projeto foi atribuído a você no momento.</h3>
           <p className="text-xs text-[#596579] max-w-sm mx-auto">
             Assim que um gestor ou administrador atribuir um projeto à sua conta, ele aparecerá aqui no seu Kanban.
@@ -254,113 +245,106 @@ export function KanbanBoardTab({
                 <div
                   key={stage.id}
                   onDragOver={handleDragOver}
-                  onDrop={(e) => handleDropStage(e, stage)}
-                  className="bg-[#F7F8FA] border border-slate-200 rounded-2xl p-3 flex flex-col justify-between space-y-3 min-h-[500px]"
+                  onDrop={(e) => handleDropOnStage(e, stage.name)}
+                  className="bg-white rounded-2xl border border-slate-200/80 p-3.5 flex flex-col justify-between space-y-3 min-h-[460px] shadow-sm"
                 >
-                  {/* COLUMN HEADER */}
-                  <div className="flex items-center justify-between border-b border-slate-200/80 pb-2.5">
+                  {/* STAGE HEADER */}
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: stage.color }} />
-                      <h3 className="text-xs font-extrabold text-[#0C1D36]">{stage.name}</h3>
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: stage.color }} />
+                      <span className="font-extrabold text-[#0C1D36] text-xs uppercase tracking-wider">{stage.name}</span>
                     </div>
-                    <span className="text-[10px] font-bold bg-white text-slate-700 px-2 py-0.5 rounded-full border border-slate-200 shrink-0">
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
                       {stageProjects.length}
                     </span>
                   </div>
 
-                  {/* COLUMN CARDS */}
-                  <div className="flex-1 space-y-3 overflow-y-auto max-h-[600px] pr-1">
+                  {/* CARDS CONTAINER */}
+                  <div className="flex-1 space-y-3 overflow-y-auto max-h-[540px] pr-1">
                     {stageProjects.length === 0 ? (
-                      <div className="text-center py-8 text-[11px] text-slate-400 italic border border-dashed border-slate-200 rounded-xl">
-                        Nenhum projeto neste estágio
+                      <div className="h-32 rounded-xl border border-dashed border-slate-200 flex items-center justify-center text-[11px] text-slate-400 font-medium italic">
+                        Sem projetos nesta etapa
                       </div>
                     ) : (
-                      stageProjects.map((project) => {
-                        const isOverdue = project.deadline_status === 'Atrasado'
-                        const isNear = project.deadline_status === 'Próximo do prazo'
+                      stageProjects.map((project) => (
+                        <div
+                          key={project.id}
+                          draggable={canMoveKanban}
+                          onDragStart={(e) => handleDragStart(e, project.id)}
+                          onClick={() => onOpenProjectDetail && onOpenProjectDetail(project)}
+                          className={cn(
+                            'p-3.5 rounded-xl border bg-white shadow-sm hover:shadow-md transition-all space-y-2.5 cursor-pointer relative group',
+                            draggedProjectId === project.id ? 'opacity-40 border-dashed border-[#0075FF]' : 'border-slate-200 hover:border-[#0075FF]'
+                          )}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="font-extrabold text-[#0C1D36] text-xs group-hover:text-[#0075FF] transition-colors leading-snug">
+                              {project.title}
+                            </span>
+                          </div>
 
-                        return (
-                          <div
-                            key={project.id}
-                            draggable={canMoveKanban}
-                            onDragStart={(e) => handleDragStart(e, project.id)}
-                            onClick={() => onOpenProjectDetail(project)}
-                            className={cn(
-                              'bg-white rounded-xl border p-3.5 shadow-sm hover:shadow-md transition-all space-y-3 cursor-pointer group',
-                              isOverdue
-                                ? 'border-rose-300 hover:border-rose-400 bg-rose-50/20'
-                                : 'border-slate-200 hover:border-[#0075FF]'
+                          <div className="text-[11px] text-slate-500 font-medium truncate">
+                            {project.client_name}
+                          </div>
+
+                          {/* METADATA CHIPS */}
+                          <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 pt-1">
+                            {project.deadline && (
+                              <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                <Icon icon={DateStatusIcon} size={12} className="text-slate-400" />
+                                <span className="font-mono font-semibold">{formatDateBR(project.deadline)}</span>
+                              </div>
                             )}
-                          >
-                            {/* TAGS & PRIORITY */}
-                            <div className="flex items-center justify-between text-[10px]">
-                              <span className="font-bold uppercase tracking-wider text-[#0075FF] bg-[#0075FF]/10 px-2 py-0.5 rounded">
-                                {project.project_type}
-                              </span>
 
-                              <span
-                                className={cn(
-                                  'font-bold px-2 py-0.5 rounded uppercase',
-                                  project.priority === 'Urgente'
-                                    ? 'bg-rose-500 text-white'
-                                    : project.priority === 'Alta'
-                                    ? 'bg-amber-500/10 text-amber-600'
-                                    : 'bg-slate-100 text-slate-600'
-                                )}
-                              >
-                                {project.priority}
-                              </span>
-                            </div>
+                            {project.files && project.files.length > 0 && (
+                              <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                <Icon icon={FileAttachmentStatusIcon} size={12} className="text-slate-400" />
+                                <span>{project.files.length}</span>
+                              </div>
+                            )}
 
-                            {/* PROJECT TITLE & CLIENT */}
-                            <div>
-                              <h4 className="text-xs font-bold text-[#0C1D36] group-hover:text-[#0075FF] transition-colors leading-tight">
-                                {project.title}
-                              </h4>
-                              <p className="text-[11px] text-[#596579] mt-0.5 truncate">{project.client_name}</p>
-                            </div>
-
-                            {/* DEADLINE BADGE */}
-                            <div className="flex items-center gap-1.5 text-[11px]">
-                              <Clock
-                                className={cn(
-                                  'w-3.5 h-3.5',
-                                  isOverdue ? 'text-rose-600' : isNear ? 'text-amber-500' : 'text-slate-400'
-                                )}
-                              />
-                              <span
-                                className={cn(
-                                  'font-semibold',
-                                  isOverdue ? 'text-rose-600 font-bold' : isNear ? 'text-amber-600 font-bold' : 'text-slate-600'
-                                )}
-                              >
-                                {formatDateBR(project.deadline)}
-                              </span>
-                            </div>
-
-                            {/* RESPONSIBLE & METRICS */}
-                            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-[#596579]">
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-5 h-5 rounded-full bg-[#081D3A] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
-                                  {project.responsible_user_name ? project.responsible_user_name.charAt(0) : '?'}
-                                </div>
-                                <span className="font-medium text-slate-700 truncate max-w-[90px]">
-                                  {project.responsible_user_name || 'Sem resp.'}
+                            {project.tasks && project.tasks.length > 0 && (
+                              <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                                <Icon icon={CheckedSquareStatusIcon} size={12} className="text-slate-400" />
+                                <span>
+                                  {project.tasks.filter((t) => t.status === 'Concluída').length}/{project.tasks.length}
                                 </span>
                               </div>
-
-                              <div className="flex items-center gap-2">
-                                {project.files && project.files.length > 0 && (
-                                  <span className="flex items-center gap-1 text-[10px] font-bold text-slate-500">
-                                    <Paperclip className="w-3 h-3 text-[#0075FF]" />
-                                    {project.files.length}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
+                            )}
                           </div>
-                        )
-                      })
+
+                          {/* FOOTER USER ASSIGNED & QUICK SELECT STAGE */}
+                          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                            <div className="flex items-center gap-1.5 overflow-hidden">
+                              <div className="w-5 h-5 rounded-full bg-[#081D3A] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
+                                {project.responsible_user_name ? project.responsible_user_name.charAt(0) : '?'}
+                              </div>
+                              <span className="text-slate-600 font-semibold truncate max-w-[90px]">
+                                {project.responsible_user_name || 'Sem resp.'}
+                              </span>
+                            </div>
+
+                            {/* SELECTOR STAGE FOR MOBILE/TOUCH */}
+                            {canMoveKanban && (
+                              <select
+                                value={stage.name}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => {
+                                  e.stopPropagation()
+                                  handleSelectStageChange(project.id, e.target.value)
+                                }}
+                                className="text-[10px] bg-slate-100 text-[#0C1D36] font-bold rounded px-1.5 py-0.5 border border-slate-200 outline-none"
+                              >
+                                {INITIAL_KANBAN_STAGES.map((s) => (
+                                  <option key={s.id} value={s.name}>
+                                    {s.name}
+                                  </option>
+                                ))}
+                              </select>
+                            )}
+                          </div>
+                        </div>
+                      ))
                     )}
                   </div>
                 </div>

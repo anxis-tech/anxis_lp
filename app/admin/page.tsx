@@ -23,32 +23,36 @@ import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-t
 import { saveClientProjectAction, deleteClientProjectAction } from '@/lib/actions/client-projects'
 import { saveQuoteAction } from '@/lib/actions/quotes'
 import { saveHomeProjectAction, deleteHomeProjectAction } from '@/lib/actions/projects'
+import { Icon } from '@/components/ui/icon'
 import {
-  LayoutDashboard,
-  Globe,
-  FolderKanban,
-  Kanban,
-  Calculator,
-  Shield,
-  LogOut,
-  ExternalLink,
-  ShieldAlert,
-  Loader2,
-  X,
-  FileText,
-  Paperclip,
-  Link as LinkIcon,
-  Download,
-  Mail,
-  User,
-  Calendar,
-  CheckSquare,
-  Trash2,
-  PanelLeftClose,
-  PanelLeftOpen,
-  DollarSign,
-  Briefcase,
-} from 'lucide-react'
+  DashboardNavIcon,
+  ProjectsNavIcon,
+  KanbanNavIcon,
+  PricingNavIcon,
+  QuotesNavIcon,
+  PortfolioNavIcon,
+  PermissionsNavIcon,
+  CollapseSidebarIcon,
+  ExpandSidebarIcon,
+  LogoutNavIcon,
+} from '@/lib/icons/navigation'
+import {
+  DeleteActionIcon,
+  DownloadActionIcon,
+  LinkActionIcon,
+  ExternalLinkActionIcon,
+  CancelActionIcon,
+} from '@/lib/icons/actions'
+import {
+  MetricRevenueIcon,
+  MetricPendingIcon,
+  MetricQuoteIcon,
+} from '@/lib/icons/dashboard'
+import {
+  SpinnerStatusIcon,
+  RestrictedStatusIcon,
+  FileAttachmentStatusIcon,
+} from '@/lib/icons/status'
 import { cn } from '@/lib/utils'
 
 export default function AdminDashboardPage() {
@@ -308,7 +312,7 @@ export default function AdminDashboardPage() {
           <Image src="/images/logo-transparente.png" alt="ANXIS Logo" fill className="object-contain" priority />
         </div>
         <div className="flex items-center gap-2.5 text-slate-300 text-xs font-semibold bg-white/10 px-5 py-2.5 rounded-full border border-white/10 shadow-lg backdrop-blur-md">
-          <Loader2 className="w-4 h-4 animate-spin text-[#0075FF]" />
+          <Icon icon={SpinnerStatusIcon} size={18} className="animate-spin text-[#0075FF]" />
           <span>Verificando autenticação e permissões do sistema...</span>
         </div>
       </div>
@@ -324,7 +328,7 @@ export default function AdminDashboardPage() {
         {
           id: 'dashboard',
           label: 'Dashboard',
-          icon: LayoutDashboard,
+          icon: DashboardNavIcon,
           allowed: true,
         },
       ],
@@ -335,13 +339,13 @@ export default function AdminDashboardPage() {
         {
           id: 'client_projects',
           label: 'Projetos',
-          icon: FolderKanban,
+          icon: ProjectsNavIcon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
         },
         {
           id: 'kanban_board',
           label: 'Kanban',
-          icon: Kanban,
+          icon: KanbanNavIcon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
         },
       ],
@@ -352,13 +356,13 @@ export default function AdminDashboardPage() {
         {
           id: 'pricing_calculator',
           label: 'Precificação',
-          icon: Calculator,
+          icon: PricingNavIcon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
         },
         {
           id: 'quotes_history',
           label: 'Histórico',
-          icon: FileText,
+          icon: QuotesNavIcon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
         },
       ],
@@ -369,7 +373,7 @@ export default function AdminDashboardPage() {
         {
           id: 'portfolio_home',
           label: 'Portfólio',
-          icon: Globe,
+          icon: PortfolioNavIcon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_VIEW),
         },
       ],
@@ -380,7 +384,7 @@ export default function AdminDashboardPage() {
         {
           id: 'users_permissions',
           label: 'Permissões',
-          icon: Shield,
+          icon: PermissionsNavIcon,
           allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_VIEW),
         },
       ],
@@ -420,15 +424,15 @@ export default function AdminDashboardPage() {
               type="button"
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               className={cn(
-                'p-2 rounded-xl text-slate-400 hover:text-[#0C1D36] hover:bg-slate-100 transition-all border border-slate-200/60',
+                'p-2 rounded-xl text-slate-400 hover:text-[#0C1D36] hover:bg-slate-100 transition-all border border-slate-200/60 flex items-center justify-center',
                 isSidebarCollapsed && 'mt-3 mx-auto'
               )}
               title={isSidebarCollapsed ? 'Expandir Menu' : 'Recolher Menu'}
             >
               {isSidebarCollapsed ? (
-                <PanelLeftOpen className="w-4 h-4 text-[#0C1D36]" />
+                <Icon icon={ExpandSidebarIcon} size={18} className="text-[#0C1D36]" />
               ) : (
-                <PanelLeftClose className="w-4 h-4 text-slate-400" />
+                <Icon icon={CollapseSidebarIcon} size={18} className="text-slate-400" />
               )}
             </button>
           </div>
@@ -449,7 +453,7 @@ export default function AdminDashboardPage() {
 
                   <div className="space-y-1">
                     {allowedItems.map((tab) => {
-                      const Icon = tab.icon
+                      const IconRaw = tab.icon
                       const isActive = activeTab === tab.id
                       return (
                         <button
@@ -467,8 +471,9 @@ export default function AdminDashboardPage() {
                         >
                           <div className="flex items-center gap-3">
                             <Icon
+                              icon={IconRaw}
+                              size={20}
                               className={cn(
-                                'w-4 h-4 shrink-0',
                                 isActive ? 'text-white' : 'text-slate-400 group-hover:text-[#0C1D36]'
                               )}
                             />
@@ -498,17 +503,17 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="overflow-hidden text-xs">
                   <div className="font-bold text-[#0C1D36] truncate">{userProfile?.full_name}</div>
-                  <div className="text-[10px] text-slate-400 capitalize">{userProfile?.role_slug}</div>
+                  <div className="text-[10px] text-slate-400 capitalize">{userProfile?.role_slug || 'Sem cargo'}</div>
                 </div>
               </div>
 
               <button
                 type="button"
                 onClick={handleLogout}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center"
                 title="Sair da Conta"
               >
-                <LogOut className="w-4 h-4" />
+                <Icon icon={LogoutNavIcon} size={18} />
               </button>
             </div>
           ) : (
@@ -518,7 +523,7 @@ export default function AdminDashboardPage() {
               className="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xs mx-auto border border-rose-100 hover:bg-rose-100 transition-colors"
               title="Sair da Conta"
             >
-              <LogOut className="w-4 h-4" />
+              <Icon icon={LogoutNavIcon} size={18} />
             </button>
           )}
         </div>
@@ -535,7 +540,7 @@ export default function AdminDashboardPage() {
         <main className="flex-1 space-y-6 max-w-full">
           {!currentTabObj ? (
             <div className="bg-white rounded-[32px] border border-rose-200 p-8 text-center space-y-4 shadow-sm">
-              <ShieldAlert className="w-12 h-12 text-rose-500 mx-auto" />
+              <Icon icon={RestrictedStatusIcon} size={48} className="text-rose-500 mx-auto" />
               <h3 className="text-xl font-bold text-rose-700">Acesso Negado (HTTP 403)</h3>
               <p className="text-xs text-slate-600 max-w-md mx-auto">
                 Você não possui permissão suficiente para acessar este módulo.
@@ -642,10 +647,9 @@ export default function AdminDashboardPage() {
               {/* TAB 6: USUÁRIOS E PERMISSÕES */}
               {activeTab === 'users_permissions' && (
                 <UsersPermissionsTab
-                  currentUserId={userProfile?.user_id}
-                  canEditUser={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_EDIT)}
-                  canManageRoles={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_ROLES)}
-                  canManagePermissions={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_PERMISSIONS)}
+                  users={teamUsers}
+                  onUpdateUsers={setTeamUsers}
+                  userProfile={userProfile}
                 />
               )}
             </>
@@ -670,9 +674,9 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedDetailProject(null)}
-                  className="p-2 rounded-full hover:bg-slate-100 text-slate-500"
+                  className="p-2 rounded-full hover:bg-slate-100 text-slate-500 flex items-center justify-center"
                 >
-                  <X className="w-5 h-5" />
+                  <Icon icon={CancelActionIcon} size={20} />
                 </button>
               </div>
 
@@ -777,7 +781,7 @@ export default function AdminDashboardPage() {
                     <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
                       <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                         <h4 className="font-extrabold text-sm text-[#0C1D36] flex items-center gap-1.5">
-                          <DollarSign className="w-4 h-4 text-emerald-600" />
+                          <Icon icon={MetricRevenueIcon} size={18} className="text-emerald-600" />
                           <span>Resumo Financeiro & Escopo Aprovado</span>
                         </h4>
                         <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
@@ -842,7 +846,7 @@ export default function AdminDashboardPage() {
                     </div>
                   ) : (
                     <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-2">
-                      <FileText className="w-8 h-8 text-slate-400 mx-auto" />
+                      <Icon icon={MetricQuoteIcon} size={32} className="text-slate-400 mx-auto" />
                       <p className="text-sm font-bold text-slate-600">Nenhum orçamento vinculado a este projeto.</p>
                       <p className="text-xs text-slate-400">
                         Você pode vincular ou criar um orçamento na aba "Orçamentos".
@@ -857,7 +861,7 @@ export default function AdminDashboardPage() {
                 <div className="space-y-4 text-xs">
                   <div className="space-y-2">
                     <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-1.5">
-                      <LinkIcon className="w-4 h-4" />
+                      <Icon icon={LinkActionIcon} size={18} />
                       <span>Links Cadastrados</span>
                     </h4>
                     {selectedDetailProject.links?.length === 0 ? (
@@ -873,7 +877,7 @@ export default function AdminDashboardPage() {
                               {link.category}
                             </span>
                           </div>
-                          <ExternalLink className="w-4 h-4 text-slate-400" />
+                          <Icon icon={ExternalLinkActionIcon} size={16} className="text-slate-400" />
                         </div>
                       ))
                     )}
@@ -881,7 +885,7 @@ export default function AdminDashboardPage() {
 
                   <div className="space-y-2 pt-2 border-t border-slate-100">
                     <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-1.5">
-                      <Paperclip className="w-4 h-4" />
+                      <Icon icon={FileAttachmentStatusIcon} size={18} />
                       <span>Arquivos Privados</span>
                     </h4>
                     {selectedDetailProject.files?.length === 0 ? (
@@ -900,7 +904,7 @@ export default function AdminDashboardPage() {
                             onClick={() => alert(`Baixando arquivo privado ${file.file_name} via URL assinada segura.`)}
                             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF]"
                           >
-                            <Download className="w-3.5 h-3.5" />
+                            <Icon icon={DownloadActionIcon} size={14} />
                             Baixar
                           </button>
                         </div>
@@ -919,7 +923,7 @@ export default function AdminDashboardPage() {
                   onClick={() => handleDeleteProjectFromDrawer(selectedDetailProject.id, selectedDetailProject.title)}
                   className="px-3.5 py-2 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 font-bold text-xs hover:bg-rose-100 flex items-center gap-1.5"
                 >
-                  <Trash2 className="w-4 h-4" />
+                  <Icon icon={DeleteActionIcon} size={16} />
                   <span>Excluir Projeto</span>
                 </button>
               )}
