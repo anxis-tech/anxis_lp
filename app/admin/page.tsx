@@ -243,7 +243,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div>
                   <div className="font-extrabold text-base text-[#0C1D36] tracking-tight">ANXIS</div>
-                  <div className="text-[10px] text-slate-400 font-mono font-semibold uppercase">Vision Admin</div>
+                  <div className="text-[10px] text-slate-400 font-mono font-semibold uppercase">Painel Admin</div>
                 </div>
               </div>
             ) : (
@@ -274,7 +274,7 @@ export default function AdminDashboardPage() {
           <nav className="space-y-2">
             {!isSidebarCollapsed && (
               <div className="text-[10px] font-mono font-extrabold uppercase tracking-widest text-slate-400 px-3 pb-1">
-                Administrator
+                Módulos
               </div>
             )}
 
