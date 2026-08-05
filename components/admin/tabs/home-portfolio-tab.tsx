@@ -198,7 +198,7 @@ export function HomePortfolioTab({
 
             {/* CARD ACTIONS */}
             <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
-              <span className="text-[11px] text-[#596579] font-medium">{project.client} ({project.year})</span>
+              <span className="text-[11px] text-[#596579] font-medium">{project.client} • {project.year}</span>
 
               <div className="flex items-center gap-1.5">
                 {canEdit && (

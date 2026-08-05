@@ -19,6 +19,17 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+// Date Formatter Helper (converts 2026-08-30 to 30/08/2026)
+export function formatDateBR(dateStr?: string) {
+  if (!dateStr) return 'A definir'
+  if (dateStr.includes('/')) return dateStr
+  const parts = dateStr.split('-')
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`
+  }
+  return dateStr
+}
+
 // EXACT 4 STAGES SPECIFIED BY USER
 export const INITIAL_KANBAN_STAGES: KanbanStage[] = [
   { id: 'ks-1', name: 'Novo projeto', slug: 'novo-projeto', color: '#0075FF', display_order: 1, is_active: true, is_initial: true },
@@ -161,22 +172,22 @@ export function KanbanBoardTab({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm space-y-6 max-w-full overflow-hidden">
+    <div className="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-sm space-y-6 max-w-full overflow-hidden">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
           <h2 className="text-xl font-extrabold text-[#0C1D36] flex items-center gap-2">
             <Kanban className="w-5 h-5 text-[#0075FF]" />
-            <span>Kanban de Projetos (4 Estágios)</span>
+            <span>Kanban de Projetos</span>
           </h2>
           <p className="text-xs text-[#596579]">
-            Acompanhamento do fluxo de trabalho em 4 estágios essenciais: Novo projeto, Em desenvolvimento, Aguardando revisão e Concluído.
+            Acompanhamento do fluxo de trabalho dos projetos.
           </p>
         </div>
 
         <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl shrink-0">
           <Shield className="w-4 h-4 text-[#0075FF]" />
-          <span>{canViewAll ? 'Visão Geral (Todos os Projetos)' : 'Seus Projetos Atribuídos'}</span>
+          <span>{canViewAll ? 'Visão Geral' : 'Seus Projetos Atribuídos'}</span>
         </div>
       </div>
 
@@ -306,7 +317,7 @@ export function KanbanBoardTab({
                               <h4 className="text-xs font-bold text-[#0C1D36] group-hover:text-[#0075FF] transition-colors leading-tight">
                                 {project.title}
                               </h4>
-                              <p className="text-[11px] text-[#596579] mt-0.5">{project.client_name}</p>
+                              <p className="text-[11px] text-[#596579] mt-0.5 truncate">{project.client_name}</p>
                             </div>
 
                             {/* DEADLINE BADGE */}
@@ -323,7 +334,7 @@ export function KanbanBoardTab({
                                   isOverdue ? 'text-rose-600 font-bold' : isNear ? 'text-amber-600 font-bold' : 'text-slate-600'
                                 )}
                               >
-                                {project.deadline || 'Sem prazo'}
+                                {formatDateBR(project.deadline)}
                               </span>
                             </div>
 
@@ -338,37 +349,14 @@ export function KanbanBoardTab({
                                 </span>
                               </div>
 
-                              <div className="flex items-center gap-2 font-bold text-slate-500">
+                              <div className="flex items-center gap-2">
                                 {project.files && project.files.length > 0 && (
-                                  <span className="flex items-center gap-0.5" title="Arquivos">
-                                    <Paperclip className="w-3 h-3" />
+                                  <span className="flex items-center gap-1 text-[10px] font-bold text-slate-500">
+                                    <Paperclip className="w-3 h-3 text-[#0075FF]" />
                                     {project.files.length}
                                   </span>
                                 )}
-                                {project.tasks && project.tasks.length > 0 && (
-                                  <span className="flex items-center gap-0.5 text-[#0075FF]" title="Pendências">
-                                    <CheckSquare className="w-3 h-3" />
-                                    {project.tasks.length}
-                                  </span>
-                                )}
                               </div>
-                            </div>
-
-                            {/* MOBILE ACCESSIBLE SELECT FOR STAGE CHANGE */}
-                            <div className="md:hidden pt-2 border-t border-slate-100">
-                              <label className="text-[10px] font-bold text-slate-500 block mb-1">Mover Etapa:</label>
-                              <select
-                                value={normalizeProjectStage(project.status)}
-                                onChange={(e) => handleSelectStageChange(project.id, e.target.value)}
-                                onClick={(e) => e.stopPropagation()}
-                                className="w-full text-xs py-1 px-2 rounded border border-slate-200 bg-white"
-                              >
-                                {INITIAL_KANBAN_STAGES.map((s) => (
-                                  <option key={s.id} value={s.name}>
-                                    {s.name}
-                                  </option>
-                                ))}
-                              </select>
                             </div>
                           </div>
                         )

@@ -12,6 +12,7 @@ import { UserProfileWithRole } from '@/lib/auth/permissions'
 import {
   INITIAL_KANBAN_STAGES,
   normalizeProjectStage,
+  formatDateBR,
 } from '@/components/admin/tabs/kanban-board-tab'
 import {
   FolderKanban,
@@ -456,7 +457,7 @@ export function ClientProjectsTab({
             <span>Projetos de Clientes</span>
           </h2>
           <p className="text-xs text-[#596579]">
-            Gestão operacional de projetos, briefing, contatos, materiais e atribuição de responsáveis.
+            Gestão operacional de projetos e entregas.
           </p>
         </div>
 
@@ -491,7 +492,7 @@ export function ClientProjectsTab({
             onChange={(e) => setStatusFilter(e.target.value)}
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white text-[#0C1D36]"
           >
-            <option value="todos">Todos os Estágios (4)</option>
+            <option value="todos">Todos os Estágios</option>
             {INITIAL_KANBAN_STAGES.map((s) => (
               <option key={s.id} value={s.name}>
                 {s.name}
@@ -527,13 +528,13 @@ export function ClientProjectsTab({
           <table className="w-full text-left text-xs border-collapse min-w-[700px]">
             <thead>
               <tr className="bg-[#081D3A] text-white border-b border-slate-800 font-bold uppercase tracking-wider text-[11px]">
-                <th className="p-3.5">Projeto & Cliente</th>
-                <th className="p-3.5">Tipo & Plataforma</th>
-                <th className="p-3.5">Estágio Atual</th>
-                <th className="p-3.5">Responsável Principal</th>
-                <th className="p-3.5">Prazo</th>
-                <th className="p-3.5 text-center">Links & Arquivos</th>
-                <th className="p-3.5 text-right">Ações</th>
+                <th className="p-3.5 whitespace-nowrap">Projeto & Cliente</th>
+                <th className="p-3.5 whitespace-nowrap">Tipo & Plataforma</th>
+                <th className="p-3.5 whitespace-nowrap">Estágio Atual</th>
+                <th className="p-3.5 whitespace-nowrap">Responsável Principal</th>
+                <th className="p-3.5 whitespace-nowrap">Prazo</th>
+                <th className="p-3.5 text-center whitespace-nowrap">Links & Arquivos</th>
+                <th className="p-3.5 text-right whitespace-nowrap">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -542,20 +543,20 @@ export function ClientProjectsTab({
 
                 return (
                   <tr key={project.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-3.5">
-                      <div className="font-bold text-[#0C1D36] text-sm">{project.title}</div>
-                      <div className="text-[11px] text-[#596579]">{project.client_name} ({project.company || 'N/A'})</div>
+                    <td className="p-3.5 max-w-[220px]">
+                      <div className="font-bold text-[#0C1D36] text-sm truncate">{project.title}</div>
+                      <div className="text-[11px] text-[#596579] truncate">{project.client_name}</div>
                     </td>
-                    <td className="p-3.5">
+                    <td className="p-3.5 whitespace-nowrap">
                       <div className="font-semibold text-[#0075FF]">{project.project_type}</div>
                       <div className="text-[11px] text-slate-500">{project.platform || 'N/A'}</div>
                     </td>
-                    <td className="p-3.5">
+                    <td className="p-3.5 whitespace-nowrap">
                       <span className="inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-[#0075FF]/10 text-[#0075FF]">
                         {normStage}
                       </span>
                     </td>
-                    <td className="p-3.5 text-slate-700">
+                    <td className="p-3.5 text-slate-700 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <div className="w-6 h-6 rounded-full bg-[#081D3A] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
                           {project.responsible_user_name ? project.responsible_user_name.charAt(0) : '?'}
@@ -566,10 +567,10 @@ export function ClientProjectsTab({
                         </div>
                       </div>
                     </td>
-                    <td className="p-3.5 text-slate-600">
+                    <td className="p-3.5 text-slate-600 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{project.deadline || 'A definir'}</span>
+                        <span>{formatDateBR(project.deadline)}</span>
                       </div>
                     </td>
                     <td className="p-3.5 text-center">

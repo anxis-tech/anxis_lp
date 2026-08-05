@@ -239,11 +239,11 @@ export function UsersPermissionsTab({
         <table className="w-full text-left text-xs border-collapse">
           <thead>
             <tr className="bg-[#081D3A] text-white border-b border-slate-800 font-bold uppercase tracking-wider text-[11px]">
-              <th className="p-3.5">Usuário</th>
-              <th className="p-3.5">Cargo</th>
-              <th className="p-3.5">Status</th>
-              <th className="p-3.5">Permissões Especiais</th>
-              <th className="p-3.5 text-right">Ações</th>
+              <th className="p-3.5 whitespace-nowrap">Usuário</th>
+              <th className="p-3.5 whitespace-nowrap">Cargo</th>
+              <th className="p-3.5 whitespace-nowrap">Status</th>
+              <th className="p-3.5 whitespace-nowrap">Permissões Especiais</th>
+              <th className="p-3.5 text-right whitespace-nowrap">Ações</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
