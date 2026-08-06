@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   QuoteFormData,
   PricingConfig,
@@ -10,7 +10,7 @@ import {
   DEFAULT_PRICING_CONFIG,
   calculateProjectQuote,
 } from '@/lib/utils/pricing-calculator'
-import { saveQuoteAction, savePricingSettingsAction } from '@/lib/actions/quotes'
+import { saveQuoteAction, savePricingSettingsAction, getPricingSettingsAction } from '@/lib/actions/quotes'
 import {
   STRICT_PROJECT_TYPES,
   CONTENT_COPY_OPTIONS,
@@ -59,6 +59,17 @@ export function PricingCalculatorTab({
   const [saveSuccessFeedback, setSaveSuccessFeedback] = useState(false)
   const [configSaveFeedback, setConfigSaveFeedback] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
+
+  // Load active pricing settings from Supabase DB on component mount
+  useEffect(() => {
+    async function loadPricingSettings() {
+      const savedConfig = await getPricingSettingsAction()
+      if (savedConfig) {
+        setPricingConfig(savedConfig)
+      }
+    }
+    loadPricingSettings()
+  }, [])
 
   const [formData, setFormData] = useState<QuoteFormData>(() => {
     if (initialData) return initialData
@@ -125,9 +136,13 @@ export function PricingCalculatorTab({
   const breakdown = calculateProjectQuote(formData, pricingConfig)
 
   const handleSaveConfig = async () => {
-    setConfigSaveFeedback(true)
-    await savePricingSettingsAction(pricingConfig)
-    setTimeout(() => setConfigSaveFeedback(false), 3000)
+    const res = await savePricingSettingsAction(pricingConfig)
+    if (res.success) {
+      setConfigSaveFeedback(true)
+      setTimeout(() => setConfigSaveFeedback(false), 3000)
+    } else {
+      alert(`Erro ao salvar configurações da calculadora no banco: ${res.message || 'Erro desconhecido.'}`)
+    }
   }
 
   const handleSaveQuote = async (andConvert: boolean = false) => {
