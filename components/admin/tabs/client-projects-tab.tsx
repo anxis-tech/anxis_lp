@@ -1469,26 +1469,14 @@ export function ClientProjectsTab({
 
               {/* TAB 6: PLANEJAMENTO & PRAZO */}
               {activeFormTab === 'planejamento' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                  <div>
-                    <label className="block font-bold mb-1">Data de Início do Projeto</label>
-                    <input
-                      type="date"
-                      value={editingProject.start_date || ''}
-                      onChange={(e) => setEditingProject({ ...editingProject, start_date: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold mb-1">Prazo Final Prometido ao Cliente *</label>
-                    <input
-                      type="date"
-                      value={editingProject.deadline || ''}
-                      onChange={(e) => setEditingProject({ ...editingProject, deadline: e.target.value })}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                    />
-                  </div>
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                  <label className="block font-bold mb-1">Prazo Final Prometido ao Cliente *</label>
+                  <input
+                    type="date"
+                    value={editingProject.deadline || ''}
+                    onChange={(e) => setEditingProject({ ...editingProject, deadline: e.target.value })}
+                    className="w-full sm:w-1/2 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-semibold"
+                  />
                 </div>
               )}
 
