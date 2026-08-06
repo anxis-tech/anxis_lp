@@ -41,6 +41,7 @@ interface PricingCalculatorTabProps {
   canSaveQuote?: boolean
   onSaveQuote?: (quote: SavedQuote) => void
   onConvertToProject?: (quote: SavedQuote) => void
+  onContinueToProjectForm?: (quote: SavedQuote) => void
   initialData?: QuoteFormData
 }
 
@@ -49,6 +50,7 @@ export function PricingCalculatorTab({
   canSaveQuote = true,
   onSaveQuote,
   onConvertToProject,
+  onContinueToProjectForm,
   initialData,
 }: PricingCalculatorTabProps) {
   const [pricingConfig, setPricingConfig] = useState<PricingConfig>(DEFAULT_PRICING_CONFIG)
@@ -165,8 +167,12 @@ export function PricingCalculatorTab({
 
     if (onSaveQuote) onSaveQuote(newQuote)
 
-    if (andConvert && onConvertToProject) {
-      onConvertToProject(newQuote)
+    if (andConvert) {
+      if (onContinueToProjectForm) {
+        onContinueToProjectForm(newQuote)
+      } else if (onConvertToProject) {
+        onConvertToProject(newQuote)
+      }
     } else {
       setSaveSuccessFeedback(true)
       setTimeout(() => setSaveSuccessFeedback(false), 3000)
@@ -659,10 +665,10 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               <button
                 type="button"
                 onClick={() => handleSaveQuote(true)}
-                className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-100 text-[#0C1D36] font-extrabold text-xs transition-all shadow-lg flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-100 text-[#0C1D36] font-extrabold text-xs transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Icon icon={AddActionIcon} size={16} className="text-[#0075FF]" />
-                <span>Salvar e Converter em Projeto</span>
+                <span>Continuar cadastro do projeto</span>
               </button>
             </div>
           </div>

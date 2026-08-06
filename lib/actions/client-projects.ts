@@ -3,6 +3,7 @@
 import { createClient as createServerSupabase } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { logAuditEventAction } from '@/lib/actions/audit'
+import { createContractForProject } from '@/lib/actions/contracts'
 
 export async function getClientProjectsAction() {
   const supabase = await createServerSupabase()
@@ -178,11 +179,25 @@ export async function saveClientProjectAction(projectData: any) {
     }
   }
 
+  // Trigger contract creation for new projects automatically
+  let contractId: string | undefined = undefined
+  if (!isEdit) {
+    try {
+      const contractRes = await createContractForProject(savedProjectId)
+      if (contractRes.success) {
+        contractId = contractRes.contractId
+      }
+    } catch (contractErr) {
+      console.error('Error triggering contract creation:', contractErr)
+    }
+  }
+
   revalidatePath('/admin')
   return {
     success: true,
     isEdit,
     project: verifiedProject,
+    contractId,
   }
 }
 

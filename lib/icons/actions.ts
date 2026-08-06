@@ -22,6 +22,7 @@ import {
   SlidersHorizontalIcon,
   Exchange01Icon,
   ArrangeIcon,
+  File01Icon,
 } from '@hugeicons/core-free-icons'
 
 export {
@@ -48,4 +49,5 @@ export {
   SlidersHorizontalIcon as ConfigActionIcon,
   Exchange01Icon as SwapActionIcon,
   ArrangeIcon as ReorderActionIcon,
+  File01Icon as PdfActionIcon,
 }

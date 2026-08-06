@@ -21,6 +21,8 @@ import { PricingCalculatorTab } from '@/components/admin/tabs/pricing-calculator
 import { QuotesTab } from '@/components/admin/tabs/quotes-tab'
 import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-tab'
 import { saveClientProjectAction, deleteClientProjectAction } from '@/lib/actions/client-projects'
+import { getContractByProjectId, downloadContractAction } from '@/lib/actions/contracts'
+import { Contract } from '@/types/contract.types'
 import { saveQuoteAction } from '@/lib/actions/quotes'
 import { saveHomeProjectAction, deleteHomeProjectAction } from '@/lib/actions/projects'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -69,8 +71,23 @@ export default function AdminDashboardPage() {
 
   // Project Modal & Detail Drawer State
   const [selectedDetailProject, setSelectedDetailProject] = useState<ClientProject | null>(null)
-  const [drawerTab, setDrawerTab] = useState<'geral' | 'contato' | 'escopo' | 'orcamento_escopo' | 'links_arquivos'>('geral')
+  const [drawerTab, setDrawerTab] = useState<'geral' | 'contato' | 'escopo' | 'orcamento_escopo' | 'links_arquivos' | 'contrato'>('geral')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
+  const [prefilledFromQuote, setPrefilledFromQuote] = useState<SavedQuote | null>(null)
+  const [drawerContract, setDrawerContract] = useState<Contract | null>(null)
+  const [isLoadingDrawerContract, setIsLoadingDrawerContract] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (selectedDetailProject) {
+      setIsLoadingDrawerContract(true)
+      getContractByProjectId(selectedDetailProject.id).then((contract) => {
+        setDrawerContract(contract)
+        setIsLoadingDrawerContract(false)
+      })
+    } else {
+      setDrawerContract(null)
+    }
+  }, [selectedDetailProject])
 
   useEffect(() => {
     initAdminSession()
@@ -246,67 +263,15 @@ export default function AdminDashboardPage() {
     }
   }
 
-  const handleConvertQuoteToProject = async (quote: SavedQuote) => {
+  const handleContinueToProjectForm = (quote: SavedQuote) => {
     const canCreate = isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_CREATE)
     if (!canCreate) {
       alert('Você não possui permissão para criar novos projetos.')
       return
     }
 
-    const newProjectData: Partial<ClientProject> = {
-      title: quote.client_name || quote.form_data?.clientName
-        ? `Projeto: ${quote.client_name || quote.form_data?.clientName}`
-        : `Projeto a partir do Orçamento #${quote.id}`,
-      client_name: quote.client_name || quote.form_data?.clientName || 'Cliente a Definir',
-      company: quote.company || quote.form_data?.company || 'N/A',
-      email: '',
-      whatsapp: '',
-      project_type: quote.project_type || quote.form_data?.projectType || 'Website Institucional',
-      platform: quote.platform || quote.form_data?.platform || 'Next.js + Code',
-      status: 'Novo projeto',
-      kanban_stage_name: 'Novo projeto',
-      priority: 'Normal',
-      responsible_user_name: userProfile?.full_name || 'Admin',
-      responsible_user_email: userProfile?.email || '',
-      deadline: 'A definir',
-      description: `Projeto convertido a partir do Orçamento #${quote.id}.`,
-      quote_id: quote.id,
-      quote_data: {
-        quote_id: quote.id,
-        project_type: quote.project_type || quote.form_data?.projectType || '',
-        page_count: quote.form_data?.pageCount || 1,
-        additional_page_count: quote.form_data?.additionalPageCount || 0,
-        content_option: quote.form_data?.contentOption || '',
-        urgency: quote.form_data?.urgency || '',
-        base_value: quote.calculation_breakdown?.baseValue || quote.subtotal || 0,
-        discount_amount: quote.discount || 0,
-        final_value: quote.final_value || 0,
-        additional_costs: quote.additional_costs || 0,
-        tax_amount: quote.taxes || 0,
-        notes: quote.notes || quote.form_data?.notes || '',
-      },
-      links: [],
-      files: [],
-    }
-
-    const tempProject = {
-      ...newProjectData,
-      id: `temp-${Date.now()}`,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    } as ClientProject
-
-    setClientProjects((prev) => [tempProject, ...prev])
+    setPrefilledFromQuote(quote)
     setActiveTab('client_projects')
-    setSelectedDetailProject(tempProject)
-    setDrawerTab('orcamento_escopo')
-
-    const res = await saveClientProjectAction(newProjectData)
-    if (res.success) {
-      alert(`Orçamento #${quote.id} convertido em Projeto com sucesso!`)
-    } else {
-      alert(`Aviso ao salvar no banco de dados: ${res.message}`)
-    }
   }
 
   // SKELETON SCREEN DURING AUTH RESOLUTION
@@ -314,7 +279,7 @@ export default function AdminDashboardPage() {
     return (
       <div className="min-h-screen bg-[#081D3A] text-white flex flex-col items-center justify-center p-6 space-y-5 font-sans relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#0075FF]/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative w-48 h-12 animate-pulse">
+        <div className="relative w-72 h-20 sm:w-96 sm:h-24 animate-pulse">
           <Image src="/images/logo-transparente.png" alt="ANXIS Logo" fill className="object-contain" priority />
         </div>
         <div className="flex items-center gap-2.5 text-slate-300 text-xs font-semibold bg-white/10 px-5 py-2.5 rounded-full border border-white/10 shadow-lg backdrop-blur-md">
@@ -593,6 +558,8 @@ export default function AdminDashboardPage() {
                     setSelectedDetailProject(p)
                     setDrawerTab('geral')
                   }}
+                  prefilledFromQuote={prefilledFromQuote}
+                  onClearPrefilledQuote={() => setPrefilledFromQuote(null)}
                 />
               )}
 
@@ -621,7 +588,7 @@ export default function AdminDashboardPage() {
                     setCalculatorInitialData(quote.form_data)
                     setActiveTab('pricing_calculator')
                   }}
-                  onConvertToProject={handleConvertQuoteToProject}
+                  onConvertToProject={handleContinueToProjectForm}
                   onOpenCreateQuote={() => {
                     setCalculatorInitialData(undefined)
                     setActiveTab('pricing_calculator')
@@ -637,9 +604,9 @@ export default function AdminDashboardPage() {
                   onSaveQuote={(newQuote) => {
                     setSavedQuotes((prev) => [newQuote, ...prev])
                   }}
-                  onConvertToProject={(newQuote) => {
+                  onContinueToProjectForm={(newQuote) => {
                     setSavedQuotes((prev) => [newQuote, ...prev])
-                    handleConvertQuoteToProject(newQuote)
+                    handleContinueToProjectForm(newQuote)
                   }}
                   initialData={calculatorInitialData}
                 />
@@ -690,6 +657,7 @@ export default function AdminDashboardPage() {
                   { id: 'escopo', label: 'Escopo & Briefing' },
                   { id: 'orcamento_escopo', label: 'Orçamento e Escopo' },
                   { id: 'links_arquivos', label: 'Links & Arquivos' },
+                  { id: 'contrato', label: 'Contrato' },
                 ].map((t) => (
                   <button
                     key={t.id}
@@ -913,6 +881,119 @@ export default function AdminDashboardPage() {
                       ))
                     )}
                   </div>
+                </div>
+              )}
+
+              {/* DRAWER TAB 6: CONTRATO */}
+              {drawerTab === 'contrato' && (
+                <div className="space-y-4 text-xs">
+                  {isLoadingDrawerContract ? (
+                    <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                      <HugeiconsIcon icon={Loading01Icon} className="w-6 h-6 animate-spin text-[#0075FF] mx-auto" strokeWidth={1.5} />
+                      <p className="text-xs font-semibold text-slate-600">Buscando informações do contrato...</p>
+                    </div>
+                  ) : drawerContract ? (
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                        <h4 className="font-extrabold text-sm text-[#0C1D36] flex items-center gap-1.5">
+                          <HugeiconsIcon icon={File01Icon} className="w-4 h-4 text-[#0075FF]" strokeWidth={1.5} />
+                          <span>Contrato de Prestação de Serviços</span>
+                        </h4>
+                        <span
+                          className={cn(
+                            "text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase",
+                            drawerContract.status === 'completed'
+                              ? "bg-emerald-100 text-emerald-800"
+                              : drawerContract.status === 'failed'
+                              ? "bg-rose-100 text-rose-800"
+                              : "bg-purple-100 text-purple-800"
+                          )}
+                        >
+                          {drawerContract.status === 'completed'
+                            ? 'Concluído'
+                            : drawerContract.status === 'failed'
+                            ? 'Falhou'
+                            : 'Processando'}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 text-slate-700">
+                        <div>
+                          <span className="text-slate-500 block">ID do Contrato:</span>
+                          <span className="font-mono text-[10px] font-bold text-[#0C1D36] truncate block">{drawerContract.id}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block">Versão:</span>
+                          <span className="font-bold">v{drawerContract.version}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block">Valor Contratado:</span>
+                          <span className="font-bold text-[#0075FF]">
+                            {drawerContract.final_value
+                              ? drawerContract.final_value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                              : 'R$ 0,00'}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block">Data de Geração:</span>
+                          <span className="font-bold">
+                            {drawerContract.generated_at
+                              ? new Date(drawerContract.generated_at).toLocaleDateString('pt-BR')
+                              : 'Em processamento'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {drawerContract.file_name && (
+                        <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
+                          <div>
+                            <span className="font-bold text-[#0C1D36] block">{drawerContract.file_name}</span>
+                            <span className="text-[10px] text-slate-400">
+                              {drawerContract.file_size ? `${Math.round(drawerContract.file_size / 1024)} KB` : 'PDF'}
+                            </span>
+                          </div>
+                          {drawerContract.status === 'completed' && (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const res = await downloadContractAction(drawerContract.id)
+                                if (res.success && res.signedUrl) {
+                                  const a = document.createElement('a')
+                                  a.href = res.signedUrl
+                                  a.download = res.fileName || 'contrato.pdf'
+                                  a.target = '_blank'
+                                  document.body.appendChild(a)
+                                  a.click()
+                                  document.body.removeChild(a)
+                                } else {
+                                  alert(`Erro ao baixar contrato: ${res.message}`)
+                                }
+                              }}
+                              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF] cursor-pointer shadow-sm"
+                            >
+                              <HugeiconsIcon icon={Download01Icon} className="w-4 h-4" strokeWidth={1.5} />
+                              Baixar PDF
+                            </button>
+                          )}
+                        </div>
+                      )}
+
+                      {drawerContract.error_message && (
+                        <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs">
+                          <span className="font-bold block mb-1">Erro na Geração:</span>
+                          <p>{drawerContract.error_message}</p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-2">
+                      <HugeiconsIcon icon={File01Icon} className="w-8 h-8 text-slate-400 mx-auto" strokeWidth={1.5} />
+                      <p className="text-sm font-bold text-slate-600">Nenhum contrato gerado para este projeto.</p>
+                      <p className="text-xs text-slate-400">
+                        O contrato é gerado automaticamente no salvamento do projeto.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   ClientProject,
   ClientProjectStatus,
@@ -15,6 +15,13 @@ import {
   formatDateBR,
 } from '@/components/admin/tabs/kanban-board-tab'
 import { saveClientProjectAction, deleteClientProjectAction } from '@/lib/actions/client-projects'
+import {
+  getContractsForProjects,
+  downloadContractAction,
+  retryContractGeneration,
+} from '@/lib/actions/contracts'
+import { Contract } from '@/types/contract.types'
+import { SavedQuote } from '@/types/pricing.types'
 import { Icon } from '@/components/ui/icon'
 import {
   ProjectsNavIcon,
@@ -35,6 +42,7 @@ import {
   SearchActionIcon,
   FilterActionIcon,
   MailActionIcon,
+  PdfActionIcon,
 } from '@/lib/icons/actions'
 import {
   MetricUserIcon,
@@ -65,6 +73,8 @@ interface ClientProjectsTabProps {
   canAssignResponsible: boolean
   canViewAll: boolean
   onOpenProjectDetail: (project: ClientProject) => void
+  prefilledFromQuote?: SavedQuote | null
+  onClearPrefilledQuote?: () => void
 }
 
 export function ClientProjectsTab({
@@ -78,10 +88,17 @@ export function ClientProjectsTab({
   canAssignResponsible,
   canViewAll,
   onOpenProjectDetail,
+  prefilledFromQuote,
+  onClearPrefilledQuote,
 }: ClientProjectsTabProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('todos')
   const [platformFilter, setPlatformFilter] = useState('todos')
+
+  // Contracts state
+  const [contractsMap, setContractsMap] = useState<Record<string, Contract>>({})
+  const [isGeneratingContract, setIsGeneratingContract] = useState(false)
+  const [generatingContractMsg, setGeneratingContractMsg] = useState('Salvando projeto e iniciando geração do contrato em PDF...')
 
   // Expanded Spacious Dialog State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -89,6 +106,61 @@ export function ClientProjectsTab({
   const [activeFormTab, setActiveFormTab] = useState<
     'geral' | 'contato' | 'escopo' | 'links_arquivos' | 'responsavel' | 'planejamento' | 'observacoes'
   >('geral')
+
+  // Auto-open modal when prefilledFromQuote changes
+  useEffect(() => {
+    if (prefilledFromQuote) {
+      const quote = prefilledFromQuote
+      setEditingProject({
+        title: quote.project_name ? `Projeto: ${quote.project_name}` : `Projeto para ${quote.client_name}`,
+        client_name: quote.client_name || '',
+        company: quote.company || '',
+        email: '',
+        whatsapp: '',
+        project_type: quote.project_type || 'Website Institucional',
+        platform: quote.platform || 'Next.js',
+        status: 'Novo projeto',
+        kanban_stage_name: 'Novo projeto',
+        priority: 'Normal',
+        responsible_user_name: userProfile?.full_name || 'Admin',
+        responsible_user_email: userProfile?.email || '',
+        deadline: '',
+        description: `Projeto gerado a partir do Orçamento #${quote.id}.`,
+        quote_id: quote.id,
+        approved_value: quote.final_value || 0,
+        quote_data: {
+          quote_id: quote.id,
+          project_type: quote.project_type || '',
+          page_count: quote.form_data?.pageCount || 1,
+          additional_page_count: quote.form_data?.additionalPageCount || 0,
+          content_option: quote.form_data?.contentOption || '',
+          urgency: quote.form_data?.urgency || '',
+          base_value: quote.calculation_breakdown?.baseValue || quote.subtotal || 0,
+          discount_amount: quote.discount || 0,
+          final_value: quote.final_value || 0,
+          additional_costs: quote.additional_costs || 0,
+          tax_amount: quote.taxes || 0,
+          notes: quote.notes || quote.form_data?.notes || '',
+        },
+        links: [],
+        files: [],
+      })
+      setIsEditModalOpen(true)
+      if (onClearPrefilledQuote) onClearPrefilledQuote()
+    }
+  }, [prefilledFromQuote])
+
+  // Fetch contracts for projects list
+  useEffect(() => {
+    if (projects.length > 0) {
+      const projectIds = projects.map((p) => p.id).filter((id) => !id.startsWith('temp-'))
+      if (projectIds.length > 0) {
+        getContractsForProjects(projectIds).then((map) => {
+          setContractsMap(map)
+        })
+      }
+    }
+  }, [projects])
 
   // Searchable Combobox for Responsible User
   const [userSearchText, setUserSearchText] = useState('')
@@ -211,15 +283,72 @@ export function ClientProjectsTab({
     if (isEdit) {
       const updated = projects.map((p) => (p.id === savedProject.id ? savedProject : p))
       onUpdateProjects(updated)
-      alert('Projeto atualizado com sucesso')
+      alert('Projeto atualizado com sucesso no banco de dados!')
+      setIsSaving(false)
+      setIsEditModalOpen(false)
+      setEditingProject(null)
     } else {
       onUpdateProjects([savedProject, ...projects])
-      alert('Projeto criado com sucesso')
+      setIsSaving(false)
+      setIsEditModalOpen(false)
+      setEditingProject(null)
+
+      // Show contract generation loading screen for new projects
+      setIsGeneratingContract(true)
+      setGeneratingContractMsg('Projeto salvo no banco de dados! Gerando o arquivo do contrato em PDF no servidor...')
+
+      setTimeout(() => {
+        setIsGeneratingContract(false)
+        alert(`Projeto "${savedProject.title}" criado com sucesso! O contrato em PDF foi gerado e está disponível na lista de projetos.`)
+        // Refresh contract map
+        getContractsForProjects([savedProject.id]).then((map) => {
+          setContractsMap((prev) => ({ ...prev, ...map }))
+        })
+      }, 3500)
+    }
+  }
+
+  // DOWNLOAD CONTRACT HANDLER
+  const handleDownloadContract = async (projectId: string) => {
+    const contract = contractsMap[projectId]
+    if (!contract) {
+      alert('Nenhum contrato encontrado para este projeto. O contrato pode estar em fila de geração.')
+      return
     }
 
-    setIsSaving(false)
-    setIsEditModalOpen(false)
-    setEditingProject(null)
+    if (contract.status === 'failed') {
+      const retry = window.confirm(`A geração do contrato em PDF falhou previamente.\nErro: ${contract.error_message || 'Erro no servidor'}\n\nDeseja tentar gerar novamente?`)
+      if (retry) {
+        setIsGeneratingContract(true)
+        setGeneratingContractMsg('Gerando o contrato novamente...')
+        const res = await retryContractGeneration(contract.id)
+        setIsGeneratingContract(false)
+        if (res.success) {
+          alert('Nova tentativa iniciada com sucesso. Por favor, aguarde alguns segundos.')
+        } else {
+          alert(`Erro ao tentar regerar contrato: ${res.message}`)
+        }
+      }
+      return
+    }
+
+    if (contract.status === 'pending' || contract.status === 'processing') {
+      alert('O contrato em PDF ainda está sendo gerado no servidor. Por favor, aguarde alguns instantes e tente novamente.')
+      return
+    }
+
+    const res = await downloadContractAction(contract.id)
+    if (res.success && res.signedUrl) {
+      const a = document.createElement('a')
+      a.href = res.signedUrl
+      a.download = res.fileName || 'contrato.pdf'
+      a.target = '_blank'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    } else {
+      alert(`Erro ao baixar contrato: ${res.message}`)
+    }
   }
 
   // DELETE PROJECT HANDLER
@@ -500,17 +629,28 @@ export function ClientProjectsTab({
                           </button>
                         )}
 
-                        {/* EXCLUIR */}
-                        {canDelete && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteProject(project.id, project.title)}
-                            className="w-8 h-8 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:border-rose-300 transition-all flex items-center justify-center shadow-sm"
-                            title="Excluir Projeto"
-                          >
-                            <Icon icon={DeleteActionIcon} size={16} />
-                          </button>
-                        )}
+                        {/* BAIXAR CONTRATO EM PDF */}
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadContract(project.id)}
+                          className={cn(
+                            "w-8 h-8 rounded-xl border transition-all flex items-center justify-center shadow-sm cursor-pointer",
+                            contractsMap[project.id]?.status === 'completed'
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300"
+                              : contractsMap[project.id]?.status === 'failed'
+                              ? "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100"
+                              : "border-purple-200 bg-purple-50 text-purple-600 hover:bg-purple-100"
+                          )}
+                          title={
+                            contractsMap[project.id]?.status === 'completed'
+                              ? "Baixar Contrato em PDF"
+                              : contractsMap[project.id]?.status === 'failed'
+                              ? "Falha ao gerar contrato (Clique para tentar novamente)"
+                              : "Baixar / Gerar Contrato PDF"
+                          }
+                        >
+                          <Icon icon={PdfActionIcon} size={16} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -1304,6 +1444,22 @@ export function ClientProjectsTab({
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONTRACT GENERATION OVERLAY SCREEN */}
+      {isGeneratingContract && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex flex-col items-center justify-center p-6 space-y-6 font-sans text-white animate-in fade-in duration-300">
+          <div className="w-16 h-16 rounded-full bg-[#0075FF]/20 border border-[#0075FF]/40 flex items-center justify-center text-[#168CFF]">
+            <Icon icon={PdfActionIcon} size={32} className="animate-bounce text-[#0075FF]" />
+          </div>
+          <div className="text-center space-y-2 max-w-md">
+            <h3 className="text-lg font-extrabold text-white">Processando Contrato em PDF</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">{generatingContractMsg}</p>
+          </div>
+          <div className="w-64 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+            <div className="bg-[#0075FF] h-full animate-pulse w-full transition-all duration-700" />
           </div>
         </div>
       )}

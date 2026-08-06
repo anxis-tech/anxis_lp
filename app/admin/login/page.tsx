@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
         {/* Ambient Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#0075FF]/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative w-52 h-14 animate-pulse">
+        <div className="relative w-72 h-20 sm:w-96 sm:h-24 animate-pulse">
           <Image
             src="/images/logo-transparente.png"
             alt="ANXIS Logo"
