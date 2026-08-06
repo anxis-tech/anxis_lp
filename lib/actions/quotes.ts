@@ -27,7 +27,8 @@ export async function saveQuoteAction(quote: SavedQuote) {
 
   if (!user) return { success: false, message: 'Não autenticado.' }
 
-  const isEdit = !!quote.id && !quote.id.startsWith('quote-')
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  const isEdit = !!quote.id && uuidRegex.test(quote.id)
 
   const payload = {
     client_name: quote.client_name,
@@ -47,21 +48,31 @@ export async function saveQuoteAction(quote: SavedQuote) {
     notes: quote.notes || null,
     created_by_name: quote.created_by_name || 'Admin',
     created_by: user.id,
-    linked_project_id: quote.linked_project_id || null,
+    linked_project_id: quote.linked_project_id && uuidRegex.test(quote.linked_project_id) ? quote.linked_project_id : null,
     updated_at: new Date().toISOString(),
   }
 
+  let savedQuoteData: SavedQuote
+
   if (isEdit) {
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from('quotes')
       .update(payload)
       .eq('id', quote.id)
+      .select('*')
+      .single()
 
     if (error) return { success: false, message: error.message }
+    savedQuoteData = updated as SavedQuote
   } else {
-    const { error } = await supabase.from('quotes').insert(payload)
+    const { data: inserted, error } = await supabase
+      .from('quotes')
+      .insert(payload)
+      .select('*')
+      .single()
 
     if (error) return { success: false, message: error.message }
+    savedQuoteData = inserted as SavedQuote
   }
 
   await logAuditEventAction({
@@ -71,7 +82,11 @@ export async function saveQuoteAction(quote: SavedQuote) {
   })
 
   revalidatePath('/admin')
-  return { success: true, message: 'Orçamento salvo com sucesso no banco de dados!' }
+  return {
+    success: true,
+    quote: savedQuoteData,
+    message: 'Orçamento salvo com sucesso no banco de dados!',
+  }
 }
 
 export async function deleteQuoteAction(id: string) {

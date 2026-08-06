@@ -33,7 +33,8 @@ export async function saveClientProjectAction(projectData: any) {
 
   if (!user) return { success: false, message: 'Usuário não autenticado.' }
 
-  const isEdit = !!projectData.id && !projectData.id.startsWith('cp-temp-') && !projectData.id.startsWith('temp-') && !projectData.id.startsWith('cp-')
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  const isEdit = !!projectData.id && uuidRegex.test(projectData.id)
 
   const payload = {
     title: projectData.title,
@@ -45,13 +46,13 @@ export async function saveClientProjectAction(projectData: any) {
     project_type: projectData.project_type,
     platform: projectData.platform || 'Next.js',
     status: projectData.status || 'Novo projeto',
-    kanban_stage_id: projectData.kanban_stage_id || null,
+    kanban_stage_id: projectData.kanban_stage_id && uuidRegex.test(projectData.kanban_stage_id) ? projectData.kanban_stage_id : null,
     kanban_position: projectData.kanban_position || 0,
     priority: projectData.priority || 'Normal',
-    responsible_user_id: projectData.responsible_user_id || null,
+    responsible_user_id: projectData.responsible_user_id && uuidRegex.test(projectData.responsible_user_id) ? projectData.responsible_user_id : null,
     responsible_user_name: projectData.responsible_user_name || null,
     responsible_user_email: projectData.responsible_user_email || null,
-    quote_id: projectData.quote_id || null,
+    quote_id: projectData.quote_id && uuidRegex.test(projectData.quote_id) ? projectData.quote_id : null,
     quote_data: projectData.quote_data || {},
     approved_value: projectData.quote_data?.final_value || projectData.approved_value || 0,
     paid_value: projectData.paid_value || 0,

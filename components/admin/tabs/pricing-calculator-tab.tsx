@@ -163,15 +163,22 @@ export function PricingCalculatorTab({
       updated_at: new Date().toISOString(),
     }
 
-    await saveQuoteAction(newQuote)
+    const res = await saveQuoteAction(newQuote)
 
-    if (onSaveQuote) onSaveQuote(newQuote)
+    if (!res.success) {
+      alert(`Erro ao salvar orçamento: ${res.message}`)
+      return
+    }
+
+    const savedQuote = (res.quote || newQuote) as SavedQuote
+
+    if (onSaveQuote) onSaveQuote(savedQuote)
 
     if (andConvert) {
       if (onContinueToProjectForm) {
-        onContinueToProjectForm(newQuote)
+        onContinueToProjectForm(savedQuote)
       } else if (onConvertToProject) {
-        onConvertToProject(newQuote)
+        onConvertToProject(savedQuote)
       }
     } else {
       setSaveSuccessFeedback(true)
