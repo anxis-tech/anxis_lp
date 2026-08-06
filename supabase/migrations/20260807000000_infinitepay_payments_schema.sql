@@ -63,12 +63,12 @@ INSERT INTO public.permissions (module, action, permission_key, description) VAL
 ON CONFLICT (permission_key) DO NOTHING;
 
 -- Grant permissions to admin role by default
-INSERT INTO public.roles_permissions (role_id, permission_id)
+INSERT INTO public.role_permissions (role_id, permission_id)
 SELECT r.id, p.id
 FROM public.roles r
 CROSS JOIN public.permissions p
 WHERE r.slug = 'admin' AND p.permission_key LIKE 'payments.%'
-ON CONFLICT DO NOTHING;
+ON CONFLICT (role_id, permission_id) DO NOTHING;
 
 -- 5. ROW LEVEL SECURITY (RLS) POLICIES
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
