@@ -559,17 +559,6 @@ export function ClientProjectsTab({
             Gestão operacional de projetos e entregas.
           </p>
         </div>
-
-        {canCreate && (
-          <button
-            type="button"
-            onClick={handleOpenCreateModal}
-            className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#0075FF] hover:bg-[#168CFF] shadow-md transition-all shrink-0"
-          >
-            <Icon icon={AddActionIcon} size={16} className="mr-1.5" />
-            <span>Novo Projeto de Cliente</span>
-          </button>
-        )}
       </div>
 
       {/* FILTERS & SEARCH */}
