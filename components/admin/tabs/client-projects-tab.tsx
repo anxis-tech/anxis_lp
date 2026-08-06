@@ -1543,42 +1543,89 @@ export function ClientProjectsTab({
             </div>
 
             {/* MODAL FOOTER */}
-            <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-between shrink-0">
-              {editingProject.id && canDelete ? (
-                <button
-                  type="button"
-                  onClick={() => handleDeleteProject(editingProject.id!, editingProject.title || 'Projeto')}
-                  className="px-4 py-2.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 font-bold hover:bg-rose-100 transition-colors text-xs flex items-center gap-1.5"
-                >
-                  <Icon icon={DeleteActionIcon} size={16} />
-                  <span>Excluir Projeto</span>
-                </button>
-              ) : (
-                <div className="text-[11px] text-slate-500 font-semibold">
-                  * Todos os campos são salvos diretamente na tabela client_projects do Supabase.
+            {(() => {
+              const formTabList = [
+                { id: 'geral', stepNumber: 1, name: 'Informações Gerais' },
+                { id: 'contato', stepNumber: 2, name: 'Informações do cliente' },
+                { id: 'escopo', stepNumber: 3, name: 'Escopo & Briefing' },
+                { id: 'links_arquivos', stepNumber: 4, name: 'Links & Arquivos' },
+                { id: 'responsavel', stepNumber: 5, name: 'Responsáveis' },
+                { id: 'planejamento', stepNumber: 6, name: 'Planejamento & Prazo' },
+                { id: 'observacoes', stepNumber: 7, name: 'Observações Internas' },
+              ]
+
+              const currentTabIdx = formTabList.findIndex((t) => t.id === activeFormTab)
+              const isLastTab = currentTabIdx === formTabList.length - 1
+              const nextTabInfo = !isLastTab ? formTabList[currentTabIdx + 1] : null
+              const prevTabInfo = currentTabIdx > 0 ? formTabList[currentTabIdx - 1] : null
+
+              return (
+                <div className="bg-slate-50 border-t border-slate-200 px-6 py-4 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-2">
+                    {editingProject.id && canDelete ? (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteProject(editingProject.id!, editingProject.title || 'Projeto')}
+                        className="px-4 py-2.5 rounded-xl bg-rose-50 text-rose-600 border border-rose-200 font-bold hover:bg-rose-100 transition-colors text-xs flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Icon icon={DeleteActionIcon} size={16} />
+                        <span>Excluir Projeto</span>
+                      </button>
+                    ) : (
+                      <div className="text-[11px] text-slate-500 font-semibold hidden sm:block">
+                        * Preencha as etapas para cadastrar o projeto.
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    {prevTabInfo && (
+                      <button
+                        type="button"
+                        onClick={() => setActiveFormTab(prevTabInfo.id as any)}
+                        className="px-4 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-700 hover:bg-slate-200 text-xs flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Icon icon={BackNavIcon} size={14} />
+                        <span>Etapa Anterior</span>
+                      </button>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => setIsEditModalOpen(false)}
+                      className="px-4 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-700 hover:bg-slate-200 text-xs cursor-pointer"
+                    >
+                      Cancelar
+                    </button>
+
+                    {isLastTab ? (
+                      <button
+                        type="button"
+                        disabled={isSaving}
+                        onClick={handleSaveProjectForm}
+                        className="px-6 py-2.5 rounded-xl bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF] shadow-md flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                      >
+                        <Icon icon={SuccessStatusIcon} size={16} />
+                        <span>{isSaving ? 'Salvando no banco...' : 'Salvar Projeto'}</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (nextTabInfo) {
+                            setActiveFormTab(nextTabInfo.id as any)
+                          }
+                        }}
+                        className="px-6 py-2.5 rounded-xl bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF] shadow-md flex items-center gap-2 cursor-pointer transition-all"
+                      >
+                        <span>Ir para Etapa {nextTabInfo?.stepNumber}: {nextTabInfo?.name}</span>
+                        <Icon icon={DownNavIcon} size={14} className="-rotate-90" />
+                      </button>
+                    )}
+                  </div>
                 </div>
-              )}
-
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-300 font-bold text-slate-700 hover:bg-slate-200 text-xs"
-                >
-                  Cancelar
-                </button>
-
-                <button
-                  type="button"
-                  disabled={isSaving}
-                  onClick={handleSaveProjectForm}
-                  className="px-6 py-2.5 rounded-xl bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF] shadow-md flex items-center gap-2 disabled:opacity-50 cursor-pointer"
-                >
-                  <Icon icon={SuccessStatusIcon} size={16} />
-                  <span>{isSaving ? 'Salvando no banco...' : 'Salvar Projeto'}</span>
-                </button>
-              </div>
-            </div>
+              )
+            })()}
           </div>
         </div>
       )}
