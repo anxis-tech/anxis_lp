@@ -621,6 +621,7 @@ export function ClientProjectsTab({
                 <th className="p-3.5 whitespace-nowrap">Projeto & Cliente</th>
                 <th className="p-3.5 whitespace-nowrap">Tipo & Plataforma</th>
                 <th className="p-3.5 whitespace-nowrap">Estágio Atual</th>
+                <th className="p-3.5 whitespace-nowrap">Pagamento</th>
                 <th className="p-3.5 whitespace-nowrap">Responsável Principal</th>
                 <th className="p-3.5 whitespace-nowrap">Prazo</th>
                 <th className="p-3.5 text-right whitespace-nowrap">Ações</th>
@@ -629,6 +630,7 @@ export function ClientProjectsTab({
             <tbody className="divide-y divide-slate-100">
               {filteredProjects.map((project) => {
                 const normStage = normalizeProjectStage(project.status)
+                const paymentStatus = project.payment_status || 'Sem link'
 
                 return (
                   <tr key={project.id} className="hover:bg-slate-50 transition-colors">
@@ -643,6 +645,22 @@ export function ClientProjectsTab({
                     <td className="p-3.5 whitespace-nowrap">
                       <span className="inline-block px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-[#0075FF]/10 text-[#0075FF]">
                         {normStage}
+                      </span>
+                    </td>
+                    <td className="p-3.5 whitespace-nowrap">
+                      <span
+                        className={cn(
+                          "inline-block px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase border",
+                          paymentStatus === 'Pago'
+                            ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                            : paymentStatus === 'Pendente'
+                            ? "bg-amber-100 text-amber-800 border-amber-200"
+                            : paymentStatus.includes('Falha')
+                            ? "bg-rose-100 text-rose-800 border-rose-200"
+                            : "bg-slate-100 text-slate-600 border-slate-200"
+                        )}
+                      >
+                        {paymentStatus}
                       </span>
                     </td>
                     <td className="p-3.5 text-slate-700 whitespace-nowrap">
@@ -664,6 +682,21 @@ export function ClientProjectsTab({
                     </td>
                     <td className="p-3.5 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
+                        {/* COPIAR LINK DE PAGAMENTO */}
+                        {project.payment_link && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(project.payment_link!)
+                              alert('Link de pagamento da InfinitePay copiado com sucesso!')
+                            }}
+                            className="w-8 h-8 rounded-xl border border-blue-200 bg-blue-50 text-[#0075FF] hover:bg-[#0075FF] hover:text-white transition-all flex items-center justify-center shadow-sm cursor-pointer"
+                            title="Copiar link de pagamento InfinitePay"
+                          >
+                            <Icon icon={LinkActionIcon} size={16} />
+                          </button>
+                        )}
+
                         {/* VISUALIZAR */}
                         <button
                           type="button"

@@ -8,37 +8,54 @@ Aplicação web institucional e de alta conversão para a empresa **ANXIS**, aco
 
 O painel é estruturado em 5 módulos operacionais estratégicos:
 
-1. **Visão Geral (Dashboard)**: Métricas em tempo real conectadas ao banco de dados (Receita Total Recebida, Projetos Fechados & Pagos, Pagamentos Pendentes, Projetos em Andamento) e tabela de projetos recentes com filtros por status e responsável.
+1. **Visão Geral (Dashboard)**: Métricas em tempo real conectadas ao banco de dados (Receita Total Confirmada via InfinitePay, Projetos Fechados & Pagos, Pagamentos Pendentes, Projetos em Andamento) e tabela de projetos recentes com filtros por status e responsável.
 2. **Portfólio da Home**: Controle de cases exibidos no carrossel/grade da landing page pública via Server Actions e Supabase Storage (`portfolio-public`).
-3. **Projetos de Clientes & Kanban**: Gestão interna em lista e formulário de 7 abas (Informações Gerais, Contato, Escopo & Briefing, Links & Arquivos Privados via bucket `client-project-files` com assinaturas digitais, Responsáveis, Planejamento e Observações).
+3. **Projetos de Clientes & Kanban**: Gestão interna em lista e formulário de 7 abas (Informações Gerais, Contato do Cliente, Escopo & Briefing, Links & Arquivos Privados, Contrato em PDF e Cobrança InfinitePay com link oficial).
    - Estágios do Kanban: *Novo projeto*, *Em desenvolvimento*, *Aguardando revisão*, *Concluído*.
    - Movimentação de cards sincronizada em tempo real com auditoria e timeline.
 4. **Orçamentos & Calculadora**: Precificação comercial baseada em regras dinamizadas no Supabase (`pricing_settings`), snapshots imutáveis em `quotes` e conversão direta de orçamento para Projeto de Cliente.
-5. **Usuários e Permissões**: Módulo de gestão de equipe para administradores configurarem cargos (*Administrador*, *Comercial*, *Designer*) e matriz de permissões granulares por abas e ações.
+5. **Checkout Integrado InfinitePay & Webhook**:
+   - Geração automática e sob demanda de links oficiais de pagamento InfinitePay (`https://api.checkout.infinitepay.io/links`) vinculados ao contrato concluído em PDF.
+   - Endpoint público de Webhook (`/api/webhooks/infinitepay`) com auditoria (`payment_webhook_events`) e confirmação server-to-server idêntica à API oficial (`/payment_check`).
+   - Rota de retorno pública (`/pagamento/retorno`) para o cliente.
+6. **Usuários e Permissões**: Módulo de gestão de equipe para administradores configurarem cargos (*Administrador*, *Comercial*, *Designer*) e matriz de permissões granulares por abas e ações (`payments.view`, `payments.create`, `payments.copy_link`, etc.).
 
 ---
 
 ## 🔒 Segurança, RLS e Autenticação
 
 - **Supabase Auth**: Sessões validadas no servidor via `@supabase/ssr` / Middleware. Usuários inativos têm o acesso bloqueado imediatamente.
-- **Row Level Security (RLS)**: Habilitado em **todas** as tabelas administrativas (`profiles`, `client_projects`, `quotes`, `pricing_settings`, `audit_logs`, `notifications`, etc.).
+- **Row Level Security (RLS)**: Habilitado em **todas** as tabelas administrativas (`profiles`, `client_projects`, `quotes`, `contracts`, `payments`, `payment_webhook_events`, `pricing_settings`, `audit_logs`).
 - **Storage Buckets**:
   - `portfolio-public`: Leitura pública, escrita restrita a membros autenticados.
   - `client-project-files`: Armazenamento privado com URLs assinadas expiráveis (`createSignedUrl`).
-  - `avatars`: Leitura pública para fotos de perfil.
-  - `quote-documents`: Documentos privados de orçamentos.
+  - `contracts`: PDFs de contratos gerados no servidor.
 
 ---
 
-## 🚀 Como Executar a Migração no Supabase
+## ⚙️ Variáveis de Ambiente (`.env`)
 
-1. Acesse o painel da sua hospedagem / **Supabase Console** > **SQL Editor**.
-2. Cole e execute o arquivo de migração idempotente e não-destrutivo:
-   `supabase/migrations/20260805000000_full_supabase_production.sql`
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://sua-url-supabase.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua-anon-key
+SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
+NEXT_PUBLIC_APP_URL=https://anxis.tech
+INFINITEPAY_HANDLE=sua_tag_aqui
+```
+
+---
+
+## 🚀 Como Executar as Migrações no Supabase
+
+1. Acesse o **Supabase Console** > **SQL Editor**.
+2. Cole e execute as migrações idempotentes e não-destrutivas:
+   - `supabase/migrations/20260806000000_contracts_schema.sql`
+   - `supabase/migrations/20260807000000_infinitepay_payments_schema.sql`
 
 ---
 
 ## ⚡ Verificação de Build de Produção
 ```bash
-npx next build --webpack
+npx tsc --noEmit
+npm run build
 ```

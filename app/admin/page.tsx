@@ -23,6 +23,12 @@ import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-t
 import { saveClientProjectAction, deleteClientProjectAction } from '@/lib/actions/client-projects'
 import { getContractByProjectId, downloadContractAction } from '@/lib/actions/contracts'
 import { Contract } from '@/types/contract.types'
+import {
+  getPaymentByProjectIdAction,
+  createPaymentLinkAction,
+  checkPaymentStatusAction,
+} from '@/lib/actions/payments'
+import { Payment } from '@/types/payment.types'
 import { saveQuoteAction } from '@/lib/actions/quotes'
 import { saveHomeProjectAction, deleteHomeProjectAction } from '@/lib/actions/projects'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -71,11 +77,14 @@ export default function AdminDashboardPage() {
 
   // Project Modal & Detail Drawer State
   const [selectedDetailProject, setSelectedDetailProject] = useState<ClientProject | null>(null)
-  const [drawerTab, setDrawerTab] = useState<'geral' | 'contato' | 'escopo' | 'orcamento_escopo' | 'links_arquivos' | 'contrato'>('geral')
+  const [drawerTab, setDrawerTab] = useState<'geral' | 'contato' | 'escopo' | 'orcamento_escopo' | 'links_arquivos' | 'contrato' | 'pagamento'>('geral')
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false)
   const [prefilledFromQuote, setPrefilledFromQuote] = useState<SavedQuote | null>(null)
   const [drawerContract, setDrawerContract] = useState<Contract | null>(null)
   const [isLoadingDrawerContract, setIsLoadingDrawerContract] = useState<boolean>(false)
+  const [drawerPayment, setDrawerPayment] = useState<Payment | null>(null)
+  const [isLoadingDrawerPayment, setIsLoadingDrawerPayment] = useState<boolean>(false)
+  const [isCreatingPaymentLink, setIsCreatingPaymentLink] = useState<boolean>(false)
 
   useEffect(() => {
     if (selectedDetailProject) {
@@ -84,8 +93,15 @@ export default function AdminDashboardPage() {
         setDrawerContract(contract)
         setIsLoadingDrawerContract(false)
       })
+
+      setIsLoadingDrawerPayment(true)
+      getPaymentByProjectIdAction(selectedDetailProject.id).then((payment) => {
+        setDrawerPayment(payment)
+        setIsLoadingDrawerPayment(false)
+      })
     } else {
       setDrawerContract(null)
+      setDrawerPayment(null)
     }
   }, [selectedDetailProject])
 
@@ -658,6 +674,7 @@ export default function AdminDashboardPage() {
                   { id: 'orcamento_escopo', label: 'Orçamento e Escopo' },
                   { id: 'links_arquivos', label: 'Links & Arquivos' },
                   { id: 'contrato', label: 'Contrato' },
+                  { id: 'pagamento', label: 'Pagamento' },
                 ].map((t) => (
                   <button
                     key={t.id}
@@ -992,6 +1009,177 @@ export default function AdminDashboardPage() {
                       <p className="text-xs text-slate-400">
                         O contrato é gerado automaticamente no salvamento do projeto.
                       </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* DRAWER TAB 7: PAGAMENTO (INFINITEPAY CHECKOUT INTEGRADO) */}
+              {drawerTab === 'pagamento' && (
+                <div className="space-y-4 text-xs">
+                  {isLoadingDrawerPayment ? (
+                    <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                      <HugeiconsIcon icon={Loading01Icon} className="w-6 h-6 animate-spin text-[#0075FF] mx-auto" strokeWidth={1.5} />
+                      <p className="text-xs font-semibold text-slate-600">Buscando informações do pagamento InfinitePay...</p>
+                    </div>
+                  ) : drawerPayment ? (
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                      <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+                        <h4 className="font-extrabold text-sm text-[#0C1D36] flex items-center gap-1.5">
+                          <HugeiconsIcon icon={Dollar01Icon} className="w-4 h-4 text-[#0075FF]" strokeWidth={1.5} />
+                          <span>Cobrança Checkout Integrado InfinitePay</span>
+                        </h4>
+                        <span
+                          className={cn(
+                            "text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase border",
+                            drawerPayment.status === 'Pago'
+                              ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                              : drawerPayment.status === 'Pendente'
+                              ? "bg-amber-100 text-amber-800 border-amber-200"
+                              : "bg-rose-100 text-rose-800 border-rose-200"
+                          )}
+                        >
+                          {drawerPayment.status}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 text-slate-700">
+                        <div>
+                          <span className="text-slate-500 block">Identificador (Order NSU):</span>
+                          <span className="font-mono text-[10px] font-bold text-[#0C1D36] truncate block">{drawerPayment.order_nsu}</span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block">Valor da Cobrança:</span>
+                          <span className="font-bold text-[#0075FF] text-sm font-mono">
+                            {(drawerPayment.expected_amount / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-slate-500 block">Data de Geração:</span>
+                          <span className="font-bold">
+                            {drawerPayment.generated_at ? new Date(drawerPayment.generated_at).toLocaleDateString('pt-BR') : 'N/A'}
+                          </span>
+                        </div>
+                        {drawerPayment.status === 'Pago' && (
+                          <>
+                            <div>
+                              <span className="text-slate-500 block">Data do Pagamento:</span>
+                              <span className="font-bold text-emerald-700">
+                                {drawerPayment.paid_at ? new Date(drawerPayment.paid_at).toLocaleDateString('pt-BR') : 'Confirmado'}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block">Forma de Pagamento:</span>
+                              <span className="font-bold">{drawerPayment.capture_method || 'Cartão/Pix InfinitePay'}</span>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block">Parcelas:</span>
+                              <span className="font-bold">{drawerPayment.installments || 1}x</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* PAYMENT LINK ACTIONS */}
+                      {drawerPayment.payment_url && (
+                        <div className="pt-3 border-t border-slate-200 space-y-3">
+                          <span className="font-bold text-slate-700 block">Link de Pagamento Oficial:</span>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              readOnly
+                              value={drawerPayment.payment_url}
+                              className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-mono text-slate-600 outline-none"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText(drawerPayment.payment_url!)
+                                alert('Link de pagamento da InfinitePay copiado!')
+                              }}
+                              className="px-3 py-2 rounded-xl bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF] cursor-pointer shrink-0 shadow-sm"
+                            >
+                              Copiar Link
+                            </button>
+                            <a
+                              href={drawerPayment.payment_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="px-3 py-2 rounded-xl bg-[#081D3A] text-white font-bold text-xs hover:bg-[#0075FF] cursor-pointer shrink-0 shadow-sm"
+                            >
+                              Abrir Checkout
+                            </a>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* VERIFY / RE-CHECK PAYMENT STATUS BUTTON */}
+                      <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-2">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const res = await checkPaymentStatusAction(drawerPayment.id)
+                            if (res.success) {
+                              if (res.isPaid) {
+                                alert('Pagamento confirmado com sucesso na InfinitePay!')
+                                setDrawerPayment(res.payment || null)
+                              } else {
+                                alert(res.message || 'O pagamento continua pendente.')
+                              }
+                            } else {
+                              alert(`Erro ao consultar status: ${res.message}`)
+                            }
+                          }}
+                          className="px-4 py-2 rounded-xl bg-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-300 cursor-pointer shadow-sm flex items-center gap-1.5"
+                        >
+                          <span>Consultar Pagamento (InfinitePay)</span>
+                        </button>
+
+                        {drawerPayment.receipt_url && (
+                          <a
+                            href={drawerPayment.receipt_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-4 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 cursor-pointer shadow-sm"
+                          >
+                            Ver Comprovante
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-3">
+                      <HugeiconsIcon icon={Dollar01Icon} className="w-8 h-8 text-slate-400 mx-auto" strokeWidth={1.5} />
+                      <p className="text-sm font-bold text-slate-600">Nenhum link de pagamento gerado ainda.</p>
+                      <p className="text-xs text-slate-400 max-w-xs mx-auto">
+                        Certifique-se de que o contrato em PDF foi gerado para criar a cobrança via InfinitePay.
+                      </p>
+
+                      <button
+                        type="button"
+                        disabled={isCreatingPaymentLink}
+                        onClick={async () => {
+                          setIsCreatingPaymentLink(true)
+                          const res = await createPaymentLinkAction({ projectId: selectedDetailProject.id })
+                          setIsCreatingPaymentLink(false)
+                          if (res.success) {
+                            alert('Link de pagamento gerado com sucesso!')
+                            setDrawerPayment(res.payment || null)
+                          } else {
+                            alert(`Erro ao gerar link de pagamento: ${res.message}`)
+                          }
+                        }}
+                        className="mt-2 px-5 py-2.5 rounded-xl bg-[#0075FF] text-white font-bold text-xs hover:bg-[#168CFF] cursor-pointer shadow-md inline-flex items-center gap-2"
+                      >
+                        {isCreatingPaymentLink ? (
+                          <>
+                            <HugeiconsIcon icon={Loading01Icon} className="w-4 h-4 animate-spin text-white" strokeWidth={1.5} />
+                            <span>Gerando link de pagamento...</span>
+                          </>
+                        ) : (
+                          <span>Gerar Link de Pagamento InfinitePay</span>
+                        )}
+                      </button>
                     </div>
                   )}
                 </div>

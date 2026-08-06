@@ -36,8 +36,11 @@ export function DashboardOverviewTab({
   const [statusFilter, setStatusFilter] = useState('todos')
   const [responsibleFilter, setResponsibleFilter] = useState('todos')
 
-  // Real Database Metrics
+  // Real Database & Confirmed Payments Metrics
   const totalProjectsCount = projects.length
+
+  const paidProjects = projects.filter((p) => p.payment_status === 'Pago')
+  const pendingPaymentProjects = projects.filter((p) => p.payment_status === 'Pendente')
 
   const completedProjectsCount = projects.filter(
     (p) => normalizeProjectStage(p.status) === 'Concluído'
@@ -47,8 +50,9 @@ export function DashboardOverviewTab({
     (p) => normalizeProjectStage(p.status) === 'Em desenvolvimento'
   ).length
 
-  const totalRevenueValue = projects.reduce((sum, p) => {
-    return sum + (p.quote_data?.final_value || 12500)
+  // Revenue total: Sum strictly confirmed paid_value (0 if unconfirmed)
+  const totalRevenueValue = paidProjects.reduce((sum, p) => {
+    return sum + (p.paid_value || 0)
   }, 0)
 
   const overallCompletionPercentage =

@@ -3,6 +3,7 @@
 import { createClient as createServerSupabase } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Contract, ContractGenerationJob } from '@/types/contract.types'
+import { createPaymentLinkAction } from '@/lib/actions/payments'
 import { revalidatePath } from 'next/cache'
 import { jsPDF } from 'jspdf'
 
@@ -465,6 +466,17 @@ async function generateContractPdf(
     }).eq('contract_id', contractId)
 
     console.log(`Contract PDF generated successfully: ${storagePath} (${pdfBuffer.length} bytes)`)
+
+    // Auto-trigger InfinitePay payment link creation after contract completion
+    createPaymentLinkAction({ projectId, contractId })
+      .then((res) => {
+        if (res.success) {
+          console.log(`Payment link created automatically for project ${projectId}: ${res.paymentUrl}`)
+        } else {
+          console.warn(`Payment link auto-generation notice: ${res.message}`)
+        }
+      })
+      .catch((err) => console.error('Error auto-generating payment link:', err))
 
   } catch (err: any) {
     console.error('Contract PDF generation failed:', err)
