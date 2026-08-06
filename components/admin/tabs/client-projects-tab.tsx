@@ -174,6 +174,8 @@ export function ClientProjectsTab({
   const [newFileCategory, setNewFileCategory] = useState<FileCategory>('Documentos')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
+  const isAdmin = userProfile?.role_slug === 'admin'
+
   // FILTER VISIBILITY BY PERMISSION:
   const visibleProjects = projects.filter((p) => {
     if (canViewAll) return true
@@ -881,15 +883,38 @@ export function ClientProjectsTab({
                     </div>
 
                     <div>
-                      <label className="block font-bold mb-1">Valor Aprovado do Projeto (R$) *</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="font-bold">Valor Aprovado do Projeto (R$) *</label>
+                        {isAdmin ? (
+                          <span className="text-[10px] bg-amber-50 text-amber-700 font-extrabold px-2 py-0.5 rounded border border-amber-200">
+                            Editável (Administrador)
+                          </span>
+                        ) : (
+                          <span className="text-[10px] bg-slate-100 text-slate-600 font-extrabold px-2 py-0.5 rounded border border-slate-200">
+                            🔒 Calculadora Comercial (Bloqueado)
+                          </span>
+                        )}
+                      </div>
                       <input
                         type="number"
                         step="0.01"
+                        readOnly={!isAdmin}
+                        disabled={!isAdmin}
                         value={editingProject.approved_value || ''}
                         onChange={(e) => setEditingProject({ ...editingProject, approved_value: parseFloat(e.target.value) || 0 })}
-                        placeholder="Ex: 4500.00"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-mono font-bold text-[#0075FF]"
+                        placeholder={isAdmin ? "Ex: 4500.00" : "Valor fixado pela Calculadora"}
+                        className={cn(
+                          'w-full px-3.5 py-2.5 rounded-xl border font-mono font-bold text-[#0075FF]',
+                          !isAdmin
+                            ? 'bg-slate-100/90 text-slate-600 border-slate-200 cursor-not-allowed select-none opacity-90'
+                            : 'bg-white border-slate-200'
+                        )}
                       />
+                      {!isAdmin && (
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          Definido estritamente pelas regras da Calculadora Comercial. Alterações permitidas apenas para o Administrador.
+                        </p>
+                      )}
                     </div>
                   </div>
 
