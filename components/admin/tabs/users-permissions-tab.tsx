@@ -11,8 +11,6 @@ import {
   CancelCircleIcon,
   Settings01Icon,
   UserIcon,
-  UserRemove01Icon,
-  UserCheck01Icon,
   CrownIcon,
   Cancel01Icon,
   RefreshIcon,
@@ -138,21 +136,6 @@ export function UsersPermissionsTab({
     }
   }
 
-  const handleToggleUserStatus = (userId: string) => {
-    setUserList((prev) =>
-      prev.map((u) => {
-        if (u.user_id === userId) {
-          if (u.role_slug === 'admin' && u.is_active && prev.filter((x) => x.role_slug === 'admin' && x.is_active).length <= 1) {
-            alert('Ação bloqueada: Não é possível desativar o único administrador do sistema!')
-            return u
-          }
-          return { ...u, is_active: !u.is_active }
-        }
-        return u
-      })
-    )
-  }
-
   const handleOpenPermissionsModal = (user: UserProfileWithRole) => {
     setEditingUserPerms(user)
     setCustomPerms(user.custom_permissions ? { ...user.custom_permissions } : {})
@@ -234,7 +217,6 @@ export function UsersPermissionsTab({
             <tr className="bg-[#081D3A] text-white border-b border-slate-800 font-bold uppercase tracking-wider text-[11px]">
               <th className="p-3.5 whitespace-nowrap">Usuário</th>
               <th className="p-3.5 whitespace-nowrap">Cargo</th>
-              <th className="p-3.5 whitespace-nowrap">Status do Acesso</th>
               <th className="p-3.5 whitespace-nowrap">Permissões de Abas</th>
               <th className="p-3.5 text-right whitespace-nowrap">Ações de Permissão</th>
             </tr>
@@ -242,7 +224,7 @@ export function UsersPermissionsTab({
           <tbody className="divide-y divide-slate-100 font-medium">
             {isLoading ? (
               <tr>
-                <td colSpan={5} className="p-8 text-center">
+                <td colSpan={4} className="p-8 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-6 h-6 border-2 border-[#0075FF] border-t-transparent rounded-full animate-spin" />
                     <span className="text-xs text-slate-500 font-medium">Carregando usuários do Supabase...</span>
@@ -251,7 +233,7 @@ export function UsersPermissionsTab({
               </tr>
             ) : fetchError ? (
               <tr>
-                <td colSpan={5} className="p-8 text-center">
+                <td colSpan={4} className="p-8 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <HugeiconsIcon icon={CancelCircleIcon} className="w-8 h-8 text-rose-400"  strokeWidth={1.5} />
                     <span className="text-xs text-rose-600 font-bold">{fetchError}</span>
@@ -267,7 +249,7 @@ export function UsersPermissionsTab({
               </tr>
             ) : filteredUsers.length === 0 ? (
               <tr>
-                <td colSpan={5} className="p-8 text-center">
+                <td colSpan={4} className="p-8 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <HugeiconsIcon icon={UserIcon} className="w-8 h-8 text-slate-300"  strokeWidth={1.5} />
                     <span className="text-sm font-bold text-slate-500">
@@ -331,18 +313,6 @@ export function UsersPermissionsTab({
                   </td>
 
                   <td className="p-3.5">
-                    <span
-                      className={cn(
-                        'inline-flex items-center gap-1 font-bold text-[11px]',
-                        user.is_active ? 'text-emerald-600' : 'text-rose-500'
-                      )}
-                    >
-                      {user.is_active ? <HugeiconsIcon icon={CheckmarkCircle01Icon} className="w-3.5 h-3.5"  strokeWidth={1.5} /> : <HugeiconsIcon icon={CancelCircleIcon} className="w-3.5 h-3.5"  strokeWidth={1.5} />}
-                      <span>{user.is_active ? 'Acesso Ativo' : 'Acesso Suspenso'}</span>
-                    </span>
-                  </td>
-
-                  <td className="p-3.5">
                     {user.role_slug === 'admin' ? (
                       <span className="text-[10px] bg-emerald-500/10 text-emerald-700 font-extrabold px-2.5 py-1 rounded-md border border-emerald-200">
                         Acesso Total (Administrador Supabase)
@@ -364,26 +334,10 @@ export function UsersPermissionsTab({
                         <button
                           type="button"
                           onClick={() => handleOpenPermissionsModal(user)}
-                          className="w-8 h-8 rounded-xl bg-[#0075FF] text-white hover:bg-[#168CFF] flex items-center justify-center shadow-sm transition-all"
+                          className="w-8 h-8 rounded-xl bg-[#0075FF] text-white hover:bg-[#168CFF] flex items-center justify-center shadow-sm transition-all cursor-pointer"
                           title="Editar Ações de Permissão"
                         >
                           <HugeiconsIcon icon={Settings01Icon} className="w-4 h-4"  strokeWidth={1.5} />
-                        </button>
-                      )}
-
-                      {canEditUser && (
-                        <button
-                          type="button"
-                          onClick={() => handleToggleUserStatus(user.user_id)}
-                          className={cn(
-                            'w-8 h-8 rounded-xl border flex items-center justify-center shadow-sm transition-all',
-                            user.is_active
-                              ? 'bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100'
-                              : 'bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100'
-                          )}
-                          title={user.is_active ? 'Suspender Acesso' : 'Reativar Acesso'}
-                        >
-                          {user.is_active ? <HugeiconsIcon icon={UserRemove01Icon} className="w-4 h-4"  strokeWidth={1.5} /> : <HugeiconsIcon icon={UserCheck01Icon} className="w-4 h-4"  strokeWidth={1.5} />}
                         </button>
                       )}
                     </div>
