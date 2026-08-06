@@ -629,27 +629,29 @@ export function ClientProjectsTab({
                           </button>
                         )}
 
-                        {/* BAIXAR CONTRATO EM PDF */}
+                        {/* BAIXAR CONTRATO EM PDF (BOTÃO EVIDENTE COM TEXTO E ÍCONE) */}
                         <button
                           type="button"
+                          disabled={contractsMap[project.id]?.status !== 'completed'}
                           onClick={() => handleDownloadContract(project.id)}
                           className={cn(
-                            "w-8 h-8 rounded-xl border transition-all flex items-center justify-center shadow-sm cursor-pointer",
+                            "h-8 px-2.5 rounded-xl border transition-all flex items-center gap-1 shadow-sm text-xs font-extrabold",
                             contractsMap[project.id]?.status === 'completed'
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:border-emerald-300"
-                              : contractsMap[project.id]?.status === 'failed'
-                              ? "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100"
-                              : "border-purple-200 bg-purple-50 text-purple-600 hover:bg-purple-100"
+                              ? "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:border-rose-300 cursor-pointer"
+                              : "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed opacity-50 shadow-none"
                           )}
                           title={
                             contractsMap[project.id]?.status === 'completed'
                               ? "Baixar Contrato em PDF"
+                              : contractsMap[project.id]?.status === 'processing' || contractsMap[project.id]?.status === 'pending'
+                              ? "Gerando contrato em PDF no servidor..."
                               : contractsMap[project.id]?.status === 'failed'
-                              ? "Falha ao gerar contrato (Clique para tentar novamente)"
-                              : "Baixar / Gerar Contrato PDF"
+                              ? "Geração do PDF falhou (consulte a aba Contrato nos Detalhes)"
+                              : "Contrato em PDF não gerado"
                           }
                         >
-                          <Icon icon={PdfActionIcon} size={16} />
+                          <Icon icon={PdfActionIcon} size={14} className={contractsMap[project.id]?.status === 'completed' ? "text-rose-600" : "text-slate-400"} />
+                          <span className="text-[10px] font-black tracking-tight uppercase">PDF</span>
                         </button>
                       </div>
                     </td>

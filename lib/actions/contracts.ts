@@ -200,6 +200,29 @@ export async function createContractForProject(projectId: string) {
   return { success: true, contractId: contract.id }
 }
 
+// Helper to auto-create contracts bucket in Supabase Storage if it does not exist
+async function ensureContractsBucketExists(adminSupabase: any) {
+  try {
+    const { data: buckets } = await adminSupabase.storage.listBuckets()
+    const exists = buckets?.some((b: any) => b.name === 'contracts' || b.id === 'contracts')
+
+    if (!exists) {
+      const { error: createError } = await adminSupabase.storage.createBucket('contracts', {
+        public: false,
+        fileSizeLimit: 10485760, // 10MB limit
+        allowedMimeTypes: ['application/pdf'],
+      })
+      if (createError) {
+        console.warn('Could not auto-create contracts storage bucket:', createError.message)
+      } else {
+        console.log('Successfully created "contracts" storage bucket.')
+      }
+    }
+  } catch (err) {
+    console.warn('Error verifying contracts storage bucket:', err)
+  }
+}
+
 // ──────────────────────────────────────────────
 // 5. GENERATE CONTRACT PDF (internal)
 // ──────────────────────────────────────────────
@@ -409,12 +432,15 @@ async function generateContractPdf(
     const fileName = `contrato-${sanitizedTitle}-${timestamp}.pdf`
     const storagePath = `contracts/${projectId}/${contractId}/${fileName}`
 
+    // Ensure contracts bucket exists in Supabase Storage before uploading
+    await ensureContractsBucketExists(adminSupabase)
+
     // Upload to Supabase Storage
     const { error: uploadError } = await adminSupabase.storage
       .from('contracts')
       .upload(storagePath, pdfBuffer, {
         contentType: 'application/pdf',
-        upsert: false,
+        upsert: true,
       })
 
     if (uploadError) {
