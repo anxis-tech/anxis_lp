@@ -54,20 +54,20 @@ CREATE INDEX IF NOT EXISTS idx_payment_webhook_events_order_nsu ON public.paymen
 CREATE INDEX IF NOT EXISTS idx_payment_webhook_events_status ON public.payment_webhook_events(processing_status);
 
 -- 4. INSERT PAYMENT PERMISSIONS
-INSERT INTO public.permissions (key, module, action, description) VALUES
-  ('payments.view', 'payments', 'view', 'Visualizar registros e status de pagamentos'),
-  ('payments.create', 'payments', 'create', 'Gerar novos links de pagamento InfinitePay'),
-  ('payments.copy_link', 'payments', 'copy_link', 'Copiar links de pagamento'),
-  ('payments.check_status', 'payments.check_status', 'check_status', 'Consultar status oficial de pagamentos na API'),
-  ('payments.view_financial_data', 'payments', 'view_financial_data', 'Visualizar relatórios e comprovantes financeiros')
-ON CONFLICT (key) DO NOTHING;
+INSERT INTO public.permissions (module, action, permission_key, description) VALUES
+  ('payments', 'view', 'payments.view', 'Visualizar registros e status de pagamentos'),
+  ('payments', 'create', 'payments.create', 'Gerar novos links de pagamento InfinitePay'),
+  ('payments', 'copy_link', 'payments.copy_link', 'Copiar links de pagamento'),
+  ('payments', 'check_status', 'payments.check_status', 'Consultar status oficial de pagamentos na API'),
+  ('payments', 'view_financial_data', 'payments.view_financial_data', 'Visualizar relatórios e comprovantes financeiros')
+ON CONFLICT (permission_key) DO NOTHING;
 
 -- Grant permissions to admin role by default
 INSERT INTO public.roles_permissions (role_id, permission_id)
 SELECT r.id, p.id
 FROM public.roles r
 CROSS JOIN public.permissions p
-WHERE r.slug = 'admin' AND p.key LIKE 'payments.%'
+WHERE r.slug = 'admin' AND p.permission_key LIKE 'payments.%'
 ON CONFLICT DO NOTHING;
 
 -- 5. ROW LEVEL SECURITY (RLS) POLICIES
