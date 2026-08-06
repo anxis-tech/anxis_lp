@@ -132,6 +132,11 @@ export interface ClientProject {
     best_time_to_contact?: string
     preferred_channel?: string
     contact_notes?: string
+    cep?: string
+    street?: string
+    neighborhood?: string
+    city?: string
+    state?: string
   }
 
   // Scope & Briefing Section

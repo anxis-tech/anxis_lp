@@ -203,6 +203,7 @@ export function ClientProjectsTab({
       title: '',
       client_name: '',
       company: '',
+      approved_value: 0,
       project_type: 'Site institucional',
       platform: 'Next.js',
       status: 'Novo projeto',
@@ -217,9 +218,11 @@ export function ClientProjectsTab({
         email: '',
         phone: '',
         whatsapp: '',
-        role: '',
-        preferred_channel: 'WhatsApp',
-        contact_notes: '',
+        cep: '',
+        street: '',
+        neighborhood: '',
+        city: '',
+        state: '',
       },
       scope_briefing_json: {
         objective: '',
@@ -243,8 +246,74 @@ export function ClientProjectsTab({
   const [isSaving, setIsSaving] = useState(false)
 
   const handleSaveProjectForm = async () => {
-    if (!editingProject?.title || !editingProject?.client_name) {
-      alert('Por favor, preencha pelo menos o Nome do Projeto e o Nome do Cliente.')
+    if (!editingProject) return
+
+    // Validate mandatory fields (except links, scope, responsible, internal_notes)
+    const missing: { fieldName: string; tab: typeof activeFormTab }[] = []
+
+    if (!editingProject?.title?.trim()) {
+      missing.push({ fieldName: 'Nome do Projeto', tab: 'geral' })
+    }
+    if (!editingProject?.client_name?.trim()) {
+      missing.push({ fieldName: 'Nome do Cliente', tab: 'geral' })
+    }
+    if (!editingProject?.company?.trim()) {
+      missing.push({ fieldName: 'Empresa / Razão Social', tab: 'geral' })
+    }
+    if (!editingProject?.project_type?.trim()) {
+      missing.push({ fieldName: 'Tipo de Projeto', tab: 'geral' })
+    }
+    if (!editingProject?.platform?.trim()) {
+      missing.push({ fieldName: 'Plataforma', tab: 'geral' })
+    }
+    if (!editingProject?.approved_value || Number(editingProject.approved_value) <= 0) {
+      missing.push({ fieldName: 'Valor Aprovado do Projeto (R$)', tab: 'geral' })
+    }
+    if (!editingProject?.description?.trim()) {
+      missing.push({ fieldName: 'Descrição Geral do Projeto', tab: 'geral' })
+    }
+
+    // Tab 2: Informações do cliente
+    const contactName = editingProject?.client_contact_json?.contact_name || editingProject?.client_name
+    if (!contactName?.trim()) {
+      missing.push({ fieldName: 'Nome do Contato Principal', tab: 'contato' })
+    }
+    const email = editingProject?.client_contact_json?.email || editingProject?.email
+    if (!email?.trim()) {
+      missing.push({ fieldName: 'E-mail de Contato', tab: 'contato' })
+    }
+    const phone = editingProject?.client_contact_json?.phone || editingProject?.phone || editingProject?.whatsapp
+    if (!phone?.trim()) {
+      missing.push({ fieldName: 'Telefone/WhatsApp', tab: 'contato' })
+    }
+    if (!editingProject?.client_contact_json?.cep?.trim()) {
+      missing.push({ fieldName: 'CEP', tab: 'contato' })
+    }
+    if (!editingProject?.client_contact_json?.street?.trim()) {
+      missing.push({ fieldName: 'Logradouro / Endereço', tab: 'contato' })
+    }
+    if (!editingProject?.client_contact_json?.neighborhood?.trim()) {
+      missing.push({ fieldName: 'Bairro', tab: 'contato' })
+    }
+    if (!editingProject?.client_contact_json?.city?.trim()) {
+      missing.push({ fieldName: 'Cidade', tab: 'contato' })
+    }
+    if (!editingProject?.client_contact_json?.state?.trim()) {
+      missing.push({ fieldName: 'Estado (UF)', tab: 'contato' })
+    }
+
+    // Tab 6: Planejamento
+    if (!editingProject?.deadline?.trim()) {
+      missing.push({ fieldName: 'Prazo Final Prometido ao Cliente', tab: 'planejamento' })
+    }
+
+    if (missing.length > 0) {
+      const firstTab = missing[0].tab
+      setActiveFormTab(firstTab)
+      alert(
+        `Por favor, preencha todos os campos obrigatórios antes de salvar:\n\n• ` +
+          missing.map((m) => m.fieldName).join('\n• ')
+      )
       return
     }
 
@@ -694,7 +763,7 @@ export function ClientProjectsTab({
             <div className="bg-slate-100 px-6 py-2 border-b border-slate-200 flex items-center gap-2 overflow-x-auto shrink-0 text-xs font-bold">
               {[
                 { id: 'geral', label: '1. Informações Gerais', icon: ProjectsNavIcon },
-                { id: 'contato', label: '2. Contato do Cliente', icon: MetricUserIcon },
+                { id: 'contato', label: '2. Informações do cliente', icon: MetricUserIcon },
                 { id: 'escopo', label: '3. Escopo & Briefing', icon: MetricQuoteIcon },
                 { id: 'links_arquivos', label: '4. Links & Arquivos', icon: LinkActionIcon },
                 { id: 'responsavel', label: '5. Responsáveis', icon: MetricTeamIcon },
@@ -709,7 +778,7 @@ export function ClientProjectsTab({
                     type="button"
                     onClick={() => setActiveFormTab(tab.id as any)}
                     className={cn(
-                      'flex items-center gap-2 px-3.5 py-2 rounded-xl whitespace-nowrap transition-all',
+                      'flex items-center gap-2 px-3.5 py-2 rounded-xl whitespace-nowrap transition-all cursor-pointer',
                       isActive
                         ? 'bg-[#0075FF] text-white shadow-sm'
                         : 'bg-white text-slate-700 hover:bg-slate-200 border border-slate-200'
@@ -744,29 +813,47 @@ export function ClientProjectsTab({
                       <input
                         type="text"
                         value={editingProject.client_name || ''}
-                        onChange={(e) => setEditingProject({ ...editingProject, client_name: e.target.value })}
+                        onChange={(e) =>
+                          setEditingProject({
+                            ...editingProject,
+                            client_name: e.target.value,
+                            client_contact_json: {
+                              ...editingProject.client_contact_json,
+                              contact_name: editingProject.client_contact_json?.contact_name || e.target.value,
+                            },
+                          })
+                        }
                         placeholder="Ex: Mariana Lima"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="block font-bold mb-1">Empresa / Razão Social</label>
+                      <label className="block font-bold mb-1">Empresa / Razão Social *</label>
                       <input
                         type="text"
                         value={editingProject.company || ''}
-                        onChange={(e) => setEditingProject({ ...editingProject, company: e.target.value })}
+                        onChange={(e) =>
+                          setEditingProject({
+                            ...editingProject,
+                            company: e.target.value,
+                            client_contact_json: {
+                              ...editingProject.client_contact_json,
+                              company: e.target.value,
+                            },
+                          })
+                        }
                         placeholder="Ex: Decor Studio Ltda"
                         className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white"
                       />
                     </div>
 
                     <div>
-                      <label className="block font-bold mb-1">Tipo de Projeto</label>
+                      <label className="block font-bold mb-1">Tipo de Projeto *</label>
                       <select
                         value={editingProject.project_type || 'Site institucional'}
                         onChange={(e) => setEditingProject({ ...editingProject, project_type: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-semibold"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-semibold cursor-pointer"
                       >
                         <option value="Landing page">Landing page</option>
                         <option value="Página de vendas">Página de vendas</option>
@@ -778,11 +865,11 @@ export function ClientProjectsTab({
                     </div>
 
                     <div>
-                      <label className="block font-bold mb-1">Plataforma</label>
+                      <label className="block font-bold mb-1">Plataforma *</label>
                       <select
                         value={editingProject.platform || 'Next.js'}
                         onChange={(e) => setEditingProject({ ...editingProject, platform: e.target.value })}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-semibold"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-semibold cursor-pointer"
                       >
                         <option value="Next.js">Next.js / React</option>
                         <option value="Tray">Tray</option>
@@ -794,29 +881,20 @@ export function ClientProjectsTab({
                     </div>
 
                     <div>
-                      <label className="block font-bold mb-1">Estágio Atual (4 Estágios do Kanban)</label>
-                      <select
-                        value={normalizeProjectStage(editingProject.status)}
-                        onChange={(e) =>
-                          setEditingProject({
-                            ...editingProject,
-                            status: e.target.value as ClientProjectStatus,
-                            kanban_stage_name: e.target.value,
-                          })
-                        }
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-bold text-[#0075FF]"
-                      >
-                        {INITIAL_KANBAN_STAGES.map((s) => (
-                          <option key={s.id} value={s.name}>
-                            {s.name}
-                          </option>
-                        ))}
-                      </select>
+                      <label className="block font-bold mb-1">Valor Aprovado do Projeto (R$) *</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={editingProject.approved_value || ''}
+                        onChange={(e) => setEditingProject({ ...editingProject, approved_value: parseFloat(e.target.value) || 0 })}
+                        placeholder="Ex: 4500.00"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white font-mono font-bold text-[#0075FF]"
+                      />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block font-bold mb-1">Descrição Geral do Projeto</label>
+                    <label className="block font-bold mb-1">Descrição Geral do Projeto *</label>
                     <textarea
                       rows={4}
                       value={editingProject.description || ''}
@@ -828,164 +906,184 @@ export function ClientProjectsTab({
                 </div>
               )}
 
-              {/* TAB 2: CONTATO DO CLIENTE */}
+              {/* TAB 2: INFORMAÇÕES DO CLIENTE */}
               {activeFormTab === 'contato' && (
-                <div className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                  <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-2">
-                    <Icon icon={MailActionIcon} size={16} />
-                    <span>Informações de Contato do Cliente</span>
-                  </h4>
+                <div className="space-y-6">
+                  {/* DADOS DE CONTATO */}
+                  <div className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-2">
+                      <Icon icon={MailActionIcon} size={16} />
+                      <span>Informações de Contato do Cliente</span>
+                    </h4>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block font-bold mb-1">Nome do Contato Principal</label>
-                      <input
-                        type="text"
-                        value={editingProject.client_contact_json?.contact_name || ''}
-                        onChange={(e) =>
-                          setEditingProject({
-                            ...editingProject,
-                            client_contact_json: {
-                              ...editingProject.client_contact_json,
-                              contact_name: e.target.value,
-                            },
-                          })
-                        }
-                        placeholder="Ex: Mariana Lima"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                      />
-                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block font-bold mb-1">Nome do Contato Principal *</label>
+                        <input
+                          type="text"
+                          value={editingProject.client_contact_json?.contact_name || editingProject.client_name || ''}
+                          onChange={(e) =>
+                            setEditingProject({
+                              ...editingProject,
+                              client_contact_json: {
+                                ...editingProject.client_contact_json,
+                                contact_name: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="Ex: Mariana Lima"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block font-bold mb-1">Empresa</label>
-                      <input
-                        type="text"
-                        value={editingProject.company || ''}
-                        onChange={(e) => setEditingProject({ ...editingProject, company: e.target.value })}
-                        placeholder="Ex: Decor Studio"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold mb-1">E-mail de Contato</label>
-                      <input
-                        type="email"
-                        value={editingProject.client_contact_json?.email || editingProject.email || ''}
-                        onChange={(e) =>
-                          setEditingProject({
-                            ...editingProject,
-                            email: e.target.value,
-                            client_contact_json: {
-                              ...editingProject.client_contact_json,
+                      <div>
+                        <label className="block font-bold mb-1">E-mail de Contato *</label>
+                        <input
+                          type="email"
+                          value={editingProject.client_contact_json?.email || editingProject.email || ''}
+                          onChange={(e) =>
+                            setEditingProject({
+                              ...editingProject,
                               email: e.target.value,
-                            },
-                          })
-                        }
-                        placeholder="cliente@empresa.com.br"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                      />
-                    </div>
+                              client_contact_json: {
+                                ...editingProject.client_contact_json,
+                                email: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="cliente@empresa.com.br"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block font-bold mb-1">Telefone Fixo / Comercial</label>
-                      <input
-                        type="text"
-                        value={editingProject.client_contact_json?.phone || editingProject.phone || ''}
-                        onChange={(e) =>
-                          setEditingProject({
-                            ...editingProject,
-                            phone: e.target.value,
-                            client_contact_json: {
-                              ...editingProject.client_contact_json,
+                      <div>
+                        <label className="block font-bold mb-1">Telefone/WhatsApp *</label>
+                        <input
+                          type="text"
+                          value={editingProject.client_contact_json?.phone || editingProject.phone || editingProject.whatsapp || ''}
+                          onChange={(e) =>
+                            setEditingProject({
+                              ...editingProject,
                               phone: e.target.value,
-                            },
-                          })
-                        }
-                        placeholder="(11) 3333-4444"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold mb-1">WhatsApp de Contato</label>
-                      <input
-                        type="text"
-                        value={editingProject.client_contact_json?.whatsapp || editingProject.whatsapp || ''}
-                        onChange={(e) =>
-                          setEditingProject({
-                            ...editingProject,
-                            whatsapp: e.target.value,
-                            client_contact_json: {
-                              ...editingProject.client_contact_json,
                               whatsapp: e.target.value,
-                            },
-                          })
-                        }
-                        placeholder="(11) 98888-7777"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold mb-1">Cargo do Contato</label>
-                      <input
-                        type="text"
-                        value={editingProject.client_contact_json?.role || ''}
-                        onChange={(e) =>
-                          setEditingProject({
-                            ...editingProject,
-                            client_contact_json: {
-                              ...editingProject.client_contact_json,
-                              role: e.target.value,
-                            },
-                          })
-                        }
-                        placeholder="Ex: Gerente de Marketing"
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-bold mb-1">Canal Preferencial</label>
-                      <select
-                        value={editingProject.client_contact_json?.preferred_channel || 'WhatsApp'}
-                        onChange={(e) =>
-                          setEditingProject({
-                            ...editingProject,
-                            client_contact_json: {
-                              ...editingProject.client_contact_json,
-                              preferred_channel: e.target.value,
-                            },
-                          })
-                        }
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                      >
-                        <option value="WhatsApp">WhatsApp</option>
-                        <option value="E-mail">E-mail</option>
-                        <option value="Reunião Online (Google Meet)">Reunião Online (Google Meet)</option>
-                        <option value="Telefone">Telefone</option>
-                      </select>
+                              client_contact_json: {
+                                ...editingProject.client_contact_json,
+                                phone: e.target.value,
+                                whatsapp: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="(11) 98888-7777"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block font-bold mb-1">Observações do Contato</label>
-                    <textarea
-                      rows={3}
-                      value={editingProject.client_contact_json?.contact_notes || ''}
-                      onChange={(e) =>
-                        setEditingProject({
-                          ...editingProject,
-                          client_contact_json: {
-                            ...editingProject.client_contact_json,
-                            contact_notes: e.target.value,
-                          },
-                        })
-                      }
-                      placeholder="Horários preferenciais para reuniões, observações..."
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                    />
+                  {/* ENDEREÇO DO CLIENTE */}
+                  <div className="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                    <h4 className="font-bold text-sm text-[#0075FF] flex items-center gap-2">
+                      <Icon icon={ProjectsNavIcon} size={16} />
+                      <span>Endereço Completo do Cliente</span>
+                    </h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div>
+                        <label className="block font-bold mb-1">CEP *</label>
+                        <input
+                          type="text"
+                          value={editingProject.client_contact_json?.cep || ''}
+                          onChange={(e) =>
+                            setEditingProject({
+                              ...editingProject,
+                              client_contact_json: {
+                                ...editingProject.client_contact_json,
+                                cep: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="00000-000"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-mono"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2 lg:col-span-3">
+                        <label className="block font-bold mb-1">Logradouro / Endereço (Rua e Número) *</label>
+                        <input
+                          type="text"
+                          value={editingProject.client_contact_json?.street || ''}
+                          onChange={(e) =>
+                            setEditingProject({
+                              ...editingProject,
+                              client_contact_json: {
+                                ...editingProject.client_contact_json,
+                                street: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="Ex: Av. Paulista, 1000, Sala 42"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold mb-1">Bairro *</label>
+                        <input
+                          type="text"
+                          value={editingProject.client_contact_json?.neighborhood || ''}
+                          onChange={(e) =>
+                            setEditingProject({
+                              ...editingProject,
+                              client_contact_json: {
+                                ...editingProject.client_contact_json,
+                                neighborhood: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="Ex: Bela Vista"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold mb-1">Cidade *</label>
+                        <input
+                          type="text"
+                          value={editingProject.client_contact_json?.city || ''}
+                          onChange={(e) =>
+                            setEditingProject({
+                              ...editingProject,
+                              client_contact_json: {
+                                ...editingProject.client_contact_json,
+                                city: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="Ex: São Paulo"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold mb-1">Estado (UF) *</label>
+                        <input
+                          type="text"
+                          maxLength={2}
+                          value={editingProject.client_contact_json?.state || ''}
+                          onChange={(e) =>
+                            setEditingProject({
+                              ...editingProject,
+                              client_contact_json: {
+                                ...editingProject.client_contact_json,
+                                state: e.target.value.toUpperCase(),
+                              },
+                            })
+                          }
+                          placeholder="SP"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-mono uppercase"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1383,7 +1481,7 @@ export function ClientProjectsTab({
                   </div>
 
                   <div>
-                    <label className="block font-bold mb-1">Prazo Final Prometido ao Cliente</label>
+                    <label className="block font-bold mb-1">Prazo Final Prometido ao Cliente *</label>
                     <input
                       type="date"
                       value={editingProject.deadline || ''}
