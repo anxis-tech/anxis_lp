@@ -13,7 +13,6 @@ import {
   EditActionIcon,
   DeleteActionIcon,
   ViewActionIcon,
-  DuplicateActionIcon,
   SearchActionIcon,
   CancelActionIcon,
 } from '@/lib/icons/actions'
@@ -63,21 +62,6 @@ export function QuotesTab({
 
     return matchesSearch && matchesStatus && matchesType
   })
-
-  // Duplicate quote handler
-  const handleDuplicateQuote = async (quote: SavedQuote) => {
-    const duplicated: SavedQuote = {
-      ...quote,
-      id: `q-${Date.now()}`,
-      project_name: `${quote.project_name} (Cópia)`,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }
-
-    await saveQuoteAction(duplicated)
-    onUpdateQuotes([duplicated, ...quotes])
-    alert('Orçamento duplicado com sucesso!')
-  }
 
   // Delete quote handler
   const handleDeleteQuote = async (quoteId: string, projectName: string) => {
@@ -250,14 +234,14 @@ export function QuotesTab({
                         <Icon icon={EditActionIcon} size={16} />
                       </button>
 
-                      {/* DUPLICAR */}
+                      {/* TRANSFORMAR EM PROJETO */}
                       <button
                         type="button"
-                        onClick={() => handleDuplicateQuote(quote)}
-                        className="p-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
-                        title="Duplicar Orçamento"
+                        onClick={() => onConvertToProject(quote)}
+                        className="p-1.5 rounded-lg bg-blue-50 text-[#0075FF] hover:bg-[#0075FF] hover:text-white transition-colors cursor-pointer"
+                        title="Transformar em Projeto (Cadastrar Projeto)"
                       >
-                        <Icon icon={DuplicateActionIcon} size={16} />
+                        <Icon icon={AddActionIcon} size={16} />
                       </button>
 
                       {/* EXCLUIR */}

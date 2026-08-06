@@ -13,6 +13,7 @@ import {
   More01Icon,
   CreditCardIcon,
   MailSend01Icon,
+  ArrowDown01Icon,
 } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 
@@ -243,32 +244,38 @@ export function DashboardOverviewTab({
               <p className="text-xs text-slate-500">Acompanhamento das entregas e contratos mais recentes.</p>
             </div>
 
-            {/* FILTROS LIMPOS COM ESPAÇAMENTO CONFORTÁVEL DA BORDAS */}
+            {/* FILTROS LIMPOS COM ESPAÇAMENTO CONFORTÁVEL DAS BORDAS */}
             <div className="flex items-center gap-2">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-4 pr-9 py-2 rounded-full border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0075FF] cursor-pointer transition-all shadow-sm"
-              >
-                <option value="todos">Status: Todos</option>
-                <option value="Novo projeto">Novo projeto</option>
-                <option value="Em desenvolvimento">Em desenvolvimento</option>
-                <option value="Aguardando revisão">Aguardando revisão</option>
-                <option value="Concluído">Concluído</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="pl-4 pr-9 py-2 rounded-full border border-slate-200 text-xs font-extrabold bg-slate-50 text-[#0C1D36] appearance-none outline-none focus:border-[#0075FF] cursor-pointer transition-all shadow-sm"
+                >
+                  <option value="todos">Status: Todos</option>
+                  <option value="Novo projeto">Novo projeto</option>
+                  <option value="Em desenvolvimento">Em desenvolvimento</option>
+                  <option value="Aguardando revisão">Aguardando revisão</option>
+                  <option value="Concluído">Concluído</option>
+                </select>
+                <HugeiconsIcon icon={ArrowDown01Icon} className="w-3.5 h-3.5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#0C1D36] pointer-events-none" strokeWidth={1.5} />
+              </div>
 
-              <select
-                value={responsibleFilter}
-                onChange={(e) => setResponsibleFilter(e.target.value)}
-                className="pl-4 pr-9 py-2 rounded-full border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0075FF] cursor-pointer transition-all shadow-sm"
-              >
-                <option value="todos">Responsável: Todos</option>
-                {uniqueResponsibles.map((resp) => (
-                  <option key={resp} value={resp}>
-                    {resp}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={responsibleFilter}
+                  onChange={(e) => setResponsibleFilter(e.target.value)}
+                  className="pl-4 pr-9 py-2 rounded-full border border-slate-200 text-xs font-extrabold bg-slate-50 text-[#0C1D36] appearance-none outline-none focus:border-[#0075FF] cursor-pointer transition-all shadow-sm"
+                >
+                  <option value="todos">Responsável: Todos</option>
+                  {uniqueResponsibles.map((resp) => (
+                    <option key={resp} value={resp}>
+                      {resp}
+                    </option>
+                  ))}
+                </select>
+                <HugeiconsIcon icon={ArrowDown01Icon} className="w-3.5 h-3.5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#0C1D36] pointer-events-none" strokeWidth={1.5} />
+              </div>
             </div>
           </div>
 
