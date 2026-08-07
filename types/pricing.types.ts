@@ -30,6 +30,7 @@ export interface QuoteFormData {
   contentOption: ContentCopyOption
   urgency: UrgencyOption
   additionalCosts: number
+  final_value?: number
   notes?: string
   paymentTerms?: string
 }
@@ -67,6 +68,7 @@ export interface SavedQuote {
   created_by_name?: string
   created_by_user_id?: string
   linked_project_id?: string
+  converted_project_id?: string
   created_at: string
   updated_at: string
 }

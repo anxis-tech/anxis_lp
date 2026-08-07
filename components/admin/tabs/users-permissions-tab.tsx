@@ -23,7 +23,7 @@ export interface PermissionItem {
   key: string
   label: string
   description: string
-  category: 'Gestão de Projetos' | 'Orçamentos' | 'Conteúdo & Website' | 'Configurações'
+  category: 'Gestão de Projetos' | 'Orçamentos' | 'Conteúdo & Website' | 'Configurações' | 'Financeiro'
 }
 
 export const TAB_PERMISSION_KEYS: PermissionItem[] = [
@@ -160,11 +160,24 @@ export const TAB_PERMISSION_KEYS: PermissionItem[] = [
     description: 'Permite alterar o rótulo organizacional do usuário (Designer, Comercial, etc.).',
     category: 'Configurações',
   },
+  // Financeiro
   {
-    key: 'users.manage_permissions',
-    label: 'Gerenciar Permissões da Equipe',
-    description: 'Permite abrir este modal e alterar permissões individuais de outros membros.',
-    category: 'Configurações',
+    key: 'finance.view',
+    label: 'Visualizar Módulo Financeiro',
+    description: 'Permite acessar a aba Financeiro no painel.',
+    category: 'Financeiro',
+  },
+  {
+    key: 'finance.view_values',
+    label: 'Visualizar Valores e Faturamento',
+    description: 'Permite ver os valores em R$ nos cards e relatórios do Financeiro.',
+    category: 'Financeiro',
+  },
+  {
+    key: 'finance.view_payments',
+    label: 'Visualizar Tabela de Pagamentos',
+    description: 'Permite consultar o histórico detalhado de transações financeiras.',
+    category: 'Financeiro',
   },
 ]
 

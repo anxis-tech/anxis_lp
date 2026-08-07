@@ -43,6 +43,11 @@ export const PERMISSIONS = {
 
   // Auditoria
   AUDIT_VIEW: 'audit.view',
+
+  // Financeiro
+  FINANCE_VIEW: 'finance.view',
+  FINANCE_VIEW_VALUES: 'finance.view_values',
+  FINANCE_VIEW_PAYMENTS: 'finance.view_payments',
 } as const
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]

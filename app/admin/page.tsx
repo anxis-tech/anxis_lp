@@ -20,6 +20,7 @@ import { KanbanBoardTab } from '@/components/admin/tabs/kanban-board-tab'
 import { PricingCalculatorTab } from '@/components/admin/tabs/pricing-calculator-tab'
 import { QuotesTab } from '@/components/admin/tabs/quotes-tab'
 import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-tab'
+import { FinanceTab } from '@/components/admin/tabs/finance-tab'
 import { saveClientProjectAction, deleteClientProjectAction } from '@/lib/actions/client-projects'
 import { getContractByProjectId, downloadContractAction } from '@/lib/actions/contracts'
 import { Contract } from '@/types/contract.types'
@@ -73,6 +74,8 @@ export default function AdminDashboardPage() {
   const [clientProjects, setClientProjects] = useState<ClientProject[]>([])
   const [savedQuotes, setSavedQuotes] = useState<SavedQuote[]>([])
   const [teamUsers, setTeamUsers] = useState<UserProfileWithRole[]>([])
+  const [paymentsList, setPaymentsList] = useState<Payment[]>([])
+  const [contractsList, setContractsList] = useState<Contract[]>([])
   const [calculatorInitialData, setCalculatorInitialData] = useState<QuoteFormData | undefined>()
 
   // Project Modal & Detail Drawer State
@@ -235,22 +238,28 @@ export default function AdminDashboardPage() {
         return
       }
 
-      // Fetch live home projects, client projects & saved quotes from Supabase DB
+      // Fetch live home projects, client projects, saved quotes, payments & contracts from Supabase DB
       const [
         { data: pData },
         { data: cpData },
         { data: qData },
-        { data: teamData }
+        { data: teamData },
+        { data: paymentsData },
+        { data: contractsData }
       ] = await Promise.all([
         supabase.from('projects').select('*').order('display_order', { ascending: true }),
         supabase.from('client_projects').select('*').order('updated_at', { ascending: false }),
         supabase.from('quotes').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('*, roles(slug)').eq('is_active', true).order('full_name', { ascending: true }),
+        supabase.from('payments').select('*').order('created_at', { ascending: false }),
+        supabase.from('contracts').select('*').order('created_at', { ascending: false }),
       ])
 
       setHomeProjects(pData || [])
       setClientProjects((cpData as any) || [])
       setSavedQuotes((qData as any) || [])
+      setPaymentsList((paymentsData as any) || [])
+      setContractsList((contractsData as any) || [])
 
       // Map team users for the responsible user selector
       if (teamData && teamData.length > 0) {
@@ -394,6 +403,17 @@ export default function AdminDashboardPage() {
           label: 'Portfólio',
           icon: Globe02Icon,
           allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_VIEW),
+        },
+      ],
+    },
+    {
+      title: 'Financeiro',
+      items: [
+        {
+          id: 'finance_overview',
+          label: 'Financeiro',
+          icon: Dollar01Icon,
+          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.FINANCE_VIEW),
         },
       ],
     },
@@ -706,6 +726,24 @@ export default function AdminDashboardPage() {
                   canManagePermissions={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_PERMISSIONS)}
                   onProfilePermissionsUpdated={() => {
                     initAdminSession()
+                  }}
+                />
+              )}
+
+              {/* TAB 7: MÓDULO FINANCEIRO */}
+              {activeTab === 'finance_overview' && (
+                <FinanceTab
+                  projects={clientProjects}
+                  quotes={savedQuotes}
+                  contracts={contractsList}
+                  payments={paymentsList}
+                  teamUsers={teamUsers}
+                  userProfile={userProfile}
+                  canViewValues={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.FINANCE_VIEW_VALUES)}
+                  canViewPayments={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.FINANCE_VIEW_PAYMENTS)}
+                  onOpenProjectDetail={(p) => {
+                    setSelectedDetailProject(p)
+                    setDrawerTab('geral')
                   }}
                 />
               )}
