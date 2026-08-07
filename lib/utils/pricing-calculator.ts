@@ -15,7 +15,6 @@ export const DEFAULT_PRICING_CONFIG: PricingConfig = {
   blogModuleRate: 1200,
   urgencyMultipliers: {
     'Sem urgência': 1.0,
-    'Prazo normal': 1.0,
     'Urgente': 1.3,
     'Prioridade máxima': 1.6,
   },

@@ -22,7 +22,6 @@ export type ContentCopyOption = typeof CONTENT_COPY_OPTIONS[number]
 
 export const URGENCY_OPTIONS = [
   'Sem urgência',
-  'Prazo normal',
   'Urgente',
   'Prioridade máxima',
 ] as const

@@ -92,7 +92,7 @@ export function PricingCalculatorTab({
       hasCustomCode: false,
       hasBlogModule: false,
       contentOption: 'Cliente fornecerá todo o conteúdo',
-      urgency: 'Prazo normal',
+      urgency: 'Sem urgência',
       additionalCosts: 0,
       taxPercent: 8,
       notes: '',
