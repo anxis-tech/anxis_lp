@@ -339,17 +339,7 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
           {/* PAGE RATES & FEATURE RATES */}
           <div className="space-y-2 pt-4 border-t border-white/10">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Métricas de Páginas & Taxas Adicionais (R$)</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Valor p/ Página Padrão (R$)</label>
-                <input
-                  type="number"
-                  value={pricingConfig.perPageRate}
-                  onChange={(e) => setPricingConfig({ ...pricingConfig, perPageRate: Number(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none"
-                />
-              </div>
-
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
               <div>
                 <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Valor p/ Página Adicional (R$)</label>
                 <input
@@ -376,6 +366,114 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                   type="number"
                   value={pricingConfig.blogModuleRate}
                   onChange={(e) => setPricingConfig({ ...pricingConfig, blogModuleRate: Number(e.target.value) })}
+                  className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* CONTENT & COPY RATES */}
+          <div className="space-y-2 pt-4 border-t border-white/10">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Taxas de Conteúdo & Copy (R$)</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+              {CONTENT_COPY_OPTIONS.map((opt) => (
+                <div key={opt}>
+                  <label className="text-[10px] text-slate-400 block mb-1 font-semibold truncate" title={opt}>{opt}</label>
+                  <input
+                    type="number"
+                    value={pricingConfig.contentRates[opt] ?? 0}
+                    onChange={(e) =>
+                      setPricingConfig((prev) => ({
+                        ...prev,
+                        contentRates: {
+                          ...prev.contentRates,
+                          [opt]: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none focus:border-[#0075FF]"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* COMPLEXITY MULTIPLIERS */}
+          <div className="space-y-2 pt-4 border-t border-white/10">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Multiplicadores de Complexidade (x)</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+              {['Simples', 'Intermediária', 'Avançada', 'Personalizada'].map((comp) => (
+                <div key={comp}>
+                  <label className="text-[10px] text-slate-400 block mb-1 font-semibold">{comp}</label>
+                  <input
+                    type="number"
+                    step="0.05"
+                    value={pricingConfig.complexityMultipliers[comp] ?? 1.0}
+                    onChange={(e) =>
+                      setPricingConfig((prev) => ({
+                        ...prev,
+                        complexityMultipliers: {
+                          ...prev.complexityMultipliers,
+                          [comp]: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none focus:border-[#0075FF]"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* URGENCY MULTIPLIERS */}
+          <div className="space-y-2 pt-4 border-t border-white/10">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Multiplicadores de Urgência (x)</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+              {URGENCY_OPTIONS.map((urg) => (
+                <div key={urg}>
+                  <label className="text-[10px] text-slate-400 block mb-1 font-semibold truncate" title={urg}>{urg}</label>
+                  <input
+                    type="number"
+                    step="0.05"
+                    value={pricingConfig.urgencyMultipliers[urg] ?? 1.0}
+                    onChange={(e) =>
+                      setPricingConfig((prev) => ({
+                        ...prev,
+                        urgencyMultipliers: {
+                          ...prev.urgencyMultipliers,
+                          [urg]: Number(e.target.value),
+                        },
+                      }))
+                    }
+                    className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none focus:border-[#0075FF]"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* TAXES & MARGIN */}
+          <div className="space-y-2 pt-4 border-t border-white/10">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Impostos & Limite de Desconto (%)</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Taxa de Impostos Padrão (%)</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={pricingConfig.taxPercent}
+                  onChange={(e) => setPricingConfig({ ...pricingConfig, taxPercent: Number(e.target.value) })}
+                  className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Desconto Máximo Permitido (%)</label>
+                <input
+                  type="number"
+                  step="1"
+                  value={pricingConfig.maxDiscountPercent}
+                  onChange={(e) => setPricingConfig({ ...pricingConfig, maxDiscountPercent: Number(e.target.value) })}
                   className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none"
                 />
               </div>
@@ -419,12 +517,12 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               </div>
 
               <div>
-                <label className="block text-slate-600 font-bold mb-1">Nome do Projeto *</label>
+                <label className="block text-slate-600 font-bold mb-1">Nome Identificador do Projeto *</label>
                 <input
                   type="text"
                   value={formData.projectName}
                   onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
-                  placeholder="Ex: Redesign E-commerce Iluminação"
+                  placeholder="Ex: Redesenho do Site Institucional"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#0C1D36]"
                 />
               </div>
@@ -433,12 +531,18 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                 <label className="block text-slate-600 font-bold mb-1">Tipo de Projeto *</label>
                 <select
                   value={formData.projectType}
-                  onChange={(e) => handleProjectTypeChange(e.target.value as StrictProjectType)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-extrabold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      projectType: e.target.value as StrictProjectType,
+                      pageCount: e.target.value === 'Site institucional' ? 5 : 1,
+                    })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
                 >
-                  {STRICT_PROJECT_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  {STRICT_PROJECT_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
                     </option>
                   ))}
                 </select>
@@ -446,94 +550,50 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
             </div>
           </div>
 
-          {/* ETAPA 2: ESTRUTURA, PÁGINAS E CHECKBOXES */}
+          {/* ETAPA 2: MÉTRICAS E MÓDULOS */}
           <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
             <h3 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2 border-b border-slate-100 pb-3">
               <span className="w-6 h-6 rounded-full bg-[#0C1D36] text-white flex items-center justify-center text-xs">2</span>
-              <span>Estrutura, Páginas & Recursos Especiais</span>
+              <span>Métricas de Páginas & Funcionalidades</span>
             </h3>
 
-            {/* PÁGINAS PADRÃO (OCULTO PARA LOJA VIRTUAL, BLOG E INTEGRAÇÃO) & ADICIONAIS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-              {!isLojaVirtual && !isBlog && !isIntegracao ? (
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-slate-600 font-bold">Páginas Padrão</label>
-                    {isPageCountDisabled && (
-                      <span className="text-[10px] text-slate-400 flex items-center gap-1 font-semibold">
-                        <Icon icon={LockActionIcon} size={12} className="text-amber-500" />
-                        <span>Fixo para {formData.projectType}</span>
-                      </span>
-                    )}
-                  </div>
-                  <input
-                    type="number"
-                    disabled={isPageCountDisabled}
-                    value={formData.pageCount}
-                    onChange={(e) =>
-                      setFormData({ ...formData, pageCount: Math.max(1, Number(e.target.value)) })
-                    }
-                    className={cn(
-                      'w-full px-3.5 py-2.5 rounded-xl border text-xs font-extrabold outline-none',
-                      isPageCountDisabled
-                        ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
-                        : 'bg-white border-slate-200 text-[#0C1D36] focus:border-[#0C1D36]'
-                    )}
-                  />
-                </div>
-              ) : isLojaVirtual ? (
-                <div className="bg-blue-50/90 border border-blue-200 p-3.5 rounded-2xl text-blue-900 text-xs font-medium space-y-1">
-                  <div className="font-extrabold flex items-center gap-1.5 text-[#0075FF]">
-                    <Icon icon={PortfolioNavIcon} size={16} />
-                    <span>Loja Virtual Selecionada</span>
-                  </div>
-                  <p className="text-[11px] leading-relaxed text-blue-800">
-                    Páginas padrão inclusas: <strong>Home, Página de Produto Único, Páginas de Categorias, Painel do Usuário e Painel Administrativo</strong>.
-                  </p>
-                </div>
-              ) : isBlog ? (
-                <div className="bg-purple-50/90 border border-purple-200 p-3.5 rounded-2xl text-purple-900 text-xs font-medium space-y-1">
-                  <div className="font-extrabold flex items-center gap-1.5 text-purple-700">
-                    <Icon icon={MetricQuoteIcon} size={16} />
-                    <span>Blog Selecionado</span>
-                  </div>
-                  <p className="text-[11px] leading-relaxed text-purple-800">
-                    Páginas padrão inclusas: <strong>Home, Página do Artigo, Páginas de Categorias e Painel Administrativo de Conteúdo</strong>.
-                  </p>
-                </div>
-              ) : (
-                <div className="bg-emerald-50/90 border border-emerald-200 p-3.5 rounded-2xl text-emerald-900 text-xs font-medium space-y-1">
-                  <div className="font-extrabold flex items-center gap-1.5 text-emerald-700">
-                    <Icon icon={ConfigActionIcon} size={16} />
-                    <span>Integração ou Funcionalidade Selecionada</span>
-                  </div>
-                  <p className="text-[11px] leading-relaxed text-emerald-800">
-                    Projeto sem estrutura de páginas padrão (conectores API, módulos ou recursos sob medida). Telas adicionais podem ser inseridas em &quot;Páginas adicionais&quot;.
-                  </p>
-                </div>
-              )}
-
-              {/* PÁGINAS ADICIONAIS */}
+              {/* QUANTIDADE DE PÁGINAS ADICIONAIS */}
               <div>
-                <label className="block text-slate-600 font-bold mb-1">Páginas Adicionais</label>
+                <label className="block text-slate-600 font-bold mb-1">Páginas Adicionais (Extra)</label>
                 <input
                   type="number"
                   min={0}
                   value={formData.additionalPageCount}
-                  onChange={(e) =>
-                    setFormData({ ...formData, additionalPageCount: Math.max(0, Number(e.target.value)) })
-                  }
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-extrabold bg-white text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+                  onChange={(e) => setFormData({ ...formData, additionalPageCount: Math.max(0, Number(e.target.value)) })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#0C1D36]"
                 />
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  As páginas padrão do projeto já estão inclusas no valor base.
+                </span>
+              </div>
+
+              {/* COMPLEXIDADE */}
+              <div>
+                <label className="block text-slate-600 font-bold mb-1">Nível de Complexidade *</label>
+                <select
+                  value={formData.complexity}
+                  onChange={(e) => setFormData({ ...formData, complexity: e.target.value as any })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+                >
+                  <option value="Simples">Simples (x{pricingConfig.complexityMultipliers['Simples'] || 1.0})</option>
+                  <option value="Intermediária">Intermediária (x{pricingConfig.complexityMultipliers['Intermediária'] || 1.25})</option>
+                  <option value="Avançada">Avançada (x{pricingConfig.complexityMultipliers['Avançada'] || 1.5})</option>
+                  <option value="Personalizada">Personalizada (x{pricingConfig.complexityMultipliers['Personalizada'] || 2.0})</option>
+                </select>
               </div>
             </div>
 
-            {/* CHECKBOXES DA ETAPA 2 (DESENVOLVIMENTO EM CÓDIGO & MÓDULO BLOG) */}
+            {/* CHECKBOXES DE RECURSOS */}
             <div className="pt-3 border-t border-slate-100 space-y-3">
-              <label className="block text-slate-600 font-bold text-xs">Recursos Avançados Adicionais</label>
-              
+              <span className="block text-xs font-bold text-slate-700">Recursos Especiais & Módulos</span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* CHECKBOX 1: DESENVOLVIMENTO PERSONALIZADO EM CÓDIGO */}
+                {/* CHECKBOX 1: CÓDIGO PERSONALIZADO */}
                 <label className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-slate-100/80 transition-colors">
                   <input
                     type="checkbox"
@@ -542,8 +602,8 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                     className="w-4 h-4 rounded text-[#0075FF] focus:ring-[#0075FF]"
                   />
                   <div>
-                    <span className="font-extrabold text-xs text-[#0C1D36] block">Desenvolvimento personalizado em código</span>
-                    <span className="text-[10px] text-slate-500">Programação sob medida e componentes avançados</span>
+                    <span className="font-extrabold text-xs text-[#0C1D36] block">Desenvolvimento em Código Personalizado</span>
+                    <span className="text-[10px] text-slate-500">Recursos avançados fora de CMS padrão</span>
                   </div>
                 </label>
 
@@ -584,7 +644,7 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                 >
                   {CONTENT_COPY_OPTIONS.map((opt) => (
                     <option key={opt} value={opt}>
-                      {opt}
+                      {opt} {pricingConfig.contentRates[opt] ? `(+ R$ ${pricingConfig.contentRates[opt]})` : ''}
                     </option>
                   ))}
                 </select>
@@ -600,7 +660,7 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                 >
                   {URGENCY_OPTIONS.map((urg) => (
                     <option key={urg} value={urg}>
-                      {urg}
+                      {urg} (x{pricingConfig.urgencyMultipliers[urg] || 1.0})
                     </option>
                   ))}
                 </select>
@@ -619,32 +679,21 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               <h3 className="text-xl font-extrabold text-white mt-1">
                 {breakdown.finalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </h3>
-              <p className="text-[11px] text-slate-300 mt-0.5 font-medium">
-                {formData.projectType} • {isLojaVirtual ? 'Loja Virtual' : `${formData.pageCount} pág.`}
-              </p>
             </div>
 
             {/* BREAKDOWN ITEMS */}
             <div className="space-y-2 text-xs text-slate-300">
               <div className="flex justify-between">
-                <span>Taxa Base do Projeto:</span>
+                <span>{formData.projectType}:</span>
                 <span className="font-bold text-white">
                   R$ {breakdown.baseValue.toLocaleString('pt-BR')}
                 </span>
               </div>
-              {!isLojaVirtual && (
-                <div className="flex justify-between">
-                  <span>Páginas Padrão ({formData.pageCount}):</span>
-                  <span className="font-bold text-white">
-                    R$ {breakdown.pagesValue.toLocaleString('pt-BR')}
-                  </span>
-                </div>
-              )}
               {formData.additionalPageCount > 0 && (
                 <div className="flex justify-between">
                   <span>Páginas Adicionais ({formData.additionalPageCount}):</span>
                   <span className="font-bold text-white">
-                    R$ {breakdown.additionalPagesValue.toLocaleString('pt-BR')}
+                    + R$ {breakdown.additionalPagesValue.toLocaleString('pt-BR')}
                   </span>
                 </div>
               )}
@@ -660,16 +709,36 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                   <span>+ R$ {breakdown.blogModuleValue.toLocaleString('pt-BR')}</span>
                 </div>
               )}
-              <div className="flex justify-between">
-                <span>Conteúdo & Copy:</span>
-                <span className="font-bold text-white">
-                  R$ {breakdown.contentValue.toLocaleString('pt-BR')}
-                </span>
-              </div>
+              {breakdown.contentValue > 0 && (
+                <div className="flex justify-between text-slate-200">
+                  <span>Conteúdo & Copy:</span>
+                  <span className="font-bold text-white">
+                    + R$ {breakdown.contentValue.toLocaleString('pt-BR')}
+                  </span>
+                </div>
+              )}
+              {breakdown.complexityMultiplier !== 1.0 && (
+                <div className="flex justify-between text-purple-300 font-semibold">
+                  <span>Complexidade ({formData.complexity}):</span>
+                  <span>x{breakdown.complexityMultiplier.toString().replace('.', ',')}</span>
+                </div>
+              )}
+              {breakdown.urgencyMultiplier !== 1.0 && (
+                <div className="flex justify-between text-amber-300 font-semibold">
+                  <span>Urgência ({formData.urgency}):</span>
+                  <span>x{breakdown.urgencyMultiplier.toString().replace('.', ',')}</span>
+                </div>
+              )}
               <div className="flex justify-between pt-2 border-t border-white/10 font-bold text-white">
                 <span>Subtotal:</span>
                 <span>R$ {breakdown.subtotal.toLocaleString('pt-BR')}</span>
               </div>
+              {breakdown.taxes > 0 && (
+                <div className="flex justify-between text-slate-400">
+                  <span>Impostos ({formData.taxPercent || pricingConfig.taxPercent || 8}%):</span>
+                  <span>+ R$ {breakdown.taxes.toLocaleString('pt-BR')}</span>
+                </div>
+              )}
               {breakdown.discount > 0 && (
                 <div className="flex justify-between text-emerald-400 font-bold">
                   <span>Desconto:</span>
