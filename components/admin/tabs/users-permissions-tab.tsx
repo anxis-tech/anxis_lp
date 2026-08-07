@@ -596,7 +596,7 @@ export function UsersPermissionsTab({
 
             {/* PERMISSION CATEGORIES AND SWITCHES */}
             <div className="space-y-5 overflow-y-auto pr-1 text-xs flex-1">
-              {(['Gestão de Projetos', 'Orçamentos', 'Conteúdo & Website', 'Configurações'] as const).map((cat) => {
+              {(['Gestão de Projetos', 'Orçamentos', 'Conteúdo & Website', 'Financeiro', 'Configurações'] as const).map((cat) => {
                 const catKeys = TAB_PERMISSION_KEYS.filter((k) => k.category === cat)
                 if (catKeys.length === 0) return null
 
