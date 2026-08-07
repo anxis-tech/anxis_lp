@@ -38,7 +38,7 @@ export const QUOTE_STATUSES = [
   'Convertido em Projeto',
 ] as const
 
-export type QuoteStatus = typeof QUOTE_STATUSES[number]
+export type QuoteStatus = typeof QUOTE_STATUSES[number] | (string & {})
 
 export const quoteFormSchema = z.object({
   clientName: z.string().min(1, 'Nome do cliente é obrigatório'),

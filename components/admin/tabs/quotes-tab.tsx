@@ -234,15 +234,17 @@ export function QuotesTab({
                         <Icon icon={EditActionIcon} size={16} />
                       </button>
 
-                      {/* TRANSFORMAR EM PROJETO */}
-                      <button
-                        type="button"
-                        onClick={() => onConvertToProject(quote)}
-                        className="p-1.5 rounded-lg bg-blue-50 text-[#0075FF] hover:bg-[#0075FF] hover:text-white transition-colors cursor-pointer"
-                        title="Transformar em Projeto (Cadastrar Projeto)"
-                      >
-                        <Icon icon={AddActionIcon} size={16} />
-                      </button>
+                      {/* TRANSFORMAR EM PROJETO (Oculto se já for Convertido em projeto) */}
+                      {quote.status !== 'Convertido em Projeto' && quote.status !== 'Convertido em projeto' && (
+                        <button
+                          type="button"
+                          onClick={() => onConvertToProject(quote)}
+                          className="p-1.5 rounded-lg bg-blue-50 text-[#0075FF] hover:bg-[#0075FF] hover:text-white transition-colors cursor-pointer"
+                          title="Transformar em Projeto (Cadastrar Projeto)"
+                        >
+                          <Icon icon={AddActionIcon} size={16} />
+                        </button>
+                      )}
 
                       {/* EXCLUIR */}
                       <button
@@ -305,13 +307,15 @@ export function QuotesTab({
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => onConvertToProject(selectedQuoteDetail)}
-                className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md"
-              >
-                Converter em Projeto no Kanban
-              </button>
+              {selectedQuoteDetail.status !== 'Convertido em Projeto' && selectedQuoteDetail.status !== 'Convertido em projeto' && (
+                <button
+                  type="button"
+                  onClick={() => onConvertToProject(selectedQuoteDetail)}
+                  className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-md cursor-pointer"
+                >
+                  Converter em Projeto no Kanban
+                </button>
+              )}
             </div>
           </div>
         </div>

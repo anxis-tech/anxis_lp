@@ -738,9 +738,16 @@ export default function AdminDashboardPage() {
                       <span className="text-slate-500 block">E-mail:</span>
                       <span className="font-bold font-mono">{selectedDetailProject.client_contact_json?.email || selectedDetailProject.email || 'N/A'}</span>
                     </div>
-                    <div>
-                      <span className="text-slate-500 block">WhatsApp:</span>
-                      <span className="font-bold">{selectedDetailProject.client_contact_json?.whatsapp || selectedDetailProject.whatsapp || 'N/A'}</span>
+                    <div className="col-span-2 pt-2 border-t border-slate-200">
+                      <span className="text-slate-500 block mb-1 font-bold text-[#0075FF]">Endereço Completo do Cliente:</span>
+                      <p className="font-semibold text-slate-700 bg-white p-3 rounded-xl border border-slate-200">
+                        {selectedDetailProject.client_contact_json?.street || 'N/A'}
+                        {selectedDetailProject.client_contact_json?.number ? `, nº ${selectedDetailProject.client_contact_json.number}` : ''}
+                        {selectedDetailProject.client_contact_json?.neighborhood ? ` — Bairro ${selectedDetailProject.client_contact_json.neighborhood}` : ''}
+                        {selectedDetailProject.client_contact_json?.city ? `, ${selectedDetailProject.client_contact_json.city}` : ''}
+                        {selectedDetailProject.client_contact_json?.state ? ` / ${selectedDetailProject.client_contact_json.state}` : ''}
+                        {selectedDetailProject.client_contact_json?.cep ? ` (CEP: ${selectedDetailProject.client_contact_json.cep})` : ''}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1080,8 +1087,8 @@ export default function AdminDashboardPage() {
                         )}
                       </div>
 
-                      {/* PAYMENT LINK ACTIONS */}
-                      {drawerPayment.payment_url && (
+                      {/* PAYMENT LINK ACTIONS (Oculto se status for Pago) */}
+                      {drawerPayment.payment_url && drawerPayment.status !== 'Pago' && (
                         <div className="pt-3 border-t border-slate-200 space-y-3">
                           <span className="font-bold text-slate-700 block">Link de Pagamento Oficial:</span>
                           <div className="flex items-center gap-2">

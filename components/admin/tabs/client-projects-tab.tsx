@@ -292,7 +292,10 @@ export function ClientProjectsTab({
       missing.push({ fieldName: 'CEP', tab: 'contato' })
     }
     if (!editingProject?.client_contact_json?.street?.trim()) {
-      missing.push({ fieldName: 'Logradouro / Endereço', tab: 'contato' })
+      missing.push({ fieldName: 'Endereço (Rua/Logradouro)', tab: 'contato' })
+    }
+    if (!editingProject?.client_contact_json?.number?.trim()) {
+      missing.push({ fieldName: 'Número', tab: 'contato' })
     }
     if (!editingProject?.client_contact_json?.neighborhood?.trim()) {
       missing.push({ fieldName: 'Bairro', tab: 'contato' })
@@ -682,8 +685,8 @@ export function ClientProjectsTab({
                     </td>
                     <td className="p-3.5 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
-                        {/* COPIAR LINK DE PAGAMENTO */}
-                        {project.payment_link && (
+                        {/* COPIAR LINK DE PAGAMENTO (Oculto se status for Pago) */}
+                        {project.payment_link && project.payment_status !== 'Pago' && (
                           <button
                             type="button"
                             onClick={() => {
@@ -1054,8 +1057,8 @@ export function ClientProjectsTab({
                         />
                       </div>
 
-                      <div className="sm:col-span-2 lg:col-span-3">
-                        <label className="block font-bold mb-1">Logradouro / Endereço (Rua e Número) *</label>
+                      <div className="sm:col-span-2 lg:col-span-2">
+                        <label className="block font-bold mb-1">Endereço (Rua/Logradouro) *</label>
                         <input
                           type="text"
                           value={editingProject.client_contact_json?.street || ''}
@@ -1068,7 +1071,26 @@ export function ClientProjectsTab({
                               },
                             })
                           }
-                          placeholder="Ex: Av. Paulista, 1000, Sala 42"
+                          placeholder="Ex: Av. Paulista"
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold mb-1">Número *</label>
+                        <input
+                          type="text"
+                          value={editingProject.client_contact_json?.number || ''}
+                          onChange={(e) =>
+                            setEditingProject({
+                              ...editingProject,
+                              client_contact_json: {
+                                ...editingProject.client_contact_json,
+                                number: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="Ex: 1000 ou S/N"
                           className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
                         />
                       </div>

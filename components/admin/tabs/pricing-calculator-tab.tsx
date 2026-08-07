@@ -65,7 +65,14 @@ export function PricingCalculatorTab({
     async function loadPricingSettings() {
       const savedConfig = await getPricingSettingsAction()
       if (savedConfig) {
-        setPricingConfig(savedConfig)
+        setPricingConfig({
+          ...DEFAULT_PRICING_CONFIG,
+          ...savedConfig,
+          baseRates: { ...DEFAULT_PRICING_CONFIG.baseRates, ...(savedConfig.baseRates || {}) },
+          complexityMultipliers: { ...DEFAULT_PRICING_CONFIG.complexityMultipliers, ...(savedConfig.complexityMultipliers || {}) },
+          urgencyMultipliers: { ...DEFAULT_PRICING_CONFIG.urgencyMultipliers, ...(savedConfig.urgencyMultipliers || {}) },
+          contentRates: { ...DEFAULT_PRICING_CONFIG.contentRates, ...(savedConfig.contentRates || {}) },
+        })
       }
     }
     loadPricingSettings()

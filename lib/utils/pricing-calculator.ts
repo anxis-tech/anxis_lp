@@ -40,18 +40,11 @@ export function calculateProjectQuote(
   form: QuoteFormData,
   config: PricingConfig = DEFAULT_PRICING_CONFIG
 ): CalculationBreakdown {
-  // 1. Base Rate
+  // 1. Base Rate (Includes standard page count for the selected project type)
   const baseValue = config.baseRates[form.projectType] || 2500
 
-  // 2. Pages Cost (Standard & Additional)
-  const isNoStandardPageType =
-    form.projectType === 'Loja virtual' ||
-    form.projectType === 'Blog' ||
-    form.projectType === 'Integração ou funcionalidade'
-
-  const actualStandardPages = isNoStandardPageType ? 0 : (form.pageCount || 0)
-
-  const pagesValue = actualStandardPages * (config.perPageRate || 350)
+  // 2. Additional Pages Cost (Standard pages are included in baseValue; only additional pages generate extra cost)
+  const pagesValue = 0 // Standard pages are part of baseValue and not charged on top
   const additionalPagesValue = (form.additionalPageCount || 0) * (config.perAdditionalPageRate || 500)
 
   // 3. Custom Code & Blog Module Fees (Step 2 Checkboxes)
@@ -65,9 +58,9 @@ export function calculateProjectQuote(
   const complexityMultiplier = config.complexityMultipliers[form.complexity] || 1.0
   const urgencyMultiplier = config.urgencyMultipliers[form.urgency] || 1.0
 
-  // 6. Raw Subtotal
+  // 6. Raw Subtotal (Base + Additional Pages + Extra Modules + Copy Content) * Multipliers
   const rawTotal =
-    (baseValue + pagesValue + additionalPagesValue + customCodeValue + blogModuleValue + contentValue) *
+    (baseValue + additionalPagesValue + customCodeValue + blogModuleValue + contentValue) *
     complexityMultiplier *
     urgencyMultiplier
 

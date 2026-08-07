@@ -74,9 +74,15 @@ export async function deleteQuoteAction(quoteId: string) {
   return { success: true, message: 'Orçamento removido.' }
 }
 
-export async function getPricingSettingsAction() {
-  const supabase = await createServerSupabase()
-  const { data, error } = await supabase
+export async function getPricingSettingsAction(): Promise<PricingConfig | null> {
+  let dbClient: any
+  try {
+    dbClient = createAdminClient()
+  } catch (err) {
+    dbClient = await createServerSupabase()
+  }
+
+  const { data, error } = await dbClient
     .from('pricing_settings')
     .select('settings_json')
     .eq('is_active', true)
@@ -84,7 +90,7 @@ export async function getPricingSettingsAction() {
     .limit(1)
     .maybeSingle()
 
-  if (error || !data) return null
+  if (error || !data || !data.settings_json) return null
   return data.settings_json as PricingConfig
 }
 
@@ -96,7 +102,7 @@ export async function savePricingSettingsAction(newConfig: PricingConfig) {
 
   if (!user) return { success: false, message: 'Não autenticado.' }
 
-  let dbClient: any = supabase
+  let dbClient: any
   try {
     dbClient = createAdminClient()
   } catch (err) {
@@ -104,28 +110,28 @@ export async function savePricingSettingsAction(newConfig: PricingConfig) {
     dbClient = supabase
   }
 
-  // 1. Get current active settings
+  // 1. Get current highest settings version
   const { data: current } = await dbClient
     .from('pricing_settings')
     .select('id, version, settings_json')
-    .eq('is_active', true)
     .order('version', { ascending: false })
     .limit(1)
     .maybeSingle()
 
-  const currentVersion = current?.version || 1
+  const nextVersion = (current?.version || 0) + 1
 
-  // 2. Mark old settings inactive
-  if (current?.id) {
-    await dbClient.from('pricing_settings').update({ is_active: false }).eq('id', current.id)
-  }
+  // 2. Mark all existing active settings inactive
+  await dbClient
+    .from('pricing_settings')
+    .update({ is_active: false })
+    .eq('is_active', true)
 
-  // 3. Insert new settings version
+  // 3. Insert new active settings version
   const { data: inserted, error } = await dbClient
     .from('pricing_settings')
     .insert({
       settings_json: newConfig,
-      version: currentVersion + 1,
+      version: nextVersion,
       is_active: true,
       created_by: user.id,
     })
@@ -145,5 +151,5 @@ export async function savePricingSettingsAction(newConfig: PricingConfig) {
   })
 
   revalidatePath('/admin')
-  return { success: true, message: 'Configurações de precificação atualizadas no banco de dados!' }
+  return { success: true, message: 'Configurações de precificação salvas permanentemente no banco de dados!' }
 }

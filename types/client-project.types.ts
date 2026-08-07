@@ -134,6 +134,7 @@ export interface ClientProject {
     contact_notes?: string
     cep?: string
     street?: string
+    number?: string
     neighborhood?: string
     city?: string
     state?: string
