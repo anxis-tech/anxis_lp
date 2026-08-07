@@ -86,6 +86,27 @@ export default function AdminDashboardPage() {
   const [isLoadingDrawerPayment, setIsLoadingDrawerPayment] = useState<boolean>(false)
   const [isCreatingPaymentLink, setIsCreatingPaymentLink] = useState<boolean>(false)
 
+  // Deployment skew detection: tracks whether a "Failed to find Server Action" error
+  // has occurred, which means the browser has JS/HTML from a previous build while the
+  // server is already serving a new build. We show a non-invasive reload banner
+  // instead of silently breaking. This is NOT triggered by real db/auth/permission errors.
+  const [staleDeployDetected, setStaleDeployDetected] = useState<boolean>(false)
+
+  // Helper to wrap Server Action calls and detect deployment skew errors.
+  // Only surfaces the stale-deploy banner for the specific Next.js error message.
+  // All other errors are propagated normally so real failures aren't hidden.
+  const withStaleDetection = async <T,>(fn: () => Promise<T>): Promise<T> => {
+    try {
+      return await fn()
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      if (message.includes('Failed to find Server Action') || message.includes('older or newer deployment')) {
+        setStaleDeployDetected(true)
+      }
+      throw err
+    }
+  }
+
   useEffect(() => {
     if (selectedDetailProject) {
       setIsLoadingDrawerContract(true)
@@ -270,12 +291,20 @@ export default function AdminDashboardPage() {
 
     setClientProjects((prev) => prev.filter((p) => p.id !== projectId))
     setSelectedDetailProject(null)
-    const res = await deleteClientProjectAction(projectId)
-    if (res.success) {
-      alert(`Projeto "${projectTitle}" excluído com sucesso!`)
-    } else {
-      alert(`Erro: ${res.message}`)
-      initAdminSession()
+    try {
+      const res = await withStaleDetection(() => deleteClientProjectAction(projectId))
+      if (res.success) {
+        alert(`Projeto "${projectTitle}" excluído com sucesso!`)
+      } else {
+        alert(`Erro: ${res.message}`)
+        initAdminSession()
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      if (!message.includes('Failed to find Server Action') && !message.includes('older or newer deployment')) {
+        alert(`Erro inesperado ao excluir o projeto.`)
+        initAdminSession()
+      }
     }
   }
 
@@ -384,6 +413,34 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#F0F3F7] text-[#0C1D36] flex font-sans max-w-full overflow-x-hidden p-4 sm:p-6 lg:p-8">
+
+      {/* STALE DEPLOY BANNER — shown only when a Server Action from a previous build
+          is detected. This is a deployment skew issue: the user's browser has HTML/JS
+          from build N but the server is now on build N+1.
+          Reloading fetches the new HTML and resolves the issue without data loss
+          since all data is already persisted in Supabase. */}
+      {staleDeployDetected && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 bg-amber-50 border border-amber-300 text-amber-900 rounded-2xl px-5 py-3 shadow-xl text-xs font-semibold max-w-md w-full animate-in slide-in-from-top-2">
+          <HugeiconsIcon icon={AlertCircleIcon} className="w-4 h-4 text-amber-600 shrink-0" strokeWidth={2} />
+          <span className="flex-1">
+            Nova versão do sistema disponível. Recarregue para continuar usando o painel.
+          </span>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-colors whitespace-nowrap"
+          >
+            Recarregar
+          </button>
+          <button
+            onClick={() => setStaleDeployDetected(false)}
+            className="text-amber-600 hover:text-amber-800 transition-colors"
+            title="Fechar aviso"
+            aria-label="Fechar aviso de atualização"
+          >
+            <HugeiconsIcon icon={Cancel01Icon} className="w-4 h-4" strokeWidth={2} />
+          </button>
+        </div>
+      )}
       {/* FLOATING LIGHT SIDEBAR */}
       <aside
         className={cn(
@@ -576,6 +633,7 @@ export default function AdminDashboardPage() {
                   }}
                   prefilledFromQuote={prefilledFromQuote}
                   onClearPrefilledQuote={() => setPrefilledFromQuote(null)}
+                  onStaleDeployDetected={() => setStaleDeployDetected(true)}
                 />
               )}
 

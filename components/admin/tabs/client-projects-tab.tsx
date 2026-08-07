@@ -75,6 +75,9 @@ interface ClientProjectsTabProps {
   onOpenProjectDetail: (project: ClientProject) => void
   prefilledFromQuote?: SavedQuote | null
   onClearPrefilledQuote?: () => void
+  // Callback to notify the parent page of a deployment skew error (stale Server Action).
+  // The parent shows a reload banner; this component does NOT call alert() for this error.
+  onStaleDeployDetected?: () => void
 }
 
 export function ClientProjectsTab({
@@ -90,7 +93,17 @@ export function ClientProjectsTab({
   onOpenProjectDetail,
   prefilledFromQuote,
   onClearPrefilledQuote,
+  onStaleDeployDetected,
 }: ClientProjectsTabProps) {
+  // Helper: detects deployment skew errors and notifies the parent page.
+  const handleActionError = (err: unknown): boolean => {
+    const message = err instanceof Error ? err.message : String(err)
+    if (message.includes('Failed to find Server Action') || message.includes('older or newer deployment')) {
+      onStaleDeployDetected?.()
+      return true // is stale error, suppress generic alert
+    }
+    return false
+  }
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('todos')
   const [platformFilter, setPlatformFilter] = useState('todos')
@@ -344,7 +357,16 @@ export function ClientProjectsTab({
       kanban_stage_name: normStatus,
     }
 
-    const res = await saveClientProjectAction(projectToSave)
+    let res: Awaited<ReturnType<typeof saveClientProjectAction>>
+    try {
+      res = await saveClientProjectAction(projectToSave)
+    } catch (err) {
+      setIsSaving(false)
+      if (!handleActionError(err)) {
+        alert(`Erro inesperado ao salvar o projeto.`)
+      }
+      return
+    }
 
     if (!res.success || !res.project) {
       setIsSaving(false)

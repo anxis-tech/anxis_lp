@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "build:clean": "rm -rf .next && next build --webpack",
-    "build:prod": "rm -rf .next && NEXT_PUBLIC_COMMIT_HASH=$(git rev-parse --short HEAD) NEXT_PUBLIC_BUILD_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ) next build --webpack",
+    "build:prod": "rm -rf .next && next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
