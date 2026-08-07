@@ -7,7 +7,7 @@ import { z } from 'zod'
 const createUserSchema = z.object({
   fullName: z.string().min(2, 'Nome é obrigatório'),
   email: z.string().email('E-mail inválido'),
-  roleSlug: z.enum(['admin', 'comercial', 'designer']),
+  roleSlug: z.enum(['comercial', 'designer', 'desenvolvedor']),
   method: z.enum(['invite', 'temp_password']),
   tempPassword: z.string().optional(),
   notes: z.string().optional(),
@@ -107,6 +107,13 @@ export async function createAdminUserAction(formData: unknown) {
 
 export async function updateUserRoleAction(userId: string, roleSlug: string) {
   try {
+    if (roleSlug === 'admin') {
+      return {
+        success: false,
+        message: 'O cargo de Administrador Principal não é selecionável no painel. Ele deve ser atribuído exclusivamente via script no Supabase SQL Editor.',
+      }
+    }
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -134,7 +141,7 @@ export async function updateUserRoleAction(userId: string, roleSlug: string) {
     const { error: updateErr } = await supabaseAdmin
       .from('profiles')
       .update({ role_id: roleId })
-      .eq('user_id', userId)
+      .or(`user_id.eq.${userId},id.eq.${userId}`)
 
     if (updateErr) throw updateErr
 

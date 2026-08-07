@@ -381,7 +381,7 @@ export function UsersPermissionsTab({
         </div>
 
         <div className="flex items-center gap-2">
-          {['todos', 'admin', 'comercial', 'designer', 'desenvolvedor'].map((role) => (
+          {['todos', 'comercial', 'designer', 'desenvolvedor'].map((role) => (
             <button
               key={role}
               type="button"
@@ -460,15 +460,18 @@ export function UsersPermissionsTab({
                     </td>
 
                     <td className="p-3.5">
-                      {canManageRoles ? (
+                      {user.is_super_admin ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-amber-50 text-amber-800 border border-amber-300">
+                          <HugeiconsIcon icon={CrownIcon} className="w-3 h-3 text-amber-500" strokeWidth={2} />
+                          <span>Administrador Principal</span>
+                        </span>
+                      ) : canManageRoles ? (
                         <select
-                          value={user.role_slug}
+                          value={user.role_slug === 'admin' ? '' : user.role_slug}
                           onChange={(e) => handleRoleChange(user.user_id, e.target.value)}
                           className={cn(
                             'px-2.5 py-1 rounded-lg text-[11px] font-extrabold border outline-none cursor-pointer shadow-sm transition-all',
-                            user.role_slug === 'admin'
-                              ? 'bg-purple-50 text-purple-700 border-purple-300 focus:ring-purple-400'
-                              : user.role_slug === 'comercial'
+                            user.role_slug === 'comercial'
                               ? 'bg-blue-50 text-blue-700 border-blue-300 focus:ring-blue-400'
                               : user.role_slug === 'designer'
                               ? 'bg-amber-50 text-amber-700 border-amber-300 focus:ring-amber-400'
@@ -481,7 +484,6 @@ export function UsersPermissionsTab({
                           <option value="comercial">Comercial</option>
                           <option value="designer">Designer</option>
                           <option value="desenvolvedor">Desenvolvedor</option>
-                          <option value="admin">Administrador (Organizacional)</option>
                         </select>
                       ) : (
                         <span
@@ -490,7 +492,7 @@ export function UsersPermissionsTab({
                             'bg-slate-100 text-slate-700 border border-slate-200'
                           )}
                         >
-                          {user.role_slug ? user.role_slug : 'Sem cargo'}
+                          {user.role_slug && user.role_slug !== 'admin' ? user.role_slug : 'Sem cargo'}
                         </span>
                       )}
                     </td>
