@@ -296,10 +296,6 @@ export function QuotesTab({
                 <span className="text-slate-500">Subtotal:</span>
                 <span className="font-mono">R$ {selectedQuoteDetail.subtotal?.toLocaleString('pt-BR')}</span>
               </div>
-              <div className="flex justify-between text-emerald-600 font-bold">
-                <span>Desconto Aplicado:</span>
-                <span className="font-mono">- R$ {selectedQuoteDetail.discount?.toLocaleString('pt-BR')}</span>
-              </div>
               <div className="flex justify-between text-[#0075FF] font-black text-sm pt-2 border-t border-slate-200">
                 <span>Valor Total Aprovado:</span>
                 <span>{selectedQuoteDetail.final_value?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>

@@ -13,12 +13,6 @@ export const DEFAULT_PRICING_CONFIG: PricingConfig = {
   perAdditionalPageRate: 500,
   customCodeRate: 3500,
   blogModuleRate: 1200,
-  complexityMultipliers: {
-    'Simples': 1.0,
-    'Intermediária': 1.25,
-    'Avançada': 1.5,
-    'Personalizada': 2.0,
-  },
   urgencyMultipliers: {
     'Sem urgência': 1.0,
     'Prazo normal': 1.0,
@@ -33,7 +27,6 @@ export const DEFAULT_PRICING_CONFIG: PricingConfig = {
   },
   defaultMarginPercent: 20,
   taxPercent: 8,
-  maxDiscountPercent: 15,
 }
 
 export function calculateProjectQuote(
@@ -44,34 +37,29 @@ export function calculateProjectQuote(
   const baseValue = config.baseRates[form.projectType] || 2500
 
   // 2. Additional Pages Cost (Standard pages are included in baseValue; only additional pages generate extra cost)
-  const pagesValue = 0 // Standard pages are part of baseValue and not charged on top
+  const pagesValue = 0 // Standard pages are part of baseValue and displayed informatively
   const additionalPagesValue = (form.additionalPageCount || 0) * (config.perAdditionalPageRate || 500)
 
-  // 3. Custom Code & Blog Module Fees (Step 2 Checkboxes)
+  // 3. Custom Code & Blog Module Fees
   const customCodeValue = form.hasCustomCode ? (config.customCodeRate || 3500) : 0
   const blogModuleValue = (form.hasBlogModule && form.projectType !== 'Blog') ? (config.blogModuleRate || 1200) : 0
 
   // 4. Content Cost
   const contentValue = config.contentRates[form.contentOption] ?? 0
 
-  // 5. Multipliers
-  const complexityMultiplier = config.complexityMultipliers[form.complexity] || 1.0
+  // 5. Urgency Multiplier
   const urgencyMultiplier = config.urgencyMultipliers[form.urgency] || 1.0
 
-  // 6. Raw Subtotal (Base + Additional Pages + Extra Modules + Copy Content) * Multipliers
+  // 6. Raw Subtotal (Base + Additional Pages + Extra Modules + Copy Content) * Urgency Multiplier
   const rawTotal =
     (baseValue + additionalPagesValue + customCodeValue + blogModuleValue + contentValue) *
-    complexityMultiplier *
     urgencyMultiplier
 
   const subtotal = Math.round(rawTotal * 100) / 100
 
-  // 7. Adjustments & Taxes
-  const maxDiscount = (subtotal * (config.maxDiscountPercent || 15)) / 100
-  const discount = Math.min(form.discountAmount || 0, maxDiscount)
+  // 7. Taxes & Additional Costs
   const additionalCosts = form.additionalCosts || 0
-
-  const taxableAmount = Math.max(0, subtotal - discount + additionalCosts)
+  const taxableAmount = Math.max(0, subtotal + additionalCosts)
   const taxes = Math.round(((taxableAmount * (form.taxPercent || config.taxPercent || 8)) / 100) * 100) / 100
 
   const finalValue = Math.round((taxableAmount + taxes) * 100) / 100
@@ -83,10 +71,8 @@ export function calculateProjectQuote(
     customCodeValue,
     blogModuleValue,
     contentValue,
-    complexityMultiplier,
     urgencyMultiplier,
     subtotal,
-    discount,
     additionalCosts,
     taxes,
     finalValue,

@@ -11,12 +11,10 @@ export interface PricingConfig {
   perAdditionalPageRate: number
   customCodeRate: number
   blogModuleRate: number
-  complexityMultipliers: Record<string, number>
   urgencyMultipliers: Record<UrgencyOption, number>
   contentRates: Record<ContentCopyOption, number>
   defaultMarginPercent: number
   taxPercent: number
-  maxDiscountPercent: number
 }
 
 export interface QuoteFormData {
@@ -30,10 +28,8 @@ export interface QuoteFormData {
   additionalPageCount: number
   hasCustomCode?: boolean
   hasBlogModule?: boolean
-  complexity: 'Simples' | 'Intermediária' | 'Avançada' | 'Personalizada'
   contentOption: ContentCopyOption
   urgency: UrgencyOption
-  discountAmount: number
   additionalCosts: number
   taxPercent: number
   notes?: string
@@ -47,10 +43,8 @@ export interface CalculationBreakdown {
   customCodeValue: number
   blogModuleValue: number
   contentValue: number
-  complexityMultiplier: number
   urgencyMultiplier: number
   subtotal: number
-  discount: number
   additionalCosts: number
   taxes: number
   finalValue: number

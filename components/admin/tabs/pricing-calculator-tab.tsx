@@ -69,7 +69,6 @@ export function PricingCalculatorTab({
           ...DEFAULT_PRICING_CONFIG,
           ...savedConfig,
           baseRates: { ...DEFAULT_PRICING_CONFIG.baseRates, ...(savedConfig.baseRates || {}) },
-          complexityMultipliers: { ...DEFAULT_PRICING_CONFIG.complexityMultipliers, ...(savedConfig.complexityMultipliers || {}) },
           urgencyMultipliers: { ...DEFAULT_PRICING_CONFIG.urgencyMultipliers, ...(savedConfig.urgencyMultipliers || {}) },
           contentRates: { ...DEFAULT_PRICING_CONFIG.contentRates, ...(savedConfig.contentRates || {}) },
         })
@@ -92,10 +91,8 @@ export function PricingCalculatorTab({
       additionalPageCount: 0,
       hasCustomCode: false,
       hasBlogModule: false,
-      complexity: 'Intermediária',
       contentOption: 'Cliente fornecerá todo o conteúdo',
       urgency: 'Prazo normal',
-      discountAmount: 0,
       additionalCosts: 0,
       taxPercent: 8,
       notes: '',
@@ -174,7 +171,7 @@ export function PricingCalculatorTab({
       pricing_snapshot: JSON.parse(JSON.stringify(pricingConfig)),
       calculation_breakdown: { ...breakdown },
       subtotal: breakdown.subtotal,
-      discount: breakdown.discount,
+      discount: 0,
       additional_costs: breakdown.additionalCosts,
       taxes: breakdown.taxes,
       final_value: breakdown.finalValue,
@@ -222,7 +219,6 @@ Conteúdo: ${formData.contentOption}
 Urgência: ${formData.urgency}
 
 Subtotal: R$ ${breakdown.subtotal.toLocaleString('pt-BR')}
-Desconto: R$ ${breakdown.discount.toLocaleString('pt-BR')}
 Impostos (${formData.taxPercent}%): R$ ${breakdown.taxes.toLocaleString('pt-BR')}
 ----------------------------------
 VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
@@ -398,33 +394,6 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
             </div>
           </div>
 
-          {/* COMPLEXITY MULTIPLIERS */}
-          <div className="space-y-2 pt-4 border-t border-white/10">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Multiplicadores de Complexidade (x)</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
-              {['Simples', 'Intermediária', 'Avançada', 'Personalizada'].map((comp) => (
-                <div key={comp}>
-                  <label className="text-[10px] text-slate-400 block mb-1 font-semibold">{comp}</label>
-                  <input
-                    type="number"
-                    step="0.05"
-                    value={pricingConfig.complexityMultipliers[comp] ?? 1.0}
-                    onChange={(e) =>
-                      setPricingConfig((prev) => ({
-                        ...prev,
-                        complexityMultipliers: {
-                          ...prev.complexityMultipliers,
-                          [comp]: Number(e.target.value),
-                        },
-                      }))
-                    }
-                    className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none focus:border-[#0075FF]"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* URGENCY MULTIPLIERS */}
           <div className="space-y-2 pt-4 border-t border-white/10">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Multiplicadores de Urgência (x)</h4>
@@ -452,9 +421,9 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
             </div>
           </div>
 
-          {/* TAXES & MARGIN */}
+          {/* TAXES */}
           <div className="space-y-2 pt-4 border-t border-white/10">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Impostos & Limite de Desconto (%)</h4>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Impostos (%)</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
                 <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Taxa de Impostos Padrão (%)</label>
@@ -463,17 +432,6 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                   step="0.5"
                   value={pricingConfig.taxPercent}
                   onChange={(e) => setPricingConfig({ ...pricingConfig, taxPercent: Number(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Desconto Máximo Permitido (%)</label>
-                <input
-                  type="number"
-                  step="1"
-                  value={pricingConfig.maxDiscountPercent}
-                  onChange={(e) => setPricingConfig({ ...pricingConfig, maxDiscountPercent: Number(e.target.value) })}
                   className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none"
                 />
               </div>
@@ -557,7 +515,7 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               <span>Métricas de Páginas & Funcionalidades</span>
             </h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div className="grid grid-cols-1 gap-4 text-xs">
               {/* QUANTIDADE DE PÁGINAS ADICIONAIS */}
               <div>
                 <label className="block text-slate-600 font-bold mb-1">Páginas Adicionais (Extra)</label>
@@ -569,23 +527,8 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#0C1D36]"
                 />
                 <span className="text-[10px] text-slate-400 mt-1 block">
-                  As páginas padrão do projeto já estão inclusas no valor base.
+                  As páginas padrão do projeto já estão inclusas no valor base ({formData.projectType}: {isLojaVirtual ? 'Estrutura Completa de E-commerce' : isBlog ? 'Estrutura de Blog' : isIntegracao ? 'Módulo sob medida' : `${formData.pageCount} pág. padrão`}).
                 </span>
-              </div>
-
-              {/* COMPLEXIDADE */}
-              <div>
-                <label className="block text-slate-600 font-bold mb-1">Nível de Complexidade *</label>
-                <select
-                  value={formData.complexity}
-                  onChange={(e) => setFormData({ ...formData, complexity: e.target.value as any })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
-                >
-                  <option value="Simples">Simples (x{pricingConfig.complexityMultipliers['Simples'] || 1.0})</option>
-                  <option value="Intermediária">Intermediária (x{pricingConfig.complexityMultipliers['Intermediária'] || 1.25})</option>
-                  <option value="Avançada">Avançada (x{pricingConfig.complexityMultipliers['Avançada'] || 1.5})</option>
-                  <option value="Personalizada">Personalizada (x{pricingConfig.complexityMultipliers['Personalizada'] || 2.0})</option>
-                </select>
               </div>
             </div>
 
@@ -679,6 +622,9 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               <h3 className="text-xl font-extrabold text-white mt-1">
                 {breakdown.finalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </h3>
+              <p className="text-[11px] text-slate-300 mt-0.5 font-medium">
+                {formData.projectType} • {isLojaVirtual ? 'Loja Virtual' : isBlog ? 'Blog' : isIntegracao ? 'Integração' : `${formData.pageCount} pág.`}
+              </p>
             </div>
 
             {/* BREAKDOWN ITEMS */}
@@ -689,6 +635,14 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                   R$ {breakdown.baseValue.toLocaleString('pt-BR')}
                 </span>
               </div>
+              {!isLojaVirtual && !isBlog && !isIntegracao && (
+                <div className="flex justify-between text-slate-400">
+                  <span>Páginas Padrão ({formData.pageCount}):</span>
+                  <span className="font-semibold text-slate-300">
+                    R$ 0,00 <span className="text-[10px] text-slate-400 font-normal">(Incluso no valor base)</span>
+                  </span>
+                </div>
+              )}
               {formData.additionalPageCount > 0 && (
                 <div className="flex justify-between">
                   <span>Páginas Adicionais ({formData.additionalPageCount}):</span>
@@ -717,12 +671,6 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                   </span>
                 </div>
               )}
-              {breakdown.complexityMultiplier !== 1.0 && (
-                <div className="flex justify-between text-purple-300 font-semibold">
-                  <span>Complexidade ({formData.complexity}):</span>
-                  <span>x{breakdown.complexityMultiplier.toString().replace('.', ',')}</span>
-                </div>
-              )}
               {breakdown.urgencyMultiplier !== 1.0 && (
                 <div className="flex justify-between text-amber-300 font-semibold">
                   <span>Urgência ({formData.urgency}):</span>
@@ -737,12 +685,6 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                 <div className="flex justify-between text-slate-400">
                   <span>Impostos ({formData.taxPercent || pricingConfig.taxPercent || 8}%):</span>
                   <span>+ R$ {breakdown.taxes.toLocaleString('pt-BR')}</span>
-                </div>
-              )}
-              {breakdown.discount > 0 && (
-                <div className="flex justify-between text-emerald-400 font-bold">
-                  <span>Desconto:</span>
-                  <span>- R$ {breakdown.discount.toLocaleString('pt-BR')}</span>
                 </div>
               )}
             </div>

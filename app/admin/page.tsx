@@ -812,12 +812,6 @@ export default function AdminDashboardPage() {
                           <span>Valor Base:</span>
                           <span>R$ {selectedDetailProject.quote_data.base_value?.toLocaleString('pt-BR')}</span>
                         </div>
-                        {selectedDetailProject.quote_data.discount_amount > 0 && (
-                          <div className="flex justify-between text-emerald-600 font-bold">
-                            <span>Desconto Aplicado:</span>
-                            <span>- R$ {selectedDetailProject.quote_data.discount_amount?.toLocaleString('pt-BR')}</span>
-                          </div>
-                        )}
                         <div className="flex justify-between text-[#0C1D36] text-sm font-extrabold pt-2 border-t border-slate-200">
                           <span>Valor Final Aprovado:</span>
                           <span className="text-[#0075FF]">
