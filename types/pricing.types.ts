@@ -14,7 +14,6 @@ export interface PricingConfig {
   urgencyMultipliers: Record<UrgencyOption, number>
   contentRates: Record<ContentCopyOption, number>
   defaultMarginPercent: number
-  taxPercent: number
 }
 
 export interface QuoteFormData {
@@ -31,7 +30,6 @@ export interface QuoteFormData {
   contentOption: ContentCopyOption
   urgency: UrgencyOption
   additionalCosts: number
-  taxPercent: number
   notes?: string
   paymentTerms?: string
 }
@@ -46,7 +44,6 @@ export interface CalculationBreakdown {
   urgencyMultiplier: number
   subtotal: number
   additionalCosts: number
-  taxes: number
   finalValue: number
 }
 

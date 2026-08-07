@@ -26,7 +26,6 @@ export const DEFAULT_PRICING_CONFIG: PricingConfig = {
     'Criação completa de copy': 1800,
   },
   defaultMarginPercent: 20,
-  taxPercent: 8,
 }
 
 export function calculateProjectQuote(
@@ -50,19 +49,14 @@ export function calculateProjectQuote(
   // 5. Urgency Multiplier
   const urgencyMultiplier = config.urgencyMultipliers[form.urgency] || 1.0
 
-  // 6. Raw Subtotal (Base + Additional Pages + Extra Modules + Copy Content) * Urgency Multiplier
+  // 6. Raw Total (Base + Additional Pages + Extra Modules + Copy Content) * Urgency Multiplier
   const rawTotal =
     (baseValue + additionalPagesValue + customCodeValue + blogModuleValue + contentValue) *
     urgencyMultiplier
 
-  const subtotal = Math.round(rawTotal * 100) / 100
-
-  // 7. Taxes & Additional Costs
   const additionalCosts = form.additionalCosts || 0
-  const taxableAmount = Math.max(0, subtotal + additionalCosts)
-  const taxes = Math.round(((taxableAmount * (form.taxPercent || config.taxPercent || 8)) / 100) * 100) / 100
-
-  const finalValue = Math.round((taxableAmount + taxes) * 100) / 100
+  const finalValue = Math.round((rawTotal + additionalCosts) * 100) / 100
+  const subtotal = finalValue
 
   return {
     baseValue,
@@ -74,7 +68,6 @@ export function calculateProjectQuote(
     urgencyMultiplier,
     subtotal,
     additionalCosts,
-    taxes,
     finalValue,
   }
 }

@@ -54,7 +54,6 @@ export const quoteFormSchema = z.object({
   contentOption: z.enum(CONTENT_COPY_OPTIONS),
   urgency: z.enum(URGENCY_OPTIONS),
   additionalCosts: z.number().min(0),
-  taxPercent: z.number().min(0),
   notes: z.string().optional(),
   paymentTerms: z.string().optional(),
 })

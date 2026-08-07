@@ -173,7 +173,7 @@ export function PricingCalculatorTab({
       subtotal: breakdown.subtotal,
       discount: 0,
       additional_costs: breakdown.additionalCosts,
-      taxes: breakdown.taxes,
+      taxes: 0,
       final_value: breakdown.finalValue,
       status: andConvert ? 'Convertido em Projeto' : 'Aprovado',
       notes: formData.notes,
@@ -219,7 +219,6 @@ Conteúdo: ${formData.contentOption}
 Urgência: ${formData.urgency}
 
 Subtotal: R$ ${breakdown.subtotal.toLocaleString('pt-BR')}
-Impostos (${formData.taxPercent}%): R$ ${breakdown.taxes.toLocaleString('pt-BR')}
 ----------------------------------
 VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
 `
@@ -420,23 +419,6 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               ))}
             </div>
           </div>
-
-          {/* TAXES */}
-          <div className="space-y-2 pt-4 border-t border-white/10">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">Impostos (%)</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-              <div>
-                <label className="text-[10px] text-slate-400 block mb-1 font-semibold">Taxa de Impostos Padrão (%)</label>
-                <input
-                  type="number"
-                  step="0.5"
-                  value={pricingConfig.taxPercent}
-                  onChange={(e) => setPricingConfig({ ...pricingConfig, taxPercent: Number(e.target.value) })}
-                  className="w-full px-3 py-2 rounded-xl bg-white/10 border border-white/20 text-white font-bold outline-none"
-                />
-              </div>
-            </div>
-          </div>
         </div>
       )}
 
@@ -515,7 +497,56 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               <span>Métricas de Páginas & Funcionalidades</span>
             </h3>
 
-            <div className="grid grid-cols-1 gap-4 text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              {/* PÁGINAS PADRÃO (EXIBIÇÃO APENAS / DESCRITIVO) */}
+              {!isLojaVirtual && !isBlog && !isIntegracao ? (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-slate-600 font-bold">Páginas Padrão</label>
+                    <span className="text-[10px] text-slate-400 flex items-center gap-1 font-semibold">
+                      <Icon icon={LockActionIcon} size={12} className="text-amber-500" />
+                      <span>Fixo para {formData.projectType}</span>
+                    </span>
+                  </div>
+                  <input
+                    type="number"
+                    disabled
+                    value={formData.pageCount}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 font-extrabold cursor-not-allowed outline-none"
+                  />
+                </div>
+              ) : isLojaVirtual ? (
+                <div className="bg-blue-50/90 border border-blue-200 p-3.5 rounded-2xl text-blue-900 text-xs font-medium space-y-1">
+                  <div className="font-extrabold flex items-center gap-1.5 text-[#0075FF]">
+                    <Icon icon={PortfolioNavIcon} size={16} />
+                    <span>Loja Virtual Selecionada</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-blue-800">
+                    Páginas padrão inclusas: <strong>Home, Página de Produto Único, Páginas de Categorias, Painel do Usuário e Painel Administrativo</strong>.
+                  </p>
+                </div>
+              ) : isBlog ? (
+                <div className="bg-purple-50/90 border border-purple-200 p-3.5 rounded-2xl text-purple-900 text-xs font-medium space-y-1">
+                  <div className="font-extrabold flex items-center gap-1.5 text-purple-700">
+                    <Icon icon={MetricQuoteIcon} size={16} />
+                    <span>Blog Selecionado</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-purple-800">
+                    Páginas padrão inclusas: <strong>Home, Página do Artigo, Páginas de Categorias e Painel Administrativo de Conteúdo</strong>.
+                  </p>
+                </div>
+              ) : (
+                <div className="bg-emerald-50/90 border border-emerald-200 p-3.5 rounded-2xl text-emerald-900 text-xs font-medium space-y-1">
+                  <div className="font-extrabold flex items-center gap-1.5 text-emerald-700">
+                    <Icon icon={ConfigActionIcon} size={16} />
+                    <span>Integração ou Funcionalidade Selecionada</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed text-emerald-800">
+                    Projeto sem estrutura de páginas padrão (conectores API, módulos ou recursos sob medida).
+                  </p>
+                </div>
+              )}
+
               {/* QUANTIDADE DE PÁGINAS ADICIONAIS */}
               <div>
                 <label className="block text-slate-600 font-bold mb-1">Páginas Adicionais (Extra)</label>
@@ -527,7 +558,7 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#0C1D36]"
                 />
                 <span className="text-[10px] text-slate-400 mt-1 block">
-                  As páginas padrão do projeto já estão inclusas no valor base ({formData.projectType}: {isLojaVirtual ? 'Estrutura Completa de E-commerce' : isBlog ? 'Estrutura de Blog' : isIntegracao ? 'Módulo sob medida' : `${formData.pageCount} pág. padrão`}).
+                  As páginas padrão do projeto já estão inclusas no valor base.
                 </span>
               </div>
             </div>
@@ -636,11 +667,9 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                 </span>
               </div>
               {!isLojaVirtual && !isBlog && !isIntegracao && (
-                <div className="flex justify-between text-slate-400">
-                  <span>Páginas Padrão ({formData.pageCount}):</span>
-                  <span className="font-semibold text-slate-300">
-                    R$ 0,00 <span className="text-[10px] text-slate-400 font-normal">(Incluso no valor base)</span>
-                  </span>
+                <div className="flex justify-between text-slate-300">
+                  <span>Páginas Padrão:</span>
+                  <span className="font-bold text-white">{formData.pageCount} pág.</span>
                 </div>
               )}
               {formData.additionalPageCount > 0 && (
@@ -681,12 +710,6 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                 <span>Subtotal:</span>
                 <span>R$ {breakdown.subtotal.toLocaleString('pt-BR')}</span>
               </div>
-              {breakdown.taxes > 0 && (
-                <div className="flex justify-between text-slate-400">
-                  <span>Impostos ({formData.taxPercent || pricingConfig.taxPercent || 8}%):</span>
-                  <span>+ R$ {breakdown.taxes.toLocaleString('pt-BR')}</span>
-                </div>
-              )}
             </div>
 
             {/* ACTION BUTTONS */}
