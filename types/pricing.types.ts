@@ -69,6 +69,7 @@ export interface SavedQuote {
   created_by_user_id?: string
   linked_project_id?: string
   converted_project_id?: string
+  lead_id?: string
   created_at: string
   updated_at: string
 }

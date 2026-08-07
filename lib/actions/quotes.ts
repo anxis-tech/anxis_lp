@@ -26,6 +26,7 @@ export async function saveQuoteAction(quote: SavedQuote) {
   const validId = quote.id && uuidRegex.test(quote.id) ? quote.id : null
 
   const payload: any = {
+    lead_id: quote.lead_id && uuidRegex.test(quote.lead_id) ? quote.lead_id : null,
     client_name: quote.client_name,
     company: quote.company || null,
     project_name: quote.project_name,
@@ -55,6 +56,29 @@ export async function saveQuoteAction(quote: SavedQuote) {
   if (error) {
     console.error('Error saving quote:', error)
     return { success: false, message: error.message }
+  }
+
+  // If quote is linked to a lead, update lead status to 'Orçamento' and log activity
+  if (payload.lead_id) {
+    const { data: { user } } = await supabase.auth.getUser()
+    const userName = user?.user_metadata?.full_name || user?.email || 'Usuário'
+
+    await supabase
+      .from('leads')
+      .update({
+        status: 'Orçamento',
+        last_interaction_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', payload.lead_id)
+
+    await supabase.from('lead_activities').insert({
+      lead_id: payload.lead_id,
+      user_id: user?.id || null,
+      user_name: userName,
+      activity_type: 'orcamento_criado',
+      description: `Orçamento de R$ ${(quote.final_value || 0).toFixed(2)} gerado via Calculadora por ${userName}.`,
+    })
   }
 
   revalidatePath('/admin')

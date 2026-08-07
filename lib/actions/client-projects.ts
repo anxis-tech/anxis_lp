@@ -56,6 +56,7 @@ export async function saveClientProjectAction(projectData: any) {
     professional_user_name: projectData.professional_user_name || projectData.responsible_user_name || null,
     commercial_user_id: projectData.commercial_user_id && uuidRegex.test(projectData.commercial_user_id) ? projectData.commercial_user_id : null,
     commercial_user_name: projectData.commercial_user_name || null,
+    lead_id: projectData.lead_id && uuidRegex.test(projectData.lead_id) ? projectData.lead_id : null,
     quote_id: projectData.quote_id && uuidRegex.test(projectData.quote_id) ? projectData.quote_id : null,
     quote_data: projectData.quote_data || {},
     approved_value: projectData.quote_data?.final_value || projectData.approved_value || 0,
@@ -113,6 +114,28 @@ export async function saveClientProjectAction(projectData: any) {
       module: 'client_projects',
       recordId: savedProjectId,
       newData: payload,
+    })
+  }
+
+  // If project is linked to a lead, update lead status to 'Fechado' and log activity
+  if (payload.lead_id) {
+    const adminName = user.user_metadata?.full_name || user.email || 'Usuário'
+
+    await supabase
+      .from('leads')
+      .update({
+        status: 'Fechado',
+        last_interaction_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', payload.lead_id)
+
+    await supabase.from('lead_activities').insert({
+      lead_id: payload.lead_id,
+      user_id: user.id,
+      user_name: adminName,
+      activity_type: 'conversao_projeto',
+      description: `Lead convertido em Projeto de Cliente ("${payload.title}") por ${adminName}.`,
     })
   }
 

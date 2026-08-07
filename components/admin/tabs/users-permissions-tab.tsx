@@ -23,7 +23,7 @@ export interface PermissionItem {
   key: string
   label: string
   description: string
-  category: 'Gestão de Projetos' | 'Orçamentos' | 'Conteúdo & Website' | 'Configurações' | 'Financeiro'
+  category: 'Comercial' | 'Gestão de Projetos' | 'Orçamentos' | 'Conteúdo & Website' | 'Configurações' | 'Financeiro'
 }
 
 export const TAB_PERMISSION_KEYS: PermissionItem[] = [
@@ -202,6 +202,55 @@ export const TAB_PERMISSION_KEYS: PermissionItem[] = [
     label: 'Registrar Pagamento de Comissões',
     description: 'Permite dar baixa e registrar o pagamento mensal das comissões.',
     category: 'Financeiro',
+  },
+  // Comercial / Leads
+  {
+    key: 'leads.view',
+    label: 'Visualizar Módulo de Leads',
+    description: 'Permite acessar a aba e a gestão comercial de leads.',
+    category: 'Comercial',
+  },
+  {
+    key: 'leads.view_all',
+    label: 'Visualizar Todos os Leads',
+    description: 'Permite ver leads de todos os comerciais (desativa restrição Meus Leads).',
+    category: 'Comercial',
+  },
+  {
+    key: 'leads.create',
+    label: 'Cadastrar Leads Manuais',
+    description: 'Permite cadastrar novos leads manualmente pelo painel.',
+    category: 'Comercial',
+  },
+  {
+    key: 'leads.edit',
+    label: 'Editar Dados do Lead',
+    description: 'Permite alterar contatos, observações e dados do lead.',
+    category: 'Comercial',
+  },
+  {
+    key: 'leads.assign',
+    label: 'Atribuir Comercial Responsável',
+    description: 'Permite alterar o usuário comercial responsável pelo lead.',
+    category: 'Comercial',
+  },
+  {
+    key: 'leads.change_status',
+    label: 'Alterar Status do Lead',
+    description: 'Permite mudar status (Novo, Em contato, Fechado, Perdido).',
+    category: 'Comercial',
+  },
+  {
+    key: 'leads.create_quote',
+    label: 'Criar Orçamento a partir do Lead',
+    description: 'Permite direcionar o lead para a calculadora de orçamentos.',
+    category: 'Comercial',
+  },
+  {
+    key: 'leads.delete',
+    label: 'Excluir Registros de Leads',
+    description: 'Permite remover registros de leads do sistema.',
+    category: 'Comercial',
   },
 ]
 
@@ -620,7 +669,7 @@ export function UsersPermissionsTab({
 
             {/* PERMISSION CATEGORIES AND SWITCHES */}
             <div className="space-y-5 overflow-y-auto pr-1 text-xs flex-1">
-              {(['Gestão de Projetos', 'Orçamentos', 'Conteúdo & Website', 'Financeiro', 'Configurações'] as const).map((cat) => {
+              {(['Comercial', 'Gestão de Projetos', 'Orçamentos', 'Conteúdo & Website', 'Financeiro', 'Configurações'] as const).map((cat) => {
                 const catKeys = TAB_PERMISSION_KEYS.filter((k) => k.category === cat)
                 if (catKeys.length === 0) return null
 

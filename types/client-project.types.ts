@@ -110,6 +110,7 @@ export interface ClientProject {
   professional_user_name?: string
   commercial_user_id?: string
   commercial_user_name?: string
+  lead_id?: string
   participants?: { user_id: string; full_name: string; email: string }[]
   start_date?: string
   deadline?: string

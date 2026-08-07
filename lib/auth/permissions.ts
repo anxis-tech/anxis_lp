@@ -54,6 +54,16 @@ export const PERMISSIONS = {
   COMMISSIONS_VIEW_VALUES: 'commissions.view_values',
   COMMISSIONS_MANAGE_RULES: 'commissions.manage_rules',
   COMMISSIONS_REGISTER_PAYMENT: 'commissions.register_payment',
+
+  // Leads & Comercial
+  LEADS_VIEW: 'leads.view',
+  LEADS_VIEW_ALL: 'leads.view_all',
+  LEADS_CREATE: 'leads.create',
+  LEADS_EDIT: 'leads.edit',
+  LEADS_DELETE: 'leads.delete',
+  LEADS_ASSIGN: 'leads.assign',
+  LEADS_CHANGE_STATUS: 'leads.change_status',
+  LEADS_CREATE_QUOTE: 'leads.create_quote',
 } as const
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
