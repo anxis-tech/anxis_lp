@@ -653,9 +653,6 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               <h3 className="text-xl font-extrabold text-white mt-1">
                 {breakdown.finalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
               </h3>
-              <p className="text-[11px] text-slate-300 mt-0.5 font-medium">
-                {formData.projectType} • {isLojaVirtual ? 'Loja Virtual' : isBlog ? 'Blog' : isIntegracao ? 'Integração' : `${formData.pageCount} pág.`}
-              </p>
             </div>
 
             {/* BREAKDOWN ITEMS */}
@@ -669,7 +666,7 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               {!isLojaVirtual && !isBlog && !isIntegracao && (
                 <div className="flex justify-between text-slate-300">
                   <span>Páginas Padrão:</span>
-                  <span className="font-bold text-white">{formData.pageCount} pág.</span>
+                  <span className="font-bold text-white">{formData.pageCount}</span>
                 </div>
               )}
               {formData.additionalPageCount > 0 && (
