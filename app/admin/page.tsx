@@ -21,6 +21,7 @@ import { PricingCalculatorTab } from '@/components/admin/tabs/pricing-calculator
 import { QuotesTab } from '@/components/admin/tabs/quotes-tab'
 import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-tab'
 import { FinanceTab } from '@/components/admin/tabs/finance-tab'
+import { CommissionsSubtab } from '@/components/admin/tabs/commissions-subtab'
 import { saveClientProjectAction, deleteClientProjectAction } from '@/lib/actions/client-projects'
 import { getContractByProjectId, downloadContractAction } from '@/lib/actions/contracts'
 import { Contract } from '@/types/contract.types'
@@ -58,6 +59,7 @@ import {
   PanelLeftOpenIcon,
   Dollar01Icon,
   Briefcase01Icon,
+  PieChartIcon,
 } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 
@@ -415,6 +417,12 @@ export default function AdminDashboardPage() {
           icon: Dollar01Icon,
           allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.FINANCE_VIEW),
         },
+        {
+          id: 'commissions_overview',
+          label: 'Comissões',
+          icon: PieChartIcon,
+          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.COMMISSIONS_VIEW),
+        },
       ],
     },
     {
@@ -741,6 +749,22 @@ export default function AdminDashboardPage() {
                   userProfile={userProfile}
                   canViewValues={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.FINANCE_VIEW_VALUES)}
                   canViewPayments={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.FINANCE_VIEW_PAYMENTS)}
+                  onOpenProjectDetail={(p) => {
+                    setSelectedDetailProject(p)
+                    setDrawerTab('geral')
+                  }}
+                />
+              )}
+
+              {/* TAB 8: MÓDULO DE COMISSÕES */}
+              {activeTab === 'commissions_overview' && (
+                <CommissionsSubtab
+                  projects={clientProjects}
+                  teamUsers={teamUsers}
+                  userProfile={userProfile}
+                  canViewValues={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.COMMISSIONS_VIEW_VALUES)}
+                  canManageRules={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.COMMISSIONS_MANAGE_RULES)}
+                  canRegisterPayment={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.COMMISSIONS_REGISTER_PAYMENT)}
                   onOpenProjectDetail={(p) => {
                     setSelectedDetailProject(p)
                     setDrawerTab('geral')
