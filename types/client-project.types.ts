@@ -112,6 +112,7 @@ export interface ClientProject {
   estimated_completion_date?: string
   description?: string
   internal_notes?: string
+  created_by?: string
 
   // Financial & Payment Fields
   payment_status?: string

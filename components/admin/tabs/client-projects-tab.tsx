@@ -187,13 +187,19 @@ export function ClientProjectsTab({
   const [newFileCategory, setNewFileCategory] = useState<FileCategory>('Documentos')
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
-  const isAdmin = userProfile?.role_slug === 'admin'
+  const isSuperAdmin = userProfile?.is_super_admin === true
 
   // FILTER VISIBILITY BY PERMISSION:
   const visibleProjects = projects.filter((p) => {
     if (canViewAll) return true
     if (!userProfile) return false
-    return p.responsible_user_id === userProfile.user_id
+    return (
+      p.responsible_user_id === userProfile.user_id ||
+      p.responsible_user_id === userProfile.id ||
+      (userProfile.email && p.responsible_user_email === userProfile.email) ||
+      p.created_by === userProfile.user_id ||
+      p.created_by === userProfile.id
+    )
   })
 
   const filteredProjects = visibleProjects.filter((p) => {
@@ -932,9 +938,9 @@ export function ClientProjectsTab({
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <label className="font-bold">Valor Aprovado do Projeto (R$) *</label>
-                        {isAdmin ? (
+                        {isSuperAdmin ? (
                           <span className="text-[10px] bg-amber-50 text-amber-700 font-extrabold px-2 py-0.5 rounded border border-amber-200">
-                            Editável (Administrador)
+                            Editável (Administrador Principal)
                           </span>
                         ) : (
                           <span className="text-[10px] bg-slate-100 text-slate-600 font-extrabold px-2 py-0.5 rounded border border-slate-200">
@@ -945,21 +951,21 @@ export function ClientProjectsTab({
                       <input
                         type="number"
                         step="0.01"
-                        readOnly={!isAdmin}
-                        disabled={!isAdmin}
+                        readOnly={!isSuperAdmin}
+                        disabled={!isSuperAdmin}
                         value={editingProject.approved_value || ''}
                         onChange={(e) => setEditingProject({ ...editingProject, approved_value: parseFloat(e.target.value) || 0 })}
-                        placeholder={isAdmin ? "Ex: 4500.00" : "Valor fixado pela Calculadora"}
+                        placeholder={isSuperAdmin ? "Ex: 4500.00" : "Valor fixado pela Calculadora"}
                         className={cn(
                           'w-full px-3.5 py-2.5 rounded-xl border font-mono font-bold text-[#0075FF]',
-                          !isAdmin
+                          !isSuperAdmin
                             ? 'bg-slate-100/90 text-slate-600 border-slate-200 cursor-not-allowed select-none opacity-90'
                             : 'bg-white border-slate-200'
                         )}
                       />
-                      {!isAdmin && (
+                      {!isSuperAdmin && (
                         <p className="text-[10px] text-slate-400 mt-1">
-                          Definido estritamente pelas regras da Calculadora Comercial. Alterações permitidas apenas para o Administrador.
+                          Definido estritamente pelas regras da Calculadora Comercial. Alterações permitidas apenas para o Administrador Principal.
                         </p>
                       )}
                     </div>

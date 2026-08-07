@@ -21,11 +21,14 @@ export const PERMISSIONS = {
   CLIENT_PROJECTS_DELETE_FILES: 'client_projects.delete_files',
   CLIENT_PROJECTS_CHANGE_STATUS: 'client_projects.change_status',
 
+  // Quadro Kanban
+  KANBAN_VIEW: 'kanban_board.view',
+
   // Calculadora de Precificação
   PRICING_VIEW: 'pricing.view',
   PRICING_USE: 'pricing.use',
   PRICING_SAVE_QUOTE: 'pricing.save_quote',
-  PRICING_VIEW_HISTORY: 'pricing.view_history',
+  PRICING_VIEW_HISTORY: 'quotes_history.view',
   PRICING_MANAGE_SETTINGS: 'pricing.manage_settings',
 
   // Usuários e Permissões
@@ -49,16 +52,17 @@ export interface UserProfileWithRole {
   user_id: string
   full_name: string
   email: string
-  role_slug: string // 'admin', 'comercial', 'designer'
+  role_slug: string // Purely organizational tag ('comercial', 'designer', etc.) - DOES NOT GRANT PERMISSIONS
+  is_super_admin?: boolean // Real Supabase Primary Administrator (unrestricted access)
   is_active: boolean
   custom_permissions?: Record<string, boolean>
 }
 
 /**
  * Centralized authorization check:
- * - Supabase Administrator (role_slug === 'admin') has full access to everything.
- * - Roles (Comercial, Designer, Desenvolvedor, etc.) are strictly organizational tags and DO NOT grant permissions.
- * - All non-admin tab and action permissions are strictly controlled by user.custom_permissions.
+ * - Real Supabase Primary Administrator (is_super_admin === true) has full access to everything.
+ * - Roles (Cargo) are strictly organizational tags and DO NOT grant, block or alter any permissions.
+ * - All non-super-admin users rely strictly on individual custom_permissions saved in Supabase.
  */
 export function hasPermission(
   user: UserProfileWithRole | null,
@@ -66,16 +70,16 @@ export function hasPermission(
 ): boolean {
   if (!user || !user.is_active) return false
 
-  // Administrador defined in Supabase has full access to everything
-  if (user.role_slug === 'admin') return true
+  // Real Supabase Administrator has full access to everything
+  if (user.is_super_admin === true) return true
 
-  // For non-admin users, access is determined strictly by custom_permissions
+  // For all other users, access is determined strictly by custom_permissions
   if (user.custom_permissions) {
     if (permissionKey in user.custom_permissions) {
       return Boolean(user.custom_permissions[permissionKey])
     }
 
-    // Helper aliases for viewing tabs
+    // Helper aliases for viewing modules/tabs
     if (permissionKey === 'client_projects.view') {
       return (
         Boolean(user.custom_permissions['client_projects.view']) ||
@@ -92,6 +96,7 @@ export function hasPermission(
     }
   }
 
-  // Non-admin users without explicit permission return false
+  // Users without explicit custom permission return false
   return false
 }
+

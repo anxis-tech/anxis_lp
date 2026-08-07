@@ -199,10 +199,11 @@ export async function updateUserPermissionsAction(
 
     const supabaseAdmin = createAdminSupabase(supabaseUrl, serviceRoleKey)
 
+    // Update custom_permissions on profiles matching user_id OR profile id
     const { error: updateErr } = await supabaseAdmin
       .from('profiles')
-      .update({ custom_permissions: customPermissions })
-      .eq('user_id', targetUserId)
+      .update({ custom_permissions: customPermissions, updated_at: new Date().toISOString() })
+      .or(`user_id.eq.${targetUserId},id.eq.${targetUserId}`)
 
     if (updateErr) throw updateErr
 
@@ -215,6 +216,9 @@ export async function updateUserPermissionsAction(
       record_id: targetUserId,
       new_data: { custom_permissions: customPermissions },
     })
+
+    const { revalidatePath } = await import('next/cache')
+    revalidatePath('/admin')
 
     return { success: true, message: 'Permissões salvas com sucesso no Supabase!' }
   } catch (err: any) {

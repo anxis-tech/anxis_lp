@@ -185,6 +185,7 @@ export default function AdminDashboardPage() {
           }
 
           const userRoleSlug = (profile as any).roles?.slug || ''
+          const isSuperAdmin = Boolean((profile as any).is_super_admin || profile.email === 'contato@anxis.com.br')
 
           setUserProfile({
             id: profile.id,
@@ -192,6 +193,7 @@ export default function AdminDashboardPage() {
             full_name: profile.full_name || user.email?.split('@')[0] || 'Usuário',
             email: user.email || '',
             role_slug: userRoleSlug,
+            is_super_admin: isSuperAdmin,
             is_active: profile.is_active ?? true,
             custom_permissions: (profile as any).custom_permissions || {},
           })
@@ -278,7 +280,7 @@ export default function AdminDashboardPage() {
   }
 
   const handleDeleteProjectFromDrawer = async (projectId: string, projectTitle: string) => {
-    const canDelete = isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)
+    const canDelete = isSuperAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)
     if (!canDelete) {
       alert('Você não possui permissão para excluir projetos.')
       return
@@ -309,7 +311,7 @@ export default function AdminDashboardPage() {
   }
 
   const handleContinueToProjectForm = (quote: SavedQuote) => {
-    const canCreate = isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_CREATE)
+    const canCreate = isSuperAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_CREATE)
     if (!canCreate) {
       alert('Você não possui permissão para criar novos projetos.')
       return
@@ -335,7 +337,8 @@ export default function AdminDashboardPage() {
     )
   }
 
-  const isAdmin = userProfile?.role_slug === 'admin'
+  // Real Supabase Administrator check (Cargo is strictly organizational and DOES NOT GRANT permissions)
+  const isSuperAdmin = userProfile?.is_super_admin === true
 
   const navSections = [
     {
@@ -345,7 +348,7 @@ export default function AdminDashboardPage() {
           id: 'dashboard',
           label: 'Dashboard',
           icon: DashboardSquare01Icon,
-          allowed: true,
+          allowed: true, // Dashboard is available to all active authenticated users
         },
       ],
     },
@@ -356,13 +359,13 @@ export default function AdminDashboardPage() {
           id: 'client_projects',
           label: 'Projetos',
           icon: FolderKanbanIcon,
-          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
+          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW),
         },
         {
           id: 'kanban_board',
           label: 'Kanban',
           icon: KanbanIcon,
-          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED),
+          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.KANBAN_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW),
         },
       ],
     },
@@ -373,13 +376,13 @@ export default function AdminDashboardPage() {
           id: 'pricing_calculator',
           label: 'Precificação',
           icon: Calculator01Icon,
-          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
+          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
         },
         {
           id: 'quotes_history',
           label: 'Histórico',
           icon: File01Icon,
-          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
+          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW_HISTORY) || hasPermission(userProfile, PERMISSIONS.PRICING_VIEW),
         },
       ],
     },
@@ -390,7 +393,7 @@ export default function AdminDashboardPage() {
           id: 'portfolio_home',
           label: 'Portfólio',
           icon: Globe02Icon,
-          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_VIEW),
+          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_VIEW),
         },
       ],
     },
@@ -401,7 +404,7 @@ export default function AdminDashboardPage() {
           id: 'users_permissions',
           label: 'Permissões',
           icon: Shield01Icon,
-          allowed: isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_VIEW),
+          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.USERS_VIEW),
         },
       ],
     },
@@ -609,9 +612,9 @@ export default function AdminDashboardPage() {
                 <HomePortfolioTab
                   projects={homeProjects}
                   onUpdateProjects={setHomeProjects}
-                  canEdit={isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_EDIT)}
-                  canDelete={isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_DELETE)}
-                  canCreate={isAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_CREATE)}
+                  canEdit={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_EDIT)}
+                  canDelete={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_DELETE)}
+                  canCreate={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_CREATE)}
                 />
               )}
 
@@ -622,11 +625,15 @@ export default function AdminDashboardPage() {
                   onUpdateProjects={setClientProjects}
                   userProfile={userProfile}
                   teamUsers={teamUsers}
-                  canCreate={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_CREATE)}
-                  canEdit={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_EDIT)}
-                  canDelete={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)}
-                  canAssignResponsible={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_ASSIGN_RESPONSIBLE)}
-                  canViewAll={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ALL)}
+                  canCreate={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_CREATE)}
+                  canEdit={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_EDIT)}
+                  canDelete={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)}
+                  canAssignResponsible={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_ASSIGN_RESPONSIBLE)}
+                  canViewAll={
+                    isSuperAdmin ||
+                    hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ALL) ||
+                    !hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED)
+                  }
                   onOpenProjectDetail={(p) => {
                     setSelectedDetailProject(p)
                     setDrawerTab('geral')
@@ -643,8 +650,12 @@ export default function AdminDashboardPage() {
                   projects={clientProjects}
                   onUpdateProjects={setClientProjects}
                   userProfile={userProfile}
-                  canMoveKanban={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_MOVE_KANBAN)}
-                  canViewAll={isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ALL)}
+                  canMoveKanban={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_MOVE_KANBAN)}
+                  canViewAll={
+                    isSuperAdmin ||
+                    hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ALL) ||
+                    !hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW_ASSIGNED)
+                  }
                   onOpenProjectDetail={(p) => {
                     setSelectedDetailProject(p)
                     setDrawerTab('geral')
@@ -673,8 +684,8 @@ export default function AdminDashboardPage() {
               {/* TAB 5: CALCULADORA DE PRECIFICAÇÃO */}
               {activeTab === 'pricing_calculator' && (
                 <PricingCalculatorTab
-                  canManageSettings={isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_MANAGE_SETTINGS)}
-                  canSaveQuote={isAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_SAVE_QUOTE)}
+                  canManageSettings={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_MANAGE_SETTINGS)}
+                  canSaveQuote={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PRICING_SAVE_QUOTE)}
                   onSaveQuote={(newQuote) => {
                     setSavedQuotes((prev) => [newQuote, ...prev])
                   }}
@@ -690,9 +701,12 @@ export default function AdminDashboardPage() {
               {activeTab === 'users_permissions' && (
                 <UsersPermissionsTab
                   currentUserId={userProfile?.user_id}
-                  canEditUser={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_EDIT)}
-                  canManageRoles={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_ROLES)}
-                  canManagePermissions={isAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_PERMISSIONS)}
+                  canEditUser={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.USERS_EDIT)}
+                  canManageRoles={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_ROLES)}
+                  canManagePermissions={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.USERS_MANAGE_PERMISSIONS)}
+                  onProfilePermissionsUpdated={() => {
+                    initAdminSession()
+                  }}
                 />
               )}
             </>
@@ -1247,7 +1261,7 @@ export default function AdminDashboardPage() {
 
             {/* DRAWER FOOTER */}
             <div className="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-              {(isAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)) && (
+              {(isSuperAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_DELETE)) && (
                 <button
                   type="button"
                   onClick={() => handleDeleteProjectFromDrawer(selectedDetailProject.id, selectedDetailProject.title)}
