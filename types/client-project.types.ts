@@ -106,6 +106,10 @@ export interface ClientProject {
   responsible_user_name?: string
   responsible_user_email?: string
   responsible_user_role?: string
+  professional_user_id?: string
+  professional_user_name?: string
+  commercial_user_id?: string
+  commercial_user_name?: string
   participants?: { user_id: string; full_name: string; email: string }[]
   start_date?: string
   deadline?: string

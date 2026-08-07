@@ -29,6 +29,8 @@ import {
   Invoice01Icon,
 } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
+import { CommissionsSubtab } from '@/components/admin/tabs/commissions-subtab'
+import { PERMISSIONS, hasPermission } from '@/lib/auth/permissions'
 
 export type PeriodFilterOption =
   | 'hoje'
@@ -78,6 +80,9 @@ export function FinanceTab({
 
   // Chart Grouping State
   const [chartGrouping, setChartGrouping] = useState<'dia' | 'semana' | 'mes'>('dia')
+
+  // Sub-tab Navigation State ('overview' vs 'commissions')
+  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'commissions'>('overview')
 
   // Selected Detail Modal Project State
   const [selectedProjectModal, setSelectedProjectModal] = useState<ClientProject | null>(null)
@@ -450,25 +455,74 @@ export function FinanceTab({
     return d.toLocaleDateString('pt-BR')
   }
 
+  const isSuperAdmin = userProfile?.is_super_admin === true
+  const canViewCommissions = isSuperAdmin || hasPermission(userProfile, PERMISSIONS.COMMISSIONS_VIEW)
+
   return (
     <div className="space-y-8 font-sans text-[#0C1D36] animate-in fade-in duration-300">
-      {/* ------------------------------------------------------------------- */}
-      {/* 1. MODULE HEADER & PERIOD FILTER BAR (SECTION 2)                    */}
-      {/* ------------------------------------------------------------------- */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-[#0075FF]/10 text-[#0075FF] flex items-center justify-center font-bold">
-              <HugeiconsIcon icon={Dollar01Icon} className="w-6 h-6" strokeWidth={1.5} />
-            </div>
+      {/* SUB-NAVIGATION BAR (Visão Financeira vs Comissões) */}
+      <div className="flex items-center gap-2 border-b border-slate-200/80 pb-1">
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('overview')}
+          className={cn(
+            'px-5 py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-2',
+            activeSubTab === 'overview'
+              ? 'bg-[#0C1D36] text-white shadow-md'
+              : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-[#0C1D36] border border-slate-200'
+          )}
+        >
+          <HugeiconsIcon icon={Dollar01Icon} className="w-4 h-4" strokeWidth={1.5} />
+          <span>Visão Financeira</span>
+        </button>
+
+        {canViewCommissions && (
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('commissions')}
+            className={cn(
+              'px-5 py-2.5 rounded-2xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-2',
+              activeSubTab === 'commissions'
+                ? 'bg-[#0C1D36] text-white shadow-md'
+                : 'bg-white text-slate-600 hover:bg-slate-100 hover:text-[#0C1D36] border border-slate-200'
+            )}
+          >
+            <HugeiconsIcon icon={PieChartIcon} className="w-4 h-4 text-amber-400" strokeWidth={1.5} />
+            <span>Comissões</span>
+          </button>
+        )}
+      </div>
+
+      {/* RENDER COMMISSIONS SUBTAB IF ACTIVE */}
+      {activeSubTab === 'commissions' ? (
+        <CommissionsSubtab
+          projects={projects}
+          teamUsers={teamUsers}
+          userProfile={userProfile}
+          canViewValues={canViewValues}
+          canManageRules={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.COMMISSIONS_MANAGE_RULES)}
+          canRegisterPayment={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.COMMISSIONS_REGISTER_PAYMENT)}
+          onOpenProjectDetail={onOpenProjectDetail}
+        />
+      ) : (
+        <>
+          {/* ------------------------------------------------------------------- */}
+          {/* 1. MODULE HEADER & PERIOD FILTER BAR (SECTION 2)                    */}
+          {/* ------------------------------------------------------------------- */}
+          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div>
-              <h2 className="text-xl font-extrabold text-[#0C1D36]">Módulo Financeiro</h2>
-              <p className="text-xs text-slate-500 font-medium">
-                Acompanhamento real de faturamento, receita recebida e cobranças da ANXIS.
-              </p>
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-[#0075FF]/10 text-[#0075FF] flex items-center justify-center font-bold">
+                  <HugeiconsIcon icon={Dollar01Icon} className="w-6 h-6" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-extrabold text-[#0C1D36]">Módulo Financeiro</h2>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Acompanhamento real de faturamento, receita recebida e cobranças da ANXIS.
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
         {/* PERIOD SELECTOR BUTTONS */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -1219,6 +1273,8 @@ export function FinanceTab({
           </div>
         </div>
       )}
-    </div>
+    </>
+  )}
+</div>
   )
 }

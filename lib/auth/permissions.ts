@@ -48,6 +48,12 @@ export const PERMISSIONS = {
   FINANCE_VIEW: 'finance.view',
   FINANCE_VIEW_VALUES: 'finance.view_values',
   FINANCE_VIEW_PAYMENTS: 'finance.view_payments',
+
+  // Comissões
+  COMMISSIONS_VIEW: 'commissions.view',
+  COMMISSIONS_VIEW_VALUES: 'commissions.view_values',
+  COMMISSIONS_MANAGE_RULES: 'commissions.manage_rules',
+  COMMISSIONS_REGISTER_PAYMENT: 'commissions.register_payment',
 } as const
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]

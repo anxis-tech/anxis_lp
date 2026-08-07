@@ -1532,6 +1532,8 @@ export function ClientProjectsTab({
                                     responsible_user_id: u.user_id,
                                     responsible_user_name: u.full_name,
                                     responsible_user_email: u.email,
+                                    professional_user_id: u.user_id,
+                                    professional_user_name: u.full_name,
                                   })
                                   setIsComboboxOpen(false)
                                 }}
@@ -1560,6 +1562,33 @@ export function ClientProjectsTab({
                         </div>
                       </div>
                     )}
+                  </div>
+
+                  {/* COMERCIAL RESPONSÁVEL PELO FECHAMENTO */}
+                  <div className="pt-4 border-t border-slate-200/80 space-y-3">
+                    <label className="block font-bold text-xs text-[#0C1D36]">
+                      Comercial Responsável pelo Fechamento (Gera comissão comercial)
+                    </label>
+
+                    <select
+                      value={editingProject.commercial_user_id || ''}
+                      onChange={(e) => {
+                        const selectedUser = teamUsers.find((u) => u.user_id === e.target.value)
+                        setEditingProject({
+                          ...editingProject,
+                          commercial_user_id: e.target.value || undefined,
+                          commercial_user_name: selectedUser ? selectedUser.full_name : undefined,
+                        })
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white font-semibold text-xs outline-none focus:border-[#0075FF]"
+                    >
+                      <option value="">Nenhum comercial vinculado</option>
+                      {teamUsers.map((u) => (
+                        <option key={u.user_id} value={u.user_id}>
+                          {u.full_name} ({u.role_slug || 'Membro'}) - {u.email}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               )}

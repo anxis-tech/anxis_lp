@@ -179,6 +179,30 @@ export const TAB_PERMISSION_KEYS: PermissionItem[] = [
     description: 'Permite consultar o histórico detalhado de transações financeiras.',
     category: 'Financeiro',
   },
+  {
+    key: 'commissions.view',
+    label: 'Visualizar Módulo de Comissões',
+    description: 'Permite acessar a aba e o relatório de comissões de funcionários.',
+    category: 'Financeiro',
+  },
+  {
+    key: 'commissions.view_values',
+    label: 'Visualizar Valores de Comissões',
+    description: 'Permite ver os valores calculados de comissão em R$.',
+    category: 'Financeiro',
+  },
+  {
+    key: 'commissions.manage_rules',
+    label: 'Configurar Regras de Comissão',
+    description: 'Permite cadastrar e alterar percentuais e regras por tipo de projeto.',
+    category: 'Financeiro',
+  },
+  {
+    key: 'commissions.register_payment',
+    label: 'Registrar Pagamento de Comissões',
+    description: 'Permite dar baixa e registrar o pagamento mensal das comissões.',
+    category: 'Financeiro',
+  },
 ]
 
 interface SwitchProps {
