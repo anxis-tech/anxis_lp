@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { FAQItem } from '@/types/database.types'
 import { INITIAL_FAQS } from '@/lib/constants/initial-data'
-import { ChevronDown, HelpCircle } from 'lucide-react'
+import { Icon } from '@/components/ui/hugeicons'
+import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface FAQSectionProps {
@@ -39,7 +40,7 @@ export function FAQSection({
   }
 
   return (
-    <section id="faq" className="py-24 bg-[#F7F8FA] relative">
+    <section id="faq" className="py-24 sm:py-32 bg-[#F8FAFC] text-[#07090E] relative border-b border-slate-200">
       {/* Schema.org Injection */}
       <script
         type="application/ld+json"
@@ -49,13 +50,13 @@ export function FAQSection({
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* HEADER */}
         <div className="text-center space-y-4 mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#0075FF] bg-[#0075FF]/10 px-3.5 py-1.5 rounded-full border border-[#0075FF]/20">
+          <span className="text-xs font-extrabold uppercase tracking-widest text-[#00ABB8] bg-[#00ABB8]/10 px-4 py-1.5 rounded-full border border-[#00ABB8]/20 inline-block">
             DÚVIDAS FREQUENTES
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#0C1D36] tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#07090E] tracking-tight">
             {title}
           </h2>
-          <p className="text-base sm:text-lg text-[#596579] font-normal leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
             {description}
           </p>
         </div>
@@ -68,28 +69,28 @@ export function FAQSection({
             return (
               <div
                 key={faq.id}
-                className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden transition-all duration-200"
+                className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200"
               >
                 <button
                   type="button"
                   onClick={() => toggleAccordion(faq.id)}
                   aria-expanded={isOpen}
-                  className="w-full text-left px-6 py-5 flex items-center justify-between gap-4 font-bold text-base sm:text-lg text-[#0C1D36] hover:text-[#0075FF] transition-colors focus:outline-none"
+                  className="w-full text-left px-6 py-5 flex items-center justify-between gap-4 font-extrabold text-base sm:text-lg text-[#07090E] hover:text-[#00939E] transition-colors focus:outline-none cursor-pointer"
                 >
                   <span className="flex items-center gap-3">
-                    <HelpCircle className="w-5 h-5 text-[#0075FF] shrink-0" />
+                    <Icon name="Filter" size={18} className="text-[#00ABB8] shrink-0" />
                     <span>{faq.question}</span>
                   </span>
                   <ChevronDown
                     className={cn(
-                      'w-5 h-5 text-[#596579] shrink-0 transition-transform duration-300',
-                      isOpen ? 'transform rotate-180 text-[#0075FF]' : ''
+                      'w-5 h-5 text-slate-400 shrink-0 transition-transform duration-300',
+                      isOpen ? 'transform rotate-180 text-[#00939E]' : ''
                     )}
                   />
                 </button>
 
                 {isOpen && (
-                  <div className="px-6 pb-6 pt-1 text-sm text-[#596579] leading-relaxed border-t border-slate-100 animate-in fade-in duration-200">
+                  <div className="px-6 pb-6 pt-1 text-sm text-slate-600 leading-relaxed border-t border-slate-100 animate-in fade-in duration-200">
                     <p>{faq.answer}</p>
                   </div>
                 )}

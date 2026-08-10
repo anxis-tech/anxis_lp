@@ -1,13 +1,15 @@
 import { Metadata } from 'next'
 import { Header } from '@/components/layout/header'
 import { HeroSection } from '@/components/sections/hero-section'
+import { PillarsGridSection } from '@/components/sections/pillars-grid-section'
+import { TechMarquee } from '@/components/sections/tech-marquee'
+import { ProjectPreviewBar } from '@/components/sections/project-preview-bar'
+import { AboutSection } from '@/components/sections/about-section'
 import { CredibilityBar } from '@/components/sections/credibility-bar'
 import { ServicesSection } from '@/components/sections/services-section'
 import { PortfolioSection } from '@/components/sections/portfolio-section'
-import { TechMarquee } from '@/components/sections/tech-marquee'
-import { Differentiators } from '@/components/sections/differentiators'
-import { ProcessSection } from '@/components/sections/process-section'
 import { CustomSolution } from '@/components/sections/custom-solution'
+import { ProcessSection } from '@/components/sections/process-section'
 import { TestimonialsSection } from '@/components/sections/testimonials-section'
 import { FAQSection } from '@/components/sections/faq-section'
 import { CTASection } from '@/components/sections/cta-section'
@@ -145,47 +147,53 @@ export default async function HomePage() {
         googleAdsId={settings.google_ads_id}
       />
 
-      <main className="min-h-screen bg-[#F7F8FA] text-[#0C1D36] antialiased selection:bg-[#0075FF] selection:text-white">
-        {/* 1. HEADER */}
+      <main className="min-h-screen bg-[#F8FAFC] text-[#293233] antialiased selection:bg-[#00ABB8] selection:text-white">
+        {/* 1. HEADER MINIMALISTA */}
         <Header whatsapp={settings.whatsapp} ctaLabel={settings.primary_cta_label} />
 
-        {/* 2. HERO SECTION */}
+        {/* 2. HERO GRANDE */}
         <HeroSection primaryCtaText={settings.primary_cta_label} />
 
-        {/* 3. FAIXA DE CREDIBILIDADE */}
-        <CredibilityBar />
+        {/* 3. NOVA SEÇÃO DE PILARES / CARDS (DIRETAMENTE ABAIXO DA HERO) */}
+        <PillarsGridSection />
 
-        {/* 4. SERVIÇOS */}
-        <ServicesSection services={services} />
-
-        {/* 5. PROJETOS EM DESTAQUE */}
-        <PortfolioSection projects={projects} />
-
-        {/* 6. TECNOLOGIAS E PLATAFORMAS (MARQUEE) */}
+        {/* 4. MARQUEE DE TECNOLOGIAS & LOGOS */}
         <TechMarquee technologies={technologies} />
 
-        {/* 7. DIFERENCIAIS */}
-        <Differentiators />
+        {/* 5. PREVIEW DE PROJETOS DESTAQUE */}
+        <ProjectPreviewBar projects={projects} />
 
-        {/* 8. PROCESSO DE TRABALHO */}
-        <ProcessSection />
+        {/* 6. SEÇÃO INSTITUCIONAL (SOBRE A ANXIS) */}
+        <AboutSection />
 
-        {/* 9. SOLUÇÃO PERSONALIZADA */}
+        {/* FAIXA DE CREDIBILIDADE */}
+        <CredibilityBar />
+
+        {/* 7. SERVIÇOS (FUNDO ESCURO #293233 EM 2 COLUNAS) */}
+        <ServicesSection services={services} />
+
+        {/* SOLUÇÃO PERSONALIZADA EM CÓDIGO */}
         <CustomSolution />
 
-        {/* 10. DEPOIMENTOS */}
-        <TestimonialsSection testimonials={testimonials} />
+        {/* 8. PROJETOS (FUNDO CLARO #F8FAFC COM SIDEBAR) */}
+        <PortfolioSection projects={projects} />
 
-        {/* 11. PERGUNTAS FREQUENTES */}
-        <FAQSection faqs={faqs} />
+        {/* PROCESSO DE TRABALHO */}
+        <ProcessSection />
 
-        {/* 12. CTA FINAL */}
+        {/* 9. CTA DE CONTATO (#00ABB8) */}
         <CTASection whatsapp={settings.whatsapp} />
 
-        {/* 13. FORMULÁRIO DE CONTATO */}
+        {/* DEPOIMENTOS */}
+        <TestimonialsSection testimonials={testimonials} />
+
+        {/* PERGUNTAS FREQUENTES */}
+        <FAQSection faqs={faqs} />
+
+        {/* FORMULÁRIO DE CONTATO */}
         <ContactForm />
 
-        {/* 14. FOOTER */}
+        {/* 10. FOOTER (#293233) */}
         <Footer
           companyName={settings.company_name}
           email={settings.email}

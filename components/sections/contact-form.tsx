@@ -7,7 +7,8 @@ import { leadFormSchema, LeadFormData } from '@/lib/validations/lead-schema'
 import { captureUTMs, UTMData } from '@/lib/analytics/utm'
 import { submitLeadAction } from '@/lib/actions/leads'
 import { trackEvent } from '@/lib/analytics/events'
-import { CheckCircle2, Loader2, Send, ShieldCheck } from 'lucide-react'
+import { Icon } from '@/components/ui/hugeicons'
+import { Loader2 } from 'lucide-react'
 
 export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -68,38 +69,38 @@ export function ContactForm() {
   }
 
   return (
-    <section id="contato" className="py-24 bg-[#F7F8FA] relative border-t border-slate-200">
+    <section id="contato" className="py-24 sm:py-32 bg-[#F8FAFC] text-[#293233] relative border-t border-slate-200">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200/90 shadow-xl relative">
+        <div className="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200 shadow-2xl relative">
           {/* HEADER */}
-          <div className="text-center max-w-2xl mx-auto space-y-3 mb-10">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#0075FF] bg-[#0075FF]/10 px-3.5 py-1.5 rounded-full border border-[#0075FF]/20">
+          <div className="text-center max-w-2xl mx-auto space-y-3 mb-12">
+            <span className="text-xs font-extrabold uppercase tracking-widest text-[#00ABB8] bg-[#00ABB8]/10 px-4 py-1.5 rounded-full border border-[#00ABB8]/20 inline-block">
               SOLICITE UMA PROPOSTA
             </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0C1D36] tracking-tight">
-              Conte sobre a sua necessidade
+            <h2 className="text-3xl sm:text-4xl font-black text-[#293233] tracking-tight">
+              Conte sobre o seu projeto
             </h2>
-            <p className="text-sm sm:text-base text-[#596579]">
-              Preencha o formulário abaixo para receber uma análise técnica e proposta comercial personalizada para o seu negócio.
+            <p className="text-base text-slate-600">
+              Preencha o formulário abaixo para receber uma análise técnica e orçamento personalizado sem compromisso.
             </p>
           </div>
 
           {/* SUCCESS STATE */}
           {isSuccess ? (
             <div className="text-center py-16 space-y-6 animate-in zoom-in-95 duration-300">
-              <div className="w-20 h-20 bg-emerald-500/10 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20">
-                <CheckCircle2 className="w-10 h-10" />
+              <div className="w-20 h-20 bg-[#00ABB8]/15 text-[#00939E] rounded-full flex items-center justify-center mx-auto border border-[#00ABB8]/30">
+                <Icon name="Check" size={40} />
               </div>
               <div className="space-y-2 max-w-md mx-auto">
-                <h3 className="text-2xl font-extrabold text-[#0C1D36]">Proposta Enviada com Sucesso!</h3>
-                <p className="text-sm text-[#596579] leading-relaxed">
+                <h3 className="text-2xl font-black text-[#293233]">Proposta Enviada com Sucesso!</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">
                   Agradecemos seu contato. Nossa equipe técnica analisará as informações enviadas e retornará em até 24 horas úteis.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsSuccess(false)}
-                className="px-6 py-3 rounded-xl bg-[#081D3A] text-white text-xs font-bold hover:bg-[#0075FF] transition-colors"
+                className="px-6 py-3 rounded-xl bg-[#293233] text-white text-xs font-bold hover:bg-[#1E2526] transition-colors cursor-pointer"
               >
                 Enviar nova solicitação
               </button>
@@ -112,27 +113,27 @@ export function ContactForm() {
               {/* ROW 1: NAME & COMPANY */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-2">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-[#293233] mb-2">
                     Nome Completo *
                   </label>
                   <input
                     type="text"
                     placeholder="Seu nome"
                     {...register('name')}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0075FF] focus:ring-2 focus:ring-[#0075FF]/20 text-sm text-[#0C1D36] transition-all outline-none"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#00ABB8] focus:ring-2 focus:ring-[#00ABB8]/20 text-sm text-[#293233] transition-all outline-none"
                   />
-                  {errors.name && <p className="text-xs text-rose-600 mt-1">{errors.name.message}</p>}
+                  {errors.name && <p className="text-xs text-rose-600 mt-1 font-semibold">{errors.name.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-2">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-[#293233] mb-2">
                     Nome da Empresa
                   </label>
                   <input
                     type="text"
                     placeholder="Sua empresa"
                     {...register('company')}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0075FF] focus:ring-2 focus:ring-[#0075FF]/20 text-sm text-[#0C1D36] transition-all outline-none"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#00ABB8] focus:ring-2 focus:ring-[#00ABB8]/20 text-sm text-[#293233] transition-all outline-none"
                   />
                 </div>
               </div>
@@ -140,61 +141,61 @@ export function ContactForm() {
               {/* ROW 2: EMAIL & WHATSAPP */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-2">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-[#293233] mb-2">
                     E-mail Corporativo *
                   </label>
                   <input
                     type="email"
                     placeholder="seuemail@empresa.com.br"
                     {...register('email')}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0075FF] focus:ring-2 focus:ring-[#0075FF]/20 text-sm text-[#0C1D36] transition-all outline-none"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#00ABB8] focus:ring-2 focus:ring-[#00ABB8]/20 text-sm text-[#293233] transition-all outline-none"
                   />
-                  {errors.email && <p className="text-xs text-rose-600 mt-1">{errors.email.message}</p>}
+                  {errors.email && <p className="text-xs text-rose-600 mt-1 font-semibold">{errors.email.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-2">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-[#293233] mb-2">
                     WhatsApp *
                   </label>
                   <input
                     type="tel"
                     placeholder="(11) 99999-9999"
                     {...register('whatsapp')}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0075FF] focus:ring-2 focus:ring-[#0075FF]/20 text-sm text-[#0C1D36] transition-all outline-none"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#00ABB8] focus:ring-2 focus:ring-[#00ABB8]/20 text-sm text-[#293233] transition-all outline-none"
                   />
-                  {errors.whatsapp && <p className="text-xs text-rose-600 mt-1">{errors.whatsapp.message}</p>}
+                  {errors.whatsapp && <p className="text-xs text-rose-600 mt-1 font-semibold">{errors.whatsapp.message}</p>}
                 </div>
               </div>
 
               {/* ROW 3: PROJECT TYPE & CURRENT PLATFORM */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-2">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-[#293233] mb-2">
                     Tipo de Projeto *
                   </label>
                   <select
                     {...register('project_type')}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0075FF] focus:ring-2 focus:ring-[#0075FF]/20 text-sm text-[#0C1D36] transition-all outline-none bg-white"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#00ABB8] focus:ring-2 focus:ring-[#00ABB8]/20 text-sm text-[#293233] transition-all outline-none bg-white font-medium"
                   >
                     <option value="">Selecione o tipo de projeto</option>
                     <option value="Site institucional">Site Institucional</option>
-                    <option value="Landing page">Landing Page</option>
+                    <option value="Landing page">Landing Page de Alta Conversão</option>
                     <option value="Loja virtual">Loja Virtual (E-commerce)</option>
                     <option value="Reformulação">Reformulação de Site Existente</option>
                     <option value="Desenvolvimento personalizado">Desenvolvimento Sob Medida em Código</option>
                     <option value="Integração">Integrações & Melhorias Técnicas</option>
                     <option value="Ainda não sei">Ainda preciso de orientação</option>
                   </select>
-                  {errors.project_type && <p className="text-xs text-rose-600 mt-1">{errors.project_type.message}</p>}
+                  {errors.project_type && <p className="text-xs text-rose-600 mt-1 font-semibold">{errors.project_type.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-2">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-[#293233] mb-2">
                     Plataforma Atual / Desejada
                   </label>
                   <select
                     {...register('current_platform')}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0075FF] focus:ring-2 focus:ring-[#0075FF]/20 text-sm text-[#0C1D36] transition-all outline-none bg-white"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#00ABB8] focus:ring-2 focus:ring-[#00ABB8]/20 text-sm text-[#293233] transition-all outline-none bg-white font-medium"
                   >
                     <option value="">Selecione a plataforma</option>
                     <option value="Ainda não possuo">Ainda não possuo site/loja</option>
@@ -212,12 +213,12 @@ export function ContactForm() {
               {/* ROW 4: BUDGET & DEADLINE */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-2">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-[#293233] mb-2">
                     Faixa de Investimento Prevista
                   </label>
                   <select
                     {...register('budget_range')}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0075FF] focus:ring-2 focus:ring-[#0075FF]/20 text-sm text-[#0C1D36] transition-all outline-none bg-white"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#00ABB8] focus:ring-2 focus:ring-[#00ABB8]/20 text-sm text-[#293233] transition-all outline-none bg-white font-medium"
                   >
                     <option value="">Selecione a faixa estimada</option>
                     <option value="Até R$ 3.000">Até R$ 3.000</option>
@@ -228,12 +229,12 @@ export function ContactForm() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-2">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-[#293233] mb-2">
                     Prazo Desejado
                   </label>
                   <select
                     {...register('desired_deadline')}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0075FF] focus:ring-2 focus:ring-[#0075FF]/20 text-sm text-[#0C1D36] transition-all outline-none bg-white"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#00ABB8] focus:ring-2 focus:ring-[#00ABB8]/20 text-sm text-[#293233] transition-all outline-none bg-white font-medium"
                   >
                     <option value="">Selecione a expectativa de entrega</option>
                     <option value="Urgente (Até 15 dias)">Urgente (Até 15 dias)</option>
@@ -245,14 +246,14 @@ export function ContactForm() {
 
               {/* ROW 5: MESSAGE */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-[#0C1D36] mb-2">
+                <label className="block text-xs font-extrabold uppercase tracking-wider text-[#293233] mb-2">
                   Descrição do Projeto
                 </label>
                 <textarea
                   rows={4}
                   placeholder="Conte brevemente sobre o objetivo da sua empresa, páginas necessárias ou referências..."
                   {...register('message')}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#0075FF] focus:ring-2 focus:ring-[#0075FF]/20 text-sm text-[#0C1D36] transition-all outline-none resize-y"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[#00ABB8] focus:ring-2 focus:ring-[#00ABB8]/20 text-sm text-[#293233] transition-all outline-none resize-y"
                 />
               </div>
 
@@ -262,13 +263,13 @@ export function ContactForm() {
                   type="checkbox"
                   id="consent"
                   {...register('consent')}
-                  className="mt-1 rounded border-slate-300 text-[#0075FF] focus:ring-[#0075FF]"
+                  className="mt-1 rounded border-slate-300 text-[#00ABB8] focus:ring-[#00ABB8]"
                 />
-                <label htmlFor="consent" className="text-xs text-[#596579] cursor-pointer">
+                <label htmlFor="consent" className="text-xs text-slate-600 cursor-pointer font-medium">
                   Concordo em fornecer meus dados para que a equipe da ANXIS entre em contato com a proposta solicitada.
                 </label>
               </div>
-              {errors.consent && <p className="text-xs text-rose-600">{errors.consent.message}</p>}
+              {errors.consent && <p className="text-xs text-rose-600 font-semibold">{errors.consent.message}</p>}
 
               {/* ERROR ALERT */}
               {errorMessage && (
@@ -282,25 +283,25 @@ export function ContactForm() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full inline-flex items-center justify-center px-8 py-4 rounded-xl text-base font-bold text-white bg-[#0075FF] hover:bg-[#168CFF] shadow-lg hover:shadow-glow-blue transition-all duration-200 disabled:opacity-50"
+                  className="w-full inline-flex items-center justify-center px-8 py-4.5 rounded-xl text-base font-extrabold text-white bg-[#293233] hover:bg-[#1E2526] shadow-xl hover:shadow-2xl transition-all duration-200 disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                      <Loader2 className="w-5 h-5 mr-2 animate-spin text-[#00C4D4]" />
                       <span>Enviando solicitação...</span>
                     </>
                   ) : (
                     <>
-                      <Send className="w-5 h-5 mr-2.5" />
+                      <Icon name="ArrowRight" size={18} className="mr-2 text-[#00C4D4]" />
                       <span>Solicitar Proposta sem Compromisso</span>
                     </>
                   )}
                 </button>
               </div>
 
-              <div className="flex items-center justify-center gap-2 text-[11px] text-[#596579] pt-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Seus dados estão protegidos. Não enviamos spam.</span>
+              <div className="flex items-center justify-center gap-2 text-xs text-slate-500 pt-2 font-medium">
+                <Icon name="ShieldCheck" size={16} className="text-emerald-600" />
+                <span>Seus dados estão protegidos. Resposta em até 24 horas úteis.</span>
               </div>
             </form>
           )}

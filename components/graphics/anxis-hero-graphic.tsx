@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { motion, useMotionValue, useSpring, useTransform } from 'motion/react'
-import { Code2, Layout, Sparkles, CheckCircle2, ShieldCheck } from 'lucide-react'
 
 export function AnxisHeroGraphic() {
   const [isReducedMotion, setIsReducedMotion] = useState(false)
@@ -11,11 +10,11 @@ export function AnxisHeroGraphic() {
   const mouseY = useMotionValue(0)
 
   // Smooth springs for subtle parallax tilt
-  const springX = useSpring(mouseX, { stiffness: 60, damping: 20 })
-  const springY = useSpring(mouseY, { stiffness: 60, damping: 20 })
+  const springX = useSpring(mouseX, { stiffness: 50, damping: 20 })
+  const springY = useSpring(mouseY, { stiffness: 50, damping: 20 })
 
-  const rotateX = useTransform(springY, [-200, 200], [8, -8])
-  const rotateY = useTransform(springX, [-200, 200], [-8, 8])
+  const rotateX = useTransform(springY, [-200, 200], [10, -10])
+  const rotateY = useTransform(springX, [-200, 200], [-10, 10])
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -38,16 +37,16 @@ export function AnxisHeroGraphic() {
 
   return (
     <div
-      className="relative w-full aspect-square max-w-[540px] mx-auto flex items-center justify-center p-4 cursor-pointer select-none"
+      className="relative w-full aspect-square max-w-[540px] mx-auto flex items-center justify-center p-2 cursor-pointer select-none"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
       {/* Background Radial Glow */}
       <motion.div
-        className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#0075FF]/20 via-[#168CFF]/10 to-transparent blur-3xl pointer-events-none"
+        className="absolute inset-0 rounded-full bg-gradient-to-tr from-[#00ABB8]/30 via-sky-300/20 to-transparent blur-3xl pointer-events-none"
         animate={{
           scale: [1, 1.08, 1],
-          opacity: [0.6, 0.85, 0.6],
+          opacity: [0.7, 0.9, 0.7],
         }}
         transition={{
           duration: 6,
@@ -65,62 +64,85 @@ export function AnxisHeroGraphic() {
           rotateY: isReducedMotion ? 0 : rotateY,
         }}
       >
-        {/* Layer 1: Geometric Metallic 'A' Symbol Grid */}
+        {/* Layer: 3D Flowing Glass Ribbon Infinite Loop ANXIS Symbol (Matching Reference Image) */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <svg className="w-full h-full max-w-[420px] max-h-[420px] drop-shadow-2xl" viewBox="0 0 400 400" fill="none">
+          <svg className="w-full h-full max-w-[480px] max-h-[480px] drop-shadow-[0_20px_40px_rgba(0,171,184,0.35)]" viewBox="0 0 400 400" fill="none">
             <defs>
-              <linearGradient id="heroBlueGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#081D3A" />
-                <stop offset="50%" stopColor="#0055D4" />
-                <stop offset="100%" stopColor="#0075FF" />
+              <linearGradient id="ribbonTealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#80E9F2" />
+                <stop offset="40%" stopColor="#00C4D4" />
+                <stop offset="85%" stopColor="#00ABB8" />
+                <stop offset="100%" stopColor="#007780" />
               </linearGradient>
 
-              <linearGradient id="heroSilverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#657184" />
-                <stop offset="50%" stopColor="#A5B0C0" />
-                <stop offset="100%" stopColor="#E2E7F0" />
+              <linearGradient id="ribbonGlassGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.9" />
+                <stop offset="50%" stopColor="#00C4D4" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="#00ABB8" stopOpacity="0.8" />
               </linearGradient>
 
-              <linearGradient id="strokeLight" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#0075FF" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#168CFF" stopOpacity="0.2" />
-              </linearGradient>
+              <radialGradient id="sparkleGlow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#FFFFFF" />
+                <stop offset="100%" stopColor="#00ABB8" stopOpacity="0" />
+              </radialGradient>
             </defs>
 
-            {/* Background Grid Lines & Diagonal Rays */}
-            <g stroke="url(#strokeLight)" strokeWidth="1" strokeDasharray="4 4" opacity="0.4">
-              <line x1="50" y1="50" x2="350" y2="350" />
-              <line x1="350" y1="50" x2="50" y2="350" />
-              <circle cx="200" cy="200" r="160" stroke="#0075FF" strokeOpacity="0.15" fill="none" />
-              <circle cx="200" cy="200" r="110" stroke="#657184" strokeOpacity="0.15" fill="none" />
-            </g>
+            {/* Background Soft Mesh Ambient Circles */}
+            <circle cx="200" cy="200" r="160" stroke="#00ABB8" strokeWidth="1" strokeDasharray="6 6" opacity="0.2" />
+            <circle cx="200" cy="200" r="110" stroke="#00C4D4" strokeWidth="1" opacity="0.15" />
 
-            {/* Geometric Left Chevron Arrow */}
+            {/* Flowing Ribbon Loop 1 (Outer Translucent Glass Layer) */}
             <motion.path
-              d="M 180 60 L 70 270 L 260 270 L 260 215 L 145 215 L 205 105 Z"
-              fill="url(#heroBlueGrad)"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              d="M 80 260 C 20 180, 100 80, 180 120 C 260 160, 320 80, 350 140 C 380 200, 280 320, 200 270 C 120 220, 40 320, 80 260 Z"
+              fill="url(#ribbonGlassGrad)"
+              stroke="#FFFFFF"
+              strokeWidth="4"
+              opacity="0.85"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 0.85, scale: 1 }}
               transition={{ duration: 0.8 }}
             />
 
-            {/* Geometric Right Metallic Slash */}
+            {/* Flowing Ribbon Loop 2 (Main Metallic Teal Layer - ANXIS 'A' / Infinity Motif) */}
             <motion.path
-              d="M 205 55 L 330 290 L 265 290 L 140 70 Z"
-              fill="url(#heroSilverGrad)"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
+              d="M 60 220 C 10 140, 120 60, 210 140 C 300 220, 360 120, 340 210 C 320 300, 210 260, 150 290 C 90 320, 30 280, 60 220 Z"
+              fill="url(#ribbonTealGrad)"
+              stroke="#00ABB8"
+              strokeWidth="2"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             />
 
-            {/* Moving Light Beam along the 'A' path */}
+            {/* Translucent Overlay Ribs & Details */}
+            <path
+              d="M 120 140 C 160 180, 240 220, 280 160"
+              stroke="#FFFFFF"
+              strokeWidth="6"
+              strokeLinecap="round"
+              opacity="0.7"
+            />
+            <path
+              d="M 90 240 C 140 200, 220 260, 270 230"
+              stroke="#80E9F2"
+              strokeWidth="4"
+              strokeLinecap="round"
+              opacity="0.8"
+            />
+
+            {/* Orbiting Glass Spheres (Matching Reference Floating Spheres) */}
+            <circle cx="330" cy="110" r="14" fill="url(#ribbonGlassGrad)" stroke="#FFFFFF" strokeWidth="2" />
+            <circle cx="70" cy="300" r="10" fill="#00C4D4" stroke="#FFFFFF" strokeWidth="1.5" />
+            <circle cx="210" cy="330" r="8" fill="#80E9F2" />
+
+            {/* Orbiting Light Sparkle */}
             <motion.circle
               r="6"
               fill="#FFFFFF"
-              className="drop-shadow-[0_0_12px_#0075FF]"
+              className="drop-shadow-[0_0_12px_#00ABB8]"
               animate={{
-                cx: [180, 70, 260, 205, 330, 180],
-                cy: [60, 270, 270, 105, 290, 60],
+                cx: [80, 180, 350, 200, 80],
+                cy: [260, 120, 140, 270, 260],
               }}
               transition={{
                 duration: 8,
@@ -130,55 +152,6 @@ export function AnxisHeroGraphic() {
             />
           </svg>
         </div>
-
-        {/* Layer 2: Floating Floating UI Mockup Cards */}
-        {/* Top-Right Performance Badge */}
-        <motion.div
-          className="absolute top-6 right-2 sm:right-6 bg-[#081D3A]/90 backdrop-blur-md border border-[#0075FF]/30 p-3.5 rounded-xl shadow-xl flex items-center gap-3 text-white text-xs z-20"
-          initial={{ opacity: 0, scale: 0.8, y: -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          style={{ transform: 'translateZ(35px)' }}
-        >
-          <div className="w-8 h-8 rounded-lg bg-[#0075FF]/20 flex items-center justify-center text-[#168CFF]">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="font-semibold text-white">Performance 98+</div>
-            <div className="text-[10px] text-[#BBC4D1]">Core Web Vitals Otimizados</div>
-          </div>
-        </motion.div>
-
-        {/* Bottom-Left Code / Architecture Card */}
-        <motion.div
-          className="absolute bottom-8 left-2 sm:left-6 bg-white/95 backdrop-blur-md border border-slate-200 p-4 rounded-xl shadow-2xl flex items-center gap-3.5 text-slate-800 text-xs z-20"
-          initial={{ opacity: 0, scale: 0.8, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.6 }}
-          style={{ transform: 'translateZ(45px)' }}
-        >
-          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 font-bold">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="font-bold text-[#0C1D36] flex items-center gap-1.5">
-              <span>Projetos Sob Medida</span>
-            </div>
-            <div className="text-[11px] text-[#596579]">Estrutura limpa, segura e escalável</div>
-          </div>
-        </motion.div>
-
-        {/* Bottom-Right Security & Custom Stack Floating Pill */}
-        <motion.div
-          className="absolute top-1/2 -right-4 sm:right-2 transform -translate-y-1/2 bg-[#0B2F63]/90 backdrop-blur-md border border-[#BBC4D1]/30 text-white px-3.5 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-[11px] z-10"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          style={{ transform: 'translateZ(25px)' }}
-        >
-          <ShieldCheck className="w-4 h-4 text-[#0075FF]" />
-          <span className="font-medium text-slate-200">Plataformas & Código Limpo</span>
-        </motion.div>
       </motion.div>
     </div>
   )

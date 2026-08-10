@@ -1,3 +1,5 @@
+'use client'
+
 import { Technology } from '@/types/database.types'
 import { INITIAL_TECHNOLOGIES } from '@/lib/constants/initial-data'
 
@@ -9,8 +11,8 @@ interface TechMarqueeProps {
 
 export function TechMarquee({
   technologies = INITIAL_TECHNOLOGIES,
-  title = 'Tecnologia adequada para cada tipo de projeto.',
-  description = 'Trabalhamos com plataformas consolidadas e desenvolvimento personalizado para indicar a estrutura mais coerente para cada necessidade.',
+  title = 'Tecnologias & Plataformas',
+  description = 'Trabalhamos com as principais plataformas do mercado e desenvolvimento personalizado em código.',
 }: TechMarqueeProps) {
   const visibleTechs = technologies.filter((t) => t.is_visible)
 
@@ -23,31 +25,31 @@ export function TechMarquee({
   const marqueeRow2 = [...row2, ...row2, ...row2, ...row2]
 
   return (
-    <section id="tecnologias" className="py-20 bg-[#081D3A] text-white relative overflow-hidden">
+    <section id="tecnologias" className="py-16 bg-[#F8FAFC] text-[#293233] relative overflow-hidden border-b border-slate-200">
       {/* Side Fade Gradients */}
-      <div className="absolute top-0 bottom-0 left-0 w-24 bg-gradient-to-r from-[#081D3A] to-transparent z-20 pointer-events-none" />
-      <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-[#081D3A] to-transparent z-20 pointer-events-none" />
+      <div className="absolute top-0 bottom-0 left-0 w-24 bg-gradient-to-r from-[#F8FAFC] to-transparent z-20 pointer-events-none" />
+      <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-[#F8FAFC] to-transparent z-20 pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 text-center">
-        <span className="text-xs font-bold uppercase tracking-widest text-[#0075FF] bg-[#0075FF]/20 px-3.5 py-1.5 rounded-full border border-[#0075FF]/30">
-          TECNOLOGIAS & PLATAFORMAS
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 text-center">
+        <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#00939E] bg-[#00ABB8]/10 px-3.5 py-1 rounded-full border border-[#00ABB8]/20 inline-block">
+          PLATAFORMAS & STACK
         </span>
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-4 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-black text-[#293233] mt-3 tracking-tight">
           {title}
         </h2>
-        <p className="text-sm sm:text-base text-[#BBC4D1] font-normal max-w-2xl mx-auto mt-2 leading-relaxed">
+        <p className="text-sm text-slate-600 font-normal max-w-2xl mx-auto mt-2 leading-relaxed">
           {description}
         </p>
       </div>
 
-      <div className="space-y-6 overflow-hidden">
+      <div className="space-y-4 overflow-hidden">
         {/* ROW 1: LEFT TO RIGHT */}
         <div className="flex overflow-hidden select-none">
-          <div className="animate-marquee-left flex items-center gap-6">
+          <div className="animate-marquee-left flex items-center gap-5">
             {marqueeRow1.map((tech, idx) => (
               <div
                 key={`r1-${tech.id}-${idx}`}
-                className="flex items-center gap-3 bg-[#0B2F63]/80 border border-[#BBC4D1]/20 hover:border-[#0075FF] px-5 py-3 rounded-xl transition-all duration-300 group shrink-0 cursor-pointer"
+                className="flex items-center gap-3 bg-white border border-slate-200 hover:border-[#00ABB8] px-5 py-3 rounded-xl transition-all duration-300 group shrink-0 shadow-sm hover:shadow-md cursor-pointer"
               >
                 <div className="w-7 h-7 relative flex items-center justify-center grayscale group-hover:grayscale-0 transition-all duration-300">
                   <img
@@ -56,10 +58,10 @@ export function TechMarquee({
                     className="max-w-full max-h-full object-contain"
                   />
                 </div>
-                <span className="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors">
+                <span className="text-xs sm:text-sm font-extrabold text-[#293233] group-hover:text-[#00939E] transition-colors">
                   {tech.name}
                 </span>
-                <span className="text-[10px] text-[#BBC4D1] bg-[#081D3A] px-2 py-0.5 rounded border border-[#163968]">
+                <span className="text-[9px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                   {tech.category}
                 </span>
               </div>
@@ -69,11 +71,11 @@ export function TechMarquee({
 
         {/* ROW 2: RIGHT TO LEFT */}
         <div className="flex overflow-hidden select-none">
-          <div className="animate-marquee-right flex items-center gap-6">
+          <div className="animate-marquee-right flex items-center gap-5">
             {marqueeRow2.map((tech, idx) => (
               <div
                 key={`r2-${tech.id}-${idx}`}
-                className="flex items-center gap-3 bg-[#0B2F63]/80 border border-[#BBC4D1]/20 hover:border-[#0075FF] px-5 py-3 rounded-xl transition-all duration-300 group shrink-0 cursor-pointer"
+                className="flex items-center gap-3 bg-white border border-slate-200 hover:border-[#00ABB8] px-5 py-3 rounded-xl transition-all duration-300 group shrink-0 shadow-sm hover:shadow-md cursor-pointer"
               >
                 <div className="w-7 h-7 relative flex items-center justify-center grayscale group-hover:grayscale-0 transition-all duration-300">
                   <img
@@ -82,10 +84,10 @@ export function TechMarquee({
                     className="max-w-full max-h-full object-contain"
                   />
                 </div>
-                <span className="text-sm font-semibold text-slate-200 group-hover:text-white transition-colors">
+                <span className="text-xs sm:text-sm font-extrabold text-[#293233] group-hover:text-[#00939E] transition-colors">
                   {tech.name}
                 </span>
-                <span className="text-[10px] text-[#BBC4D1] bg-[#081D3A] px-2 py-0.5 rounded border border-[#163968]">
+                <span className="text-[9px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                   {tech.category}
                 </span>
               </div>

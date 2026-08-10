@@ -2,96 +2,88 @@
 
 @layer base {
   :root {
-    --background: #F7F8FA;
-    --foreground: #0C1D36;
+    --background: #F8FAFC;
+    --foreground: #293233;
 
-    --navy-deep: #081D3A;
-    --navy-medium: #0B2F63;
-    --blue-electric: #0075FF;
-    --blue-luminous: #168CFF;
-    --gray-metallic-dark: #657184;
-    --gray-metallic-light: #BBC4D1;
+    --anxis-dark: #293233;
+    --anxis-teal: #00ABB8;
+    --anxis-teal-dark: #00939E;
+    --anxis-teal-light: #00C4D4;
 
     --card: #FFFFFF;
-    --card-foreground: #0C1D36;
+    --card-foreground: #293233;
 
-    --primary: #0075FF;
+    --primary: #00ABB8;
     --primary-foreground: #FFFFFF;
 
-    --secondary: #081D3A;
+    --secondary: #293233;
     --secondary-foreground: #FFFFFF;
 
-    --muted: #EEF2F6;
-    --muted-foreground: #596579;
+    --muted: #F1F5F9;
+    --muted-foreground: #64748B;
 
-    --accent: #168CFF;
+    --accent: #00C4D4;
     --accent-foreground: #FFFFFF;
 
     --border: #E2E8F0;
     --input: #E2E8F0;
-    --ring: #0075FF;
+    --ring: #00ABB8;
 
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: #081D3A;
-    --foreground: #F7F8FA;
+    --background: #293233;
+    --foreground: #F8FAFC;
 
-    --card: #0B2F63;
-    --card-foreground: #F7F8FA;
+    --card: #293233;
+    --card-foreground: #F8FAFC;
 
-    --primary: #0075FF;
+    --primary: #00ABB8;
     --primary-foreground: #FFFFFF;
 
-    --secondary: #168CFF;
-    --secondary-foreground: #FFFFFF;
+    --secondary: #00C4D4;
+    --secondary-foreground: #293233;
 
-    --muted: #0F284D;
-    --muted-foreground: #BBC4D1;
+    --muted: #1E293B;
+    --muted-foreground: #94A3B8;
 
-    --border: #163968;
-    --input: #163968;
-    --ring: #168CFF;
+    --border: #334155;
+    --input: #334155;
+    --ring: #00C4D4;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: var(--font-plus-jakarta), var(--font-inter), sans-serif;
   }
 }
 
 @layer utilities {
   /* ANXIS Gradient Utilities */
   .bg-gradient-anxis {
-    background: linear-gradient(135deg, #081D3A 0%, #0B2F63 50%, #0075FF 100%);
+    background: linear-gradient(135deg, #293233 0%, #1E2526 50%, #00ABB8 100%);
   }
 
-  .bg-gradient-blue-glow {
-    background: radial-gradient(circle at center, rgba(0, 117, 255, 0.15) 0%, rgba(8, 29, 58, 0) 70%);
+  .bg-gradient-teal {
+    background: linear-gradient(135deg, #00ABB8 0%, #00C4D4 100%);
   }
 
-  .bg-gradient-metallic {
-    background: linear-gradient(135deg, #657184 0%, #BBC4D1 50%, #E2E7F0 100%);
+  .bg-gradient-teal-glow {
+    background: radial-gradient(circle at center, rgba(0, 171, 184, 0.25) 0%, rgba(41, 50, 51, 0) 70%);
   }
 
-  .text-gradient-blue {
-    background: linear-gradient(135deg, #0075FF 0%, #168CFF 100%);
+  .text-gradient-teal {
+    background: linear-gradient(135deg, #00ABB8 0%, #00C4D4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
-  .text-gradient-metallic {
-    background: linear-gradient(135deg, #0C1D36 0%, #657184 60%, #0075FF 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .shadow-glow-teal {
+    box-shadow: 0 0 25px -5px rgba(0, 171, 184, 0.4);
   }
 
-  .shadow-glow-blue {
-    box-shadow: 0 0 25px -5px rgba(0, 117, 255, 0.35);
-  }
-
-  .shadow-glow-blue-lg {
-    box-shadow: 0 0 50px -10px rgba(0, 117, 255, 0.45);
-  }
-
-  .border-metallic {
-    border-color: rgba(187, 196, 209, 0.3);
+  .shadow-glow-teal-lg {
+    box-shadow: 0 0 50px -10px rgba(0, 171, 184, 0.5);
   }
 }
 
@@ -102,27 +94,37 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #F7F8FA;
+  background: #F8FAFC;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #BBC4D1;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #0075FF;
+  background: #00ABB8;
 }
 
 /* Tech Marquee Animations */
 @keyframes marquee-left {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 @keyframes marquee-right {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(0%); }
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0%);
+  }
 }
 
 .animate-marquee-left {
@@ -142,9 +144,11 @@
   animation-play-state: paused;
 }
 
-/* Prevent Global Page Level Horizontal Overflow */
-html, body {
+/* Prevent Global Horizontal Overflow without Breaking position: sticky */
+html {
   scroll-behavior: smooth;
-  max-width: 100vw;
-  overflow-x: hidden;
+}
+
+body {
+  overflow-x: clip;
 }
