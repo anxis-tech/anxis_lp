@@ -14,15 +14,15 @@ export function AnxisHeroGraphic() {
       <motion.div
         animate={{ y: [-8, 8, -8], rotate: [-2, 1, -2] }}
         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute -left-2 sm:left-0 top-12 z-30 flex items-center gap-3 p-3.5 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-900/10"
+        className="absolute -left-2 sm:left-0 top-12 z-30 flex items-center gap-3 p-3.5 bg-white/95 backdrop-blur-xl border border-slate-200/90 rounded-[10px] shadow-xl shadow-slate-900/10"
       >
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#FF6B00] to-[#FFB800] flex items-center justify-center text-white shadow-md shadow-orange-500/20">
+        <div className="w-11 h-11 rounded-[10px] bg-gradient-to-tr from-[#FF6B00] to-[#FFB800] flex items-center justify-center text-white shadow-md shadow-orange-500/20">
           <Icon name="BarChart" size={22} />
         </div>
         <div>
           <div className="flex items-center gap-1.5">
             <span className="text-xs font-black text-[#0F172A] font-heading">+320%</span>
-            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">ROI</span>
+            <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded-[10px] border border-emerald-200">ROI</span>
           </div>
           <p className="text-[10px] text-slate-500 font-medium">Conversão Metrificada</p>
         </div>
@@ -52,7 +52,7 @@ export function AnxisHeroGraphic() {
           </div>
 
           {/* Simulated Agency UI Card with Brand Gradient */}
-          <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 rounded-xl p-3.5 border border-slate-800 space-y-2 relative overflow-hidden">
+          <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 rounded-[10px] p-3.5 border border-slate-800 space-y-2 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#0099FF]/20 via-transparent to-transparent rounded-full pointer-events-none" />
             <div className="text-[10px] font-mono text-[#0099FF] uppercase tracking-wider font-bold">
               Nova Estrutura Ativa
@@ -70,11 +70,11 @@ export function AnxisHeroGraphic() {
 
           {/* Quick Stat row inside phone */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-slate-950/80 rounded-xl p-2.5 border border-slate-800 text-center">
+            <div className="bg-slate-950/80 rounded-[10px] p-2.5 border border-slate-800 text-center">
               <span className="text-[9px] text-slate-400 block font-medium">Velocidade</span>
               <span className="text-xs font-black text-emerald-400 font-mono">0.4s LCP</span>
             </div>
-            <div className="bg-slate-950/80 rounded-xl p-2.5 border border-slate-800 text-center">
+            <div className="bg-slate-950/80 rounded-[10px] p-2.5 border border-slate-800 text-center">
               <span className="text-[9px] text-slate-400 block font-medium">SEO Google</span>
               <span className="text-xs font-black text-[#0099FF] font-mono">Top #1</span>
             </div>
@@ -85,7 +85,7 @@ export function AnxisHeroGraphic() {
         <motion.div
           animate={{ y: [4, -4, 4] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute -left-10 sm:-left-12 bottom-12 z-30 w-56 bg-[#0B0F19]/95 text-white p-3.5 rounded-2xl shadow-2xl border border-white/15 backdrop-blur-xl space-y-1.5"
+          className="absolute -left-10 sm:-left-12 bottom-12 z-30 w-56 bg-[#0B0F19]/95 text-white p-3.5 rounded-[10px] shadow-2xl border border-white/15 backdrop-blur-xl space-y-1.5"
         >
           <div className="flex items-center gap-2 text-xs text-[#0099FF] font-extrabold">
             <Icon name="Globe" size={14} />
@@ -104,14 +104,14 @@ export function AnxisHeroGraphic() {
       <motion.div
         animate={{ y: [-6, 6, -6] }}
         transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute -right-2 sm:right-2 top-8 z-30 w-52 bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-xl shadow-slate-900/10 border border-slate-200/90 space-y-2 hidden sm:block"
+        className="absolute -right-2 sm:right-2 top-8 z-30 w-52 bg-white/95 backdrop-blur-xl rounded-[10px] p-4 shadow-xl shadow-slate-900/10 border border-slate-200/90 space-y-2 hidden sm:block"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-xs font-extrabold text-slate-800">
             <Icon name="Zap" size={15} className="text-amber-500" />
             <span>Google Score</span>
           </div>
-          <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+          <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-[10px] border border-emerald-200">
             100/100
           </span>
         </div>
@@ -125,7 +125,7 @@ export function AnxisHeroGraphic() {
       <motion.div
         animate={{ y: [8, -8, 8], rotate: [4, -4, 4] }}
         transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute -right-4 sm:-right-6 bottom-10 z-20 hidden sm:flex items-center justify-center w-20 h-20 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-200/90 p-3 group cursor-pointer"
+        className="absolute -right-4 sm:-right-6 bottom-10 z-20 hidden sm:flex items-center justify-center w-20 h-20 bg-white/95 backdrop-blur-xl rounded-[10px] shadow-2xl border border-slate-200/90 p-3 group cursor-pointer"
       >
         <AnxisIcon size={46} className="group-hover:scale-110 transition-transform duration-300" />
       </motion.div>

@@ -2,6 +2,7 @@
 
 import { HugeiconsIcon } from '@hugeicons/react'
 import * as Icons from '@hugeicons/core-free-icons'
+import { WhatsAppIcon } from '@/components/ui/whatsapp-icon'
 
 interface IconProps {
   name: string
@@ -40,6 +41,10 @@ const ICON_LOOKUP: Record<string, any> = {
 }
 
 export function Icon({ name, size = 24, className = '', color }: IconProps) {
+  if (name === 'WhatsApp' || name === 'Whatsapp') {
+    return <WhatsAppIcon size={size} className={className} />
+  }
+
   const iconData = ICON_LOOKUP[name] || Icons[name as keyof typeof Icons] || Icons.Globe02Icon
 
   return <HugeiconsIcon icon={iconData} size={size} className={className} color={color} />

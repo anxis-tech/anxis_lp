@@ -148,7 +148,7 @@ export default async function HomePage() {
         <Header whatsapp={settings.whatsapp} ctaLabel={settings.primary_cta_label} />
 
         {/* 2. HERO GRANDE */}
-        <HeroSection primaryCtaText={settings.primary_cta_label} />
+        <HeroSection primaryCtaText={settings.primary_cta_label} projects={projects} />
 
         {/* 3. LOGOS MARQUEE (TICKER MINIMALISTA LOGO ABAIXO DA HERO) */}
         <TechMarquee technologies={technologies} />

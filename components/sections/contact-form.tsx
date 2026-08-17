@@ -10,6 +10,7 @@ import { trackEvent } from '@/lib/analytics/events'
 import { FAQItem } from '@/types/database.types'
 import { INITIAL_FAQS } from '@/lib/constants/initial-data'
 import { Icon } from '@/components/ui/hugeicons'
+import { WhatsAppIcon } from '@/components/ui/whatsapp-icon'
 import { ChevronDown, Loader2 } from 'lucide-react'
 import { cn, formatWhatsAppLink } from '@/lib/utils'
 
@@ -115,10 +116,10 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
           {/* LEFT 50%: FAQ ACCORDIONS (LG:COL-SPAN-6) */}
           <div id="faq" className="lg:col-span-6 space-y-6">
             <div className="space-y-3">
-              <span className="text-xs font-mono uppercase tracking-widest text-gradient-anxis bg-slate-100 px-4 py-1.5 rounded-full border border-slate-200 inline-block font-extrabold">
+              <span className="text-xs font-mono uppercase tracking-widest text-gradient-anxis bg-slate-100 px-4 py-1.5 rounded-[20px] border border-slate-200 inline-block font-extrabold">
                 DÚVIDAS FREQUENTES
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] tracking-tight font-heading">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#2f2f2f] tracking-tight font-heading">
                 Perguntas Frequentes
               </h2>
               <p className="text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
@@ -134,13 +135,13 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                 return (
                   <div
                     key={faq.id}
-                    className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden transition-all duration-200"
+                    className="bg-white rounded-[20px] border border-slate-200/90 shadow-sm overflow-hidden transition-all duration-200"
                   >
                     <button
                       type="button"
                       onClick={() => toggleAccordion(faq.id)}
                       aria-expanded={isOpen}
-                      className="w-full text-left px-5 py-4 flex items-center justify-between gap-3 font-extrabold text-sm sm:text-base text-[#0F172A] hover:text-[#0099FF] transition-colors focus:outline-none cursor-pointer"
+                      className="w-full text-left px-5 py-4 flex items-center justify-between gap-3 font-extrabold text-sm sm:text-base text-[#2f2f2f] hover:text-[#0099FF] transition-colors focus:outline-none cursor-pointer"
                     >
                       <span className="flex items-center gap-3">
                         <Icon name="Filter" size={16} className="text-amber-500 shrink-0" />
@@ -165,9 +166,9 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
             </div>
 
             {/* QUICK WHATSAPP HELPER BADGE */}
-            <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex items-center justify-between gap-4">
+            <div className="p-5 rounded-[20px] bg-white border border-slate-200/90 shadow-sm flex items-center justify-between gap-4">
               <div className="space-y-0.5">
-                <p className="text-xs font-bold text-[#0F172A]">Ainda possui alguma dúvida específica?</p>
+                <p className="text-xs font-bold text-[#2f2f2f]">Ainda possui alguma dúvida específica?</p>
                 <p className="text-[11px] text-slate-600">Fale diretamente com nossa equipe no WhatsApp.</p>
               </div>
               <a
@@ -175,9 +176,9 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackEvent('click_whatsapp', { location: 'faq_side' })}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shrink-0 transition-colors shadow-sm inline-flex items-center gap-1.5"
+                className="px-4 py-2 rounded-[20px] bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold shrink-0 transition-colors shadow-sm inline-flex items-center gap-1.5"
               >
-                <Icon name="MessageSquare" size={14} />
+                <WhatsAppIcon className="w-4 h-4 fill-current" />
                 <span>WhatsApp</span>
               </a>
             </div>
@@ -185,13 +186,13 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
 
           {/* RIGHT 50%: PROPOSAL CONTACT FORM (LG:COL-SPAN-6) */}
           <div className="lg:col-span-6">
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-2xl relative space-y-6">
+            <div className="bg-white rounded-[20px] p-6 sm:p-8 border border-slate-200 shadow-2xl relative space-y-6">
               {/* FORM HEADER */}
               <div className="space-y-2">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-gradient-anxis bg-slate-100 px-3.5 py-1.5 rounded-full border border-slate-200 inline-block">
+                <span className="text-xs font-extrabold uppercase tracking-widest text-gradient-anxis bg-slate-100 px-3.5 py-1.5 rounded-[20px] border border-slate-200 inline-block">
                   SOLICITE UMA PROPOSTA
                 </span>
-                <h3 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight font-heading">
+                <h3 className="text-2xl sm:text-3xl font-black text-[#2f2f2f] tracking-tight font-heading">
                   Conte sobre o seu projeto
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600">
@@ -202,11 +203,11 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
               {/* SUCCESS STATE */}
               {isSuccess ? (
                 <div className="text-center py-12 space-y-4 animate-in zoom-in-95 duration-300">
-                  <div className="w-16 h-16 bg-gradient-to-r from-[#00C968] to-[#0099FF] text-white rounded-full flex items-center justify-center mx-auto shadow-lg">
+                  <div className="w-16 h-16 bg-gradient-to-r from-[#00C968] to-[#0099FF] text-white rounded-[20px] flex items-center justify-center mx-auto shadow-lg">
                     <Icon name="Check" size={32} />
                   </div>
                   <div className="space-y-1.5 max-w-sm mx-auto">
-                    <h4 className="text-xl font-black text-[#0F172A] font-heading">Proposta Enviada!</h4>
+                    <h4 className="text-xl font-black text-[#2f2f2f] font-heading">Proposta Enviada!</h4>
                     <p className="text-xs text-slate-600 leading-relaxed">
                       Nossa equipe analisará as informações enviadas e retornará em até 24 horas úteis.
                     </p>
@@ -214,7 +215,7 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                   <button
                     type="button"
                     onClick={() => setIsSuccess(false)}
-                    className="px-5 py-2.5 rounded-xl bg-[#0F172A] text-white text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer"
+                    className="px-5 py-2.5 rounded-[20px] bg-[#2f2f2f] text-white text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer"
                   >
                     Enviar nova solicitação
                   </button>
@@ -227,27 +228,27 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                   {/* ROW 1: NAME & COMPANY */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#0F172A] mb-1.5">
+                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#2f2f2f] mb-1.5">
                         Nome Completo *
                       </label>
                       <input
                         type="text"
                         placeholder="Seu nome"
                         {...register('name')}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#0F172A] transition-all outline-none"
+                        className="w-full px-3.5 py-2.5 rounded-[20px] border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#2f2f2f] transition-all outline-none"
                       />
                       {errors.name && <p className="text-[10px] text-rose-600 mt-1 font-semibold">{errors.name.message}</p>}
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#0F172A] mb-1.5">
+                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#2f2f2f] mb-1.5">
                         Empresa
                       </label>
                       <input
                         type="text"
                         placeholder="Sua empresa"
                         {...register('company')}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#0F172A] transition-all outline-none"
+                        className="w-full px-3.5 py-2.5 rounded-[20px] border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#2f2f2f] transition-all outline-none"
                       />
                     </div>
                   </div>
@@ -255,27 +256,27 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                   {/* ROW 2: EMAIL & WHATSAPP */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#0F172A] mb-1.5">
+                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#2f2f2f] mb-1.5">
                         E-mail *
                       </label>
                       <input
                         type="email"
                         placeholder="seuemail@empresa.com"
                         {...register('email')}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#0F172A] transition-all outline-none"
+                        className="w-full px-3.5 py-2.5 rounded-[20px] border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#2f2f2f] transition-all outline-none"
                       />
                       {errors.email && <p className="text-[10px] text-rose-600 mt-1 font-semibold">{errors.email.message}</p>}
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#0F172A] mb-1.5">
+                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#2f2f2f] mb-1.5">
                         WhatsApp *
                       </label>
                       <input
                         type="tel"
                         placeholder="(11) 99999-9999"
                         {...register('whatsapp')}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#0F172A] transition-all outline-none"
+                        className="w-full px-3.5 py-2.5 rounded-[20px] border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#2f2f2f] transition-all outline-none"
                       />
                       {errors.whatsapp && <p className="text-[10px] text-rose-600 mt-1 font-semibold">{errors.whatsapp.message}</p>}
                     </div>
@@ -284,12 +285,12 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                   {/* ROW 3: PROJECT TYPE & BUDGET */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#0F172A] mb-1.5">
+                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#2f2f2f] mb-1.5">
                         Tipo de Projeto *
                       </label>
                       <select
                         {...register('project_type')}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#0F172A] transition-all outline-none bg-white font-medium"
+                        className="w-full px-3.5 py-2.5 rounded-[20px] border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#2f2f2f] transition-all outline-none bg-white font-medium"
                       >
                         <option value="">Selecione o tipo</option>
                         <option value="Site institucional">Site Institucional</option>
@@ -303,12 +304,12 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#0F172A] mb-1.5">
+                      <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#2f2f2f] mb-1.5">
                         Investimento Previsto
                       </label>
                       <select
                         {...register('budget_range')}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#0F172A] transition-all outline-none bg-white font-medium"
+                        className="w-full px-3.5 py-2.5 rounded-[20px] border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#2f2f2f] transition-all outline-none bg-white font-medium"
                       >
                         <option value="">Faixa estimada</option>
                         <option value="Até R$ 3.000">Até R$ 3.000</option>
@@ -321,14 +322,14 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
 
                   {/* ROW 4: MESSAGE */}
                   <div>
-                    <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#0F172A] mb-1.5">
+                    <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#2f2f2f] mb-1.5">
                       Descrição Resumida
                     </label>
                     <textarea
                       rows={3}
                       placeholder="Conte sobre o objetivo da empresa, páginas necessárias ou referências..."
                       {...register('message')}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#0F172A] transition-all outline-none resize-y"
+                      className="w-full px-3.5 py-2.5 rounded-[20px] border border-slate-300 focus:border-[#0099FF] focus:ring-2 focus:ring-[#0099FF]/20 text-xs text-[#2f2f2f] transition-all outline-none resize-y"
                     />
                   </div>
 
@@ -348,7 +349,7 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
 
                   {/* ERROR ALERT */}
                   {errorMessage && (
-                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+                    <div className="p-3 rounded-[20px] bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
                       {errorMessage}
                     </div>
                   )}
@@ -358,7 +359,7 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-sm font-extrabold text-white bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] hover:opacity-95 shadow-xl shadow-orange-500/15 transition-all duration-200 disabled:opacity-50 cursor-pointer group"
+                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[20px] text-sm font-extrabold text-white bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] hover:opacity-95 shadow-xl shadow-orange-500/15 transition-all duration-200 disabled:opacity-50 cursor-pointer group"
                     >
                       {isSubmitting ? (
                         <>

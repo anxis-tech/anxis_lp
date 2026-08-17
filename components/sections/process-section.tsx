@@ -53,10 +53,10 @@ export function ProcessSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16 sm:space-y-20">
         {/* HEADER */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#0099FF] bg-[#0099FF]/10 px-4 py-1.5 rounded-full border border-[#0099FF]/20 inline-block font-bold">
+          <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#0099FF] bg-[#0099FF]/10 px-4 py-1.5 rounded-[20px] border border-[#0099FF]/20 inline-block font-bold">
             METODOLOGIA & PROCESSO
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0F172A] tracking-tight font-heading">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2f2f2f] tracking-tight font-heading">
             Nosso Processo de Criação
           </h2>
           <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
@@ -78,22 +78,22 @@ export function ProcessSection() {
                   </div>
                 )}
 
-                {/* LARGE CIRCULAR WHITE ICON CONTAINER WITH COLORFUL SERIAL PILL BADGE */}
+                {/* LARGE ICON CONTAINER WITH COLORFUL SERIAL BADGE */}
                 <div className={cn(
-                  'relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-white shadow-xl shadow-slate-200/60 border border-slate-200/80 flex items-center justify-center mx-auto group-hover:scale-105 transition-all duration-300',
+                  'relative w-24 h-24 sm:w-28 sm:h-28 rounded-[20px] bg-white shadow-xl shadow-slate-200/60 border border-slate-200/80 flex items-center justify-center mx-auto group-hover:scale-105 transition-all duration-300',
                   step.borderColor
                 )}>
                   {/* SERIAL BADGE WITH STEP-SPECIFIC BRAND GRADIENT */}
                   <span className={cn(
-                    'absolute -top-1.5 -right-1.5 bg-gradient-to-r text-white text-[10px] font-black font-mono px-2.5 py-0.5 rounded-full shadow-md',
+                    'absolute -top-1.5 -right-1.5 bg-gradient-to-r text-white text-[10px] font-black font-mono px-2.5 py-0.5 rounded-[20px] shadow-md',
                     step.badgeGradient
                   )}>
                     {step.stepBadge}
                   </span>
 
-                  {/* LINE VECTOR ICON INSIDE CIRCLE */}
+                  {/* LINE VECTOR ICON */}
                   <div className={cn(
-                    'w-12 h-12 rounded-full flex items-center justify-center group-hover:text-white transition-all duration-300',
+                    'w-12 h-12 rounded-[14px] flex items-center justify-center group-hover:text-white transition-all duration-300',
                     step.iconBg
                   )}>
                     <Icon name={step.icon} size={24} />
@@ -102,7 +102,7 @@ export function ProcessSection() {
 
                 {/* STEP TITLE & DESCRIPTION */}
                 <div className="space-y-2 max-w-xs mx-auto">
-                  <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] font-heading group-hover:text-slate-900 transition-colors">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#2f2f2f] font-heading group-hover:text-slate-900 transition-colors">
                     {step.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-slate-600 font-normal leading-relaxed">

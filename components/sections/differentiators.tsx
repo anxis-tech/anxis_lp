@@ -58,7 +58,7 @@ export function Differentiators() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* HEADER */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#0075FF] bg-[#0075FF]/20 px-3.5 py-1.5 rounded-full border border-[#0075FF]/30">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#0075FF] bg-[#0075FF]/20 px-3.5 py-1.5 rounded-[20px] border border-[#0075FF]/30">
             DIFERENCIAIS ANXIS
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
@@ -76,9 +76,9 @@ export function Differentiators() {
             return (
               <div
                 key={idx}
-                className="bg-[#0B2F63]/60 backdrop-blur-md border border-[#BBC4D1]/15 hover:border-[#0075FF]/60 p-7 rounded-2xl transition-all duration-300 group hover:-translate-y-1 shadow-lg"
+                className="bg-[#0B2F63]/60 backdrop-blur-md border border-[#BBC4D1]/15 hover:border-[#0075FF]/60 p-7 rounded-[20px] transition-all duration-300 group hover:-translate-y-1 shadow-lg"
               >
-                <div className="w-12 h-12 rounded-xl bg-[#0075FF]/20 border border-[#0075FF]/30 flex items-center justify-center text-[#168CFF] group-hover:bg-[#0075FF] group-hover:text-white transition-colors duration-300 mb-5">
+                <div className="w-12 h-12 rounded-[14px] bg-[#0075FF]/20 border border-[#0075FF]/30 flex items-center justify-center text-[#168CFF] group-hover:bg-[#0075FF] group-hover:text-white transition-colors duration-300 mb-5">
                   <IconComponent className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-white group-hover:text-[#168CFF] transition-colors mb-2">

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Icon } from '@/components/ui/hugeicons'
 import { AnxisLogo } from '@/components/ui/anxis-logo'
+import { WhatsAppIcon } from '@/components/ui/whatsapp-icon'
 import { formatWhatsAppLink } from '@/lib/utils'
 
 interface FooterProps {
@@ -80,7 +81,7 @@ export function Footer({
                 <a href={`mailto:${email}`} className="hover:text-[#0F172A] transition-colors">{email}</a>
               </li>
               <li className="flex items-center gap-2.5">
-                <Icon name="Phone" size={18} className="text-emerald-600 shrink-0" />
+                <WhatsAppIcon className="w-[18px] h-[18px] text-[#25D366] shrink-0 fill-current" />
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#0F172A] transition-colors">{phone}</a>
               </li>
               <li className="flex items-center gap-2.5">
@@ -91,16 +92,9 @@ export function Footer({
           </div>
         </div>
 
-        {/* BOTTOM COPYRIGHT & ADMIN LINK */}
+        {/* BOTTOM COPYRIGHT */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
           <p>© {new Date().getFullYear()} {companyName} Desenvolvimento Digital. Todos os direitos reservados.</p>
-
-          <div className="flex items-center gap-6">
-            <Link href="/admin" className="inline-flex items-center gap-1.5 text-slate-500 hover:text-[#0F172A] transition-colors opacity-80 hover:opacity-100" title="Área Restrita do Cliente">
-              <Icon name="Lock" size={14} />
-              <span>Painel Administrativo</span>
-            </Link>
-          </div>
         </div>
       </div>
     </footer>

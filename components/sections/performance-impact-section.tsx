@@ -14,11 +14,11 @@ export function PerformanceImpactSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* LEFT COLUMN: PERSUASIVE TYPOGRAPHY & PROGRESS METRICS */}
           <div className="lg:col-span-7 space-y-6 text-left">
-            <span className="text-xs font-mono uppercase tracking-[0.2em] px-4 py-1.5 rounded-full bg-slate-100 border border-slate-200/90 inline-block font-extrabold text-gradient-anxis">
+            <span className="text-xs font-mono uppercase tracking-[0.2em] px-4 py-1.5 rounded-[20px] bg-slate-100 border border-slate-200/90 inline-block font-extrabold text-gradient-anxis">
               TECNOLOGIA & ALTA PERFORMANCE
             </span>
 
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0F172A] tracking-tight leading-[1.1] font-heading">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2f2f2f] tracking-tight leading-[1.1] font-heading">
               Como a ANXIS impulsiona os resultados do seu negócio
             </h2>
 
@@ -31,19 +31,19 @@ export function PerformanceImpactSection() {
               {/* BAR 1: ANXIS HIGH PERFORMANCE (BRAND MULTI-COLOR GRADIENT) */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-[#0F172A] flex items-center gap-2">
+                  <span className="text-[#2f2f2f] flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                     Projetos desenvolvidos com a ANXIS
                   </span>
                   <span className="text-gradient-anxis font-mono font-black text-sm">99%</span>
                 </div>
-                <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200 shadow-inner">
+                <div className="w-full h-4 bg-slate-100 rounded-[20px] overflow-hidden p-0.5 border border-slate-200 shadow-inner">
                   <motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: '99%' }}
                     viewport={{ once: true }}
                     transition={{ duration: 1.2, ease: 'easeOut' }}
-                    className="h-full bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] rounded-full shadow-sm"
+                    className="h-full bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] rounded-[20px] shadow-sm"
                   />
                 </div>
               </div>
@@ -54,13 +54,13 @@ export function PerformanceImpactSection() {
                   <span>Sites tradicionais sem otimização</span>
                   <span className="font-mono">55%</span>
                 </div>
-                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                <div className="w-full h-3 bg-slate-100 rounded-[20px] overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     whileInView={{ width: '55%' }}
                     viewport={{ once: true }}
                     transition={{ duration: 1, delay: 0.2, ease: 'easeOut' }}
-                    className="h-full bg-slate-300 rounded-full opacity-60"
+                    className="h-full bg-slate-300 rounded-[20px] opacity-60"
                   />
                 </div>
               </div>
@@ -137,37 +137,37 @@ export function PerformanceImpactSection() {
         {/* BOTTOM METRICS CARDS ROW (3 HIGHLIGHT CARDS WITH INDIVIDUAL BRAND COLORS) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
           {/* CARD 1: SKY BLUE */}
-          <div className="bg-slate-50 hover:bg-white rounded-3xl p-8 border border-slate-200/80 hover:border-[#0099FF]/60 transition-all duration-300 shadow-sm hover:shadow-xl space-y-3 relative overflow-hidden group">
+          <div className="bg-slate-50 hover:bg-white rounded-[20px] p-8 border border-slate-200/80 hover:border-[#0099FF]/60 transition-all duration-300 shadow-sm hover:shadow-xl space-y-3 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-[#0099FF] to-[#0284C7] opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="text-4xl sm:text-5xl font-black text-[#0099FF] font-heading">
               70%
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-[#0F172A]">Otimização de Velocidade</h3>
+              <h3 className="text-base font-bold text-[#2f2f2f]">Otimização de Velocidade</h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">Carregamento instantâneo que reduz drasticamente o abandono de visitantes.</p>
             </div>
           </div>
 
           {/* CARD 2: EMERALD */}
-          <div className="bg-slate-50 hover:bg-white rounded-3xl p-8 border border-slate-200/80 hover:border-emerald-400 transition-all duration-300 shadow-sm hover:shadow-xl space-y-3 relative overflow-hidden group">
+          <div className="bg-slate-50 hover:bg-white rounded-[20px] p-8 border border-slate-200/80 hover:border-emerald-400 transition-all duration-300 shadow-sm hover:shadow-xl space-y-3 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-[#00C968] to-[#10B981] opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="text-4xl sm:text-5xl font-black text-emerald-600 font-heading">
               5x
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-[#0F172A]">Mais Capacidade de Escala</h3>
+              <h3 className="text-base font-bold text-[#2f2f2f]">Mais Capacidade de Escala</h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">Estrutura preparada para suportar picos elevados de tráfego e vendas simultâneas.</p>
             </div>
           </div>
 
           {/* CARD 3: ORANGE */}
-          <div className="bg-slate-50 hover:bg-white rounded-3xl p-8 border border-slate-200/80 hover:border-orange-400 transition-all duration-300 shadow-sm hover:shadow-xl space-y-3 relative overflow-hidden group">
+          <div className="bg-slate-50 hover:bg-white rounded-[20px] p-8 border border-slate-200/80 hover:border-orange-400 transition-all duration-300 shadow-sm hover:shadow-xl space-y-3 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-[#FF6B00] to-[#FFB800] opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="text-4xl sm:text-5xl font-black text-orange-500 font-heading">
               +300%
             </div>
             <div className="space-y-1">
-              <h3 className="text-base font-bold text-[#0F172A]">Crescimento em Conversão</h3>
+              <h3 className="text-base font-bold text-[#2f2f2f]">Crescimento em Conversão</h3>
               <p className="text-xs text-slate-600 leading-relaxed font-normal">Design e arquitetura focados em transformar visitantes em leads e clientes fiéis.</p>
             </div>
           </div>

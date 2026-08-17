@@ -32,7 +32,7 @@ export function TechMarquee({ technologies = INITIAL_TECHNOLOGIES }: TechMarquee
           {marqueeItems.map((tech, idx) => (
             <div
               key={`m-${tech.id}-${idx}`}
-              className="flex items-center gap-3 px-3 py-1.5 rounded-xl border border-transparent hover:border-slate-200 hover:bg-slate-50/80 transition-all duration-300 group shrink-0 cursor-pointer"
+              className="flex items-center gap-3 px-3 py-1.5 rounded-[20px] border border-transparent hover:border-slate-200 hover:bg-slate-50/80 transition-all duration-300 group shrink-0 cursor-pointer"
             >
               <div className="w-7 h-7 relative flex items-center justify-center grayscale group-hover:grayscale-0 transition-all duration-300 group-hover:scale-110">
                 <img

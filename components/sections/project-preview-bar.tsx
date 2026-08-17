@@ -67,10 +67,10 @@ export function ProjectPreviewBar({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
         {/* SECTION HEADER */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-mono uppercase tracking-[0.25em] px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm inline-block font-extrabold text-gradient-anxis">
+          <span className="text-xs font-mono uppercase tracking-[0.25em] px-4 py-1.5 rounded-[20px] bg-white border border-slate-200 shadow-sm inline-block font-extrabold text-gradient-anxis">
             DEMONSTRAÇÃO DE PROJETOS REAIS
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0F172A] tracking-tight font-heading">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2f2f2f] tracking-tight font-heading">
             {title}
           </h2>
           <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
@@ -82,7 +82,7 @@ export function ProjectPreviewBar({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
           {/* LEFT SIDEBAR CATEGORY FILTER PANEL (STICKY TO VIEWPORT) */}
           <div className="lg:col-span-4 lg:sticky lg:top-28 self-start z-20 space-y-4">
-            <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xl shadow-slate-900/5 space-y-3">
+            <div className="bg-white rounded-[20px] p-6 border border-slate-200/90 shadow-xl shadow-slate-900/5 space-y-3">
               <div className="text-xs font-mono uppercase tracking-widest text-slate-700 font-bold flex items-center gap-2 pb-3 border-b border-slate-100">
                 <Icon name="Filter" size={16} className="text-amber-500" />
                 <span>Filtrar por Categoria</span>
@@ -100,7 +100,7 @@ export function ProjectPreviewBar({
                       type="button"
                       onClick={() => setActiveCategory(cat.key)}
                       className={cn(
-                        'w-full text-left px-4 py-3 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center justify-between cursor-pointer group',
+                        'w-full text-left px-4 py-3 rounded-[20px] text-xs font-bold transition-all duration-200 flex items-center justify-between cursor-pointer group',
                         isActive
                           ? 'bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] text-white shadow-lg shadow-orange-500/20'
                           : 'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -109,7 +109,7 @@ export function ProjectPreviewBar({
                       <span className="truncate">{cat.label}</span>
                       <span
                         className={cn(
-                          'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full transition-colors shrink-0 ml-2',
+                          'text-[10px] font-mono font-bold px-2 py-0.5 rounded-[20px] transition-colors shrink-0 ml-2',
                           isActive
                             ? 'bg-white/25 text-white'
                             : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-700'
@@ -124,7 +124,7 @@ export function ProjectPreviewBar({
             </div>
 
             {/* SIDEBAR HELPER CARD (WARM AMBER / MINT GRADIENT ACCENT) */}
-            <div className="bg-gradient-to-br from-[#FFF7ED] via-[#FFFFFF] to-[#F0FDF4] rounded-3xl p-6 border border-amber-200/70 space-y-3 hidden lg:block shadow-md relative overflow-hidden">
+            <div className="bg-gradient-to-br from-[#FFF7ED] via-[#FFFFFF] to-[#F0FDF4] rounded-[20px] p-6 border border-amber-200/70 space-y-3 hidden lg:block shadow-md relative overflow-hidden">
               <div className="flex items-center gap-2 text-gradient-anxis font-extrabold text-xs uppercase tracking-wider">
                 <Icon name="Sparkles" size={16} className="text-amber-500" />
                 <span>Projetos Sob Medida</span>
@@ -145,7 +145,7 @@ export function ProjectPreviewBar({
           {/* RIGHT SIDE: INTERACTIVE BROWSER PREVIEW GRID */}
           <div className="lg:col-span-8">
             {filteredProjects.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
+              <div className="text-center py-20 bg-white rounded-[20px] border border-dashed border-slate-200">
                 <Icon name="Filter" size={32} className="mx-auto text-slate-400 mb-3" />
                 <p className="text-base font-semibold text-slate-600">Nenhum projeto encontrado nesta categoria.</p>
               </div>
@@ -159,7 +159,7 @@ export function ProjectPreviewBar({
                   return (
                     <div
                       key={project.id}
-                      className="group relative bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-xl hover:shadow-2xl hover:border-slate-300 transition-all duration-300 flex flex-col justify-between"
+                      className="group relative bg-white rounded-[20px] border border-slate-200/90 overflow-hidden shadow-xl hover:shadow-2xl hover:border-slate-300 transition-all duration-300 flex flex-col justify-between"
                       onMouseEnter={() => setHoveredId(project.id)}
                       onMouseLeave={() => setHoveredId(null)}
                     >
@@ -173,7 +173,7 @@ export function ProjectPreviewBar({
                             {project.project_url?.replace('https://', '') || 'anxis.com.br'}
                           </span>
                         </div>
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200 shadow-2xs">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-700 bg-white px-2 py-0.5 rounded-[20px] border border-slate-200 shadow-2xs">
                           {project.category}
                         </span>
                       </div>
@@ -200,14 +200,14 @@ export function ProjectPreviewBar({
                         </div>
 
                         {/* TOUCH INDICATOR FOR MOBILE */}
-                        <div className="md:hidden absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-white text-[11px] px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg pointer-events-none">
+                        <div className="md:hidden absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-white text-[11px] px-3 py-1.5 rounded-[20px] flex items-center gap-2 shadow-lg pointer-events-none">
                           <Icon name="Touchpad" size={14} className="text-emerald-400" />
                           <span>{tappedId === project.id ? 'Pausar prévia' : 'Toque p/ rolar'}</span>
                         </div>
 
                         {/* OVERLAY HOVER BADGE */}
                         <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                          <span className="bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] text-white text-xs font-bold px-4 py-2 rounded-xl shadow-lg flex items-center gap-2">
+                          <span className="bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] text-white text-xs font-bold px-4 py-2 rounded-[20px] shadow-lg flex items-center gap-2">
                             <Icon name="Globe" size={16} />
                             <span>Ver Projeto Completo</span>
                           </span>
@@ -222,7 +222,7 @@ export function ProjectPreviewBar({
                             <span>{project.year}</span>
                           </div>
 
-                          <h3 className="text-xl font-bold text-[#0F172A] group-hover:text-slate-800 transition-colors font-heading">
+                          <h3 className="text-xl font-bold text-[#2f2f2f] group-hover:text-slate-800 transition-colors font-heading">
                             {project.title}
                           </h3>
 
@@ -235,7 +235,7 @@ export function ProjectPreviewBar({
                             {project.technologies.map((tech, tIdx) => (
                               <span
                                 key={tIdx}
-                                className="bg-slate-50 border border-slate-200 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded-md"
+                                className="bg-slate-50 border border-slate-200 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded-[20px]"
                               >
                                 {tech}
                               </span>
@@ -250,7 +250,7 @@ export function ProjectPreviewBar({
                             target={project.open_new_tab ? '_blank' : '_self'}
                             rel="noopener noreferrer"
                             onClick={() => trackEvent('click_project', { title: project.title, location: 'preview_bar' })}
-                            className="inline-flex items-center text-xs sm:text-sm font-extrabold text-[#0F172A] hover:text-orange-600 transition-colors"
+                            className="inline-flex items-center text-xs sm:text-sm font-extrabold text-[#2f2f2f] hover:text-orange-600 transition-colors"
                           >
                             <span>{project.button_label || 'Ver Case Completo'}</span>
                             <Icon name="ExternalLink" size={14} className="ml-1.5 text-emerald-600" />

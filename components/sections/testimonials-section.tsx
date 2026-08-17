@@ -36,16 +36,16 @@ export function TestimonialsSection({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
-          <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#0099FF] bg-[#0099FF]/10 px-4 py-1.5 rounded-full border border-[#0099FF]/20 inline-block font-bold">
+          <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#0099FF] bg-[#0099FF]/10 px-4 py-1.5 rounded-[20px] border border-[#0099FF]/20 inline-block font-bold">
             DEPOIMENTOS & AVALIAÇÕES
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0F172A] tracking-tight font-heading">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2f2f2f] tracking-tight font-heading">
             O que dizem os nossos parceiros
           </h2>
         </div>
 
         {/* TESTIMONIAL DISPLAY */}
-        <div className="max-w-4xl mx-auto bg-[#FAFBFC] rounded-3xl p-8 sm:p-12 border border-slate-200/90 shadow-xl relative overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-[#FAFBFC] rounded-[20px] p-8 sm:p-12 border border-slate-200/90 shadow-xl relative overflow-hidden">
           {/* Subtle multi-color gradient bar at top */}
           <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF]" />
 
@@ -56,13 +56,13 @@ export function TestimonialsSection({
               ))}
             </div>
 
-            <p className="text-lg sm:text-2xl text-[#0F172A] font-medium leading-relaxed italic">
+            <p className="text-lg sm:text-2xl text-[#2f2f2f] font-medium leading-relaxed italic">
               "{current.content}"
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200/80">
               <div>
-                <h4 className="text-base font-black text-[#0F172A] font-heading">{current.name}</h4>
+                <h4 className="text-base font-black text-[#2f2f2f] font-heading">{current.name}</h4>
                 <p className="text-xs text-slate-600">
                   {current.role ? `${current.role} - ` : ''}
                   <span className="font-bold text-[#0099FF]">{current.company}</span>
@@ -75,10 +75,10 @@ export function TestimonialsSection({
                   <button
                     type="button"
                     onClick={handlePrev}
-                    className="p-3 rounded-xl bg-white border border-slate-300 hover:border-[#0099FF] hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                    className="p-3 rounded-[20px] bg-white border border-slate-300 hover:border-[#0099FF] hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
                     aria-label="Depoimento anterior"
                   >
-                    <ChevronLeft className="w-5 h-5 text-[#0F172A]" />
+                    <ChevronLeft className="w-5 h-5 text-[#2f2f2f]" />
                   </button>
                   <span className="text-xs font-mono font-bold text-slate-600 px-3">
                     {currentIndex + 1} / {visibleItems.length}
@@ -86,10 +86,10 @@ export function TestimonialsSection({
                   <button
                     type="button"
                     onClick={handleNext}
-                    className="p-3 rounded-xl bg-white border border-slate-300 hover:border-[#0099FF] hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
+                    className="p-3 rounded-[20px] bg-white border border-slate-300 hover:border-[#0099FF] hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
                     aria-label="Próximo depoimento"
                   >
-                    <ChevronRight className="w-5 h-5 text-[#0F172A]" />
+                    <ChevronRight className="w-5 h-5 text-[#2f2f2f]" />
                   </button>
                 </div>
               )}

@@ -61,7 +61,7 @@ export function PortfolioSection({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* SECTION TOP HEADER */}
         <div className="max-w-3xl space-y-4 mb-16 text-left">
-          <span className="text-xs font-extrabold uppercase tracking-widest text-[#00ABB8] bg-[#00ABB8]/10 px-4 py-1.5 rounded-full border border-[#00ABB8]/20 inline-block">
+          <span className="text-xs font-extrabold uppercase tracking-widest text-[#00ABB8] bg-[#00ABB8]/10 px-4 py-1.5 rounded-[20px] border border-[#00ABB8]/20 inline-block">
             CASES & PORTFÓLIO
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#293233] tracking-tight font-heading">
@@ -76,7 +76,7 @@ export function PortfolioSection({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
           {/* LEFT SIDEBAR CATEGORY FILTER PANEL (FIXED TO VIEWPORT ON SCROLL) */}
           <div className="lg:col-span-4 lg:sticky lg:top-28 self-start z-20 space-y-4">
-            <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-md space-y-3">
+            <div className="bg-white rounded-[20px] p-6 border border-slate-200 shadow-md space-y-3">
               <div className="text-xs font-mono uppercase tracking-widest text-[#00939E] font-extrabold flex items-center gap-2 pb-3 border-b border-slate-100">
                 <Icon name="Filter" size={16} />
                 <span>Filtrar por Categoria</span>
@@ -94,7 +94,7 @@ export function PortfolioSection({
                       type="button"
                       onClick={() => setActiveCategory(cat.key)}
                       className={cn(
-                        'w-full text-left px-4 py-3 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center justify-between cursor-pointer group',
+                        'w-full text-left px-4 py-3 rounded-[20px] text-xs font-bold transition-all duration-200 flex items-center justify-between cursor-pointer group',
                         isActive
                           ? 'bg-[#293233] text-white shadow-md'
                           : 'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-[#293233]'
@@ -103,7 +103,7 @@ export function PortfolioSection({
                       <span className="truncate">{cat.label}</span>
                       <span
                         className={cn(
-                          'text-[10px] font-mono font-bold px-2 py-0.5 rounded-full transition-colors shrink-0 ml-2',
+                          'text-[10px] font-mono font-bold px-2 py-0.5 rounded-[20px] transition-colors shrink-0 ml-2',
                           isActive
                             ? 'bg-[#00ABB8] text-white'
                             : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-800'
@@ -118,7 +118,7 @@ export function PortfolioSection({
             </div>
 
             {/* SIDEBAR HELPER CARD */}
-            <div className="bg-[#00ABB8]/10 rounded-3xl p-6 border border-[#00ABB8]/30 space-y-3 hidden lg:block shadow-sm">
+            <div className="bg-[#00ABB8]/10 rounded-[20px] p-6 border border-[#00ABB8]/30 space-y-3 hidden lg:block shadow-sm">
               <div className="flex items-center gap-2 text-[#00939E] font-extrabold text-xs uppercase tracking-wider">
                 <Icon name="Sparkles" size={16} />
                 <span>Projetos Sob Medida</span>
@@ -139,7 +139,7 @@ export function PortfolioSection({
           {/* RIGHT SIDE: PROJECTS GRID */}
           <div className="lg:col-span-8">
             {filteredProjects.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-300">
+              <div className="text-center py-20 bg-white rounded-[20px] border border-dashed border-slate-300">
                 <Icon name="Filter" size={32} className="mx-auto text-slate-400 mb-3" />
                 <p className="text-base font-semibold text-slate-600">Nenhum projeto encontrado nesta categoria.</p>
               </div>
@@ -153,7 +153,7 @@ export function PortfolioSection({
                   return (
                     <div
                       key={project.id}
-                      className="group bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col justify-between"
+                      className="group bg-white rounded-[20px] border border-slate-200 overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 flex flex-col justify-between"
                       onMouseEnter={() => setHoveredProjectId(project.id)}
                       onMouseLeave={() => setHoveredProjectId(null)}
                     >
@@ -168,7 +168,7 @@ export function PortfolioSection({
                           </span>
                         </div>
 
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-white bg-[#00ABB8] px-2.5 py-0.5 rounded-full">
+                        <span className="text-[9px] font-bold uppercase tracking-wider text-white bg-[#00ABB8] px-2.5 py-0.5 rounded-[20px]">
                           {project.category}
                         </span>
                       </div>
@@ -195,14 +195,14 @@ export function PortfolioSection({
                         </div>
 
                         {/* TOUCH INDICATOR FOR MOBILE */}
-                        <div className="md:hidden absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-white text-[11px] px-3 py-1.5 rounded-full flex items-center gap-2 shadow-lg pointer-events-none">
+                        <div className="md:hidden absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-white text-[11px] px-3 py-1.5 rounded-[20px] flex items-center gap-2 shadow-lg pointer-events-none">
                           <Icon name="Touchpad" size={14} className="text-[#00C4D4]" />
                           <span>{tappedProjectId === project.id ? 'Pausar prévia' : 'Toque p/ rolar'}</span>
                         </div>
 
                         {/* HOVER OVERLAY BADGE */}
                         <div className="absolute inset-0 bg-[#293233]/50 backdrop-blur-[2px] opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                          <span className="bg-[#00ABB8] text-white text-xs font-extrabold px-4 py-2 rounded-xl shadow-xl flex items-center gap-2">
+                          <span className="bg-[#00ABB8] text-white text-xs font-extrabold px-4 py-2 rounded-[20px] shadow-xl flex items-center gap-2">
                             <Icon name="Globe" size={16} />
                             <span>Acessar Projeto</span>
                           </span>
@@ -230,7 +230,7 @@ export function PortfolioSection({
                             {project.technologies.map((tech, tIdx) => (
                               <span
                                 key={tIdx}
-                                className="bg-[#F8FAFC] border border-slate-200 text-[#293233] text-[10px] font-bold px-2.5 py-0.5 rounded-md"
+                                className="bg-[#F8FAFC] border border-slate-200 text-[#293233] text-[10px] font-bold px-2.5 py-0.5 rounded-[20px]"
                               >
                                 {tech}
                               </span>
@@ -245,7 +245,7 @@ export function PortfolioSection({
                             target={project.open_new_tab ? '_blank' : '_self'}
                             rel="noopener noreferrer"
                             onClick={() => trackEvent('click_project', { title: project.title })}
-                            className="inline-flex items-center text-xs sm:text-sm font-extrabold text-[#293233] hover:text-[#00939E] transition-colors"
+                            className="inline-flex items-center text-xs sm:text-sm font-extrabold text-[#293233] hover:text-[#0099FF] transition-colors"
                           >
                             <span>{project.button_label || 'Ver Case Completo'}</span>
                             <Icon name="ExternalLink" size={14} className="ml-1.5" />

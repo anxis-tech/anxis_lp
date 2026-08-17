@@ -42,7 +42,7 @@ export function AboutSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* CENTERED HEADER */}
         <div className="text-center max-w-3xl mx-auto space-y-6 mb-20">
-          <span className="text-xs font-extrabold uppercase tracking-widest text-[#00ABB8] bg-[#00ABB8]/10 px-4 py-1.5 rounded-full border border-[#00ABB8]/20 inline-block">
+          <span className="text-xs font-extrabold uppercase tracking-widest text-[#00ABB8] bg-[#00ABB8]/10 px-4 py-1.5 rounded-[20px] border border-[#00ABB8]/20 inline-block">
             SOBRE A ANXIS
           </span>
 
@@ -60,10 +60,10 @@ export function AboutSection() {
           {pillars.map((pillar, idx) => (
             <div
               key={idx}
-              className="p-8 rounded-2xl bg-[#F8FAFC] border border-slate-200/90 hover:border-[#00ABB8]/50 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
+              className="p-8 rounded-[20px] bg-[#F8FAFC] border border-slate-200/90 hover:border-[#00ABB8]/50 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
             >
               <div className="space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#00ABB8]/10 border border-[#00ABB8]/20 flex items-center justify-center text-[#00939E] group-hover:bg-[#00ABB8] group-hover:text-white transition-all duration-300">
+                <div className="w-14 h-14 rounded-[14px] bg-[#00ABB8]/10 border border-[#00ABB8]/20 flex items-center justify-center text-[#00939E] group-hover:bg-[#00ABB8] group-hover:text-white transition-all duration-300">
                   <Icon name={pillar.icon} size={28} />
                 </div>
                 <h3 className="text-lg font-bold text-[#293233] group-hover:text-[#00939E] transition-colors">
@@ -82,7 +82,7 @@ export function AboutSection() {
           <button
             type="button"
             onClick={scrollToContact}
-            className="inline-flex items-center justify-center px-8 py-4 rounded-xl text-base font-extrabold text-white bg-[#293233] hover:bg-[#1E2526] shadow-xl hover:shadow-2xl transition-all duration-200 active:scale-[0.98] cursor-pointer group"
+            className="inline-flex items-center justify-center px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-[#293233] hover:bg-[#1E2526] shadow-xl hover:shadow-2xl transition-all duration-200 active:scale-[0.98] cursor-pointer group"
           >
             <span>Falar com um especialista</span>
             <Icon name="ArrowRight" size={18} className="ml-2.5 transition-transform group-hover:translate-x-1" />

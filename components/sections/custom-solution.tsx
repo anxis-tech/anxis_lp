@@ -22,9 +22,9 @@ export function CustomSolution() {
   }
 
   return (
-    <section className="py-24 bg-[#FFFFFF] text-[#0F172A] relative overflow-hidden border-t border-slate-200/80">
+    <section className="py-24 bg-[#FFFFFF] text-[#2f2f2f] relative overflow-hidden border-t border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-[#FFFBEB]/70 via-[#FFFFFF] to-[#EFF6FF]/80 rounded-[2.5rem] p-8 sm:p-12 lg:p-16 text-[#0F172A] relative overflow-hidden shadow-2xl shadow-slate-900/5 border border-amber-200/60">
+        <div className="bg-gradient-to-br from-[#FFFBEB]/70 via-[#FFFFFF] to-[#EFF6FF]/80 rounded-[20px] p-8 sm:p-12 lg:p-16 text-[#2f2f2f] relative overflow-hidden shadow-2xl shadow-slate-900/5 border border-amber-200/60">
           {/* Background Multi-color Decorative Ambient Glows */}
           <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#0099FF]/10 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#FF6B00]/10 rounded-full blur-3xl pointer-events-none" />
@@ -32,12 +32,12 @@ export function CustomSolution() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
             {/* LEFT CONTENT */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-gradient-anxis text-xs font-extrabold uppercase tracking-wider border border-slate-200 shadow-xs">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-[20px] bg-white text-gradient-anxis text-xs font-extrabold uppercase tracking-wider border border-slate-200 shadow-xs">
                 <Icon name="Terminal" size={14} className="text-amber-500" />
                 <span>DESENVOLVIMENTO EM CÓDIGO</span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0F172A] tracking-tight leading-tight font-heading">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2f2f2f] tracking-tight leading-tight font-heading">
                 Seu projeto precisa de uma solução sob medida?
               </h2>
 
@@ -61,7 +61,7 @@ export function CustomSolution() {
                 <button
                   type="button"
                   onClick={scrollToContact}
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-extrabold text-white bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] hover:opacity-95 shadow-xl shadow-orange-500/20 transition-all duration-200 cursor-pointer group"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] hover:opacity-95 shadow-xl shadow-orange-500/20 transition-all duration-200 cursor-pointer group"
                 >
                   <span>Conversar sobre um projeto personalizado</span>
                   <Icon name="ArrowRight" size={18} className="transition-transform group-hover:translate-x-1" />
@@ -71,7 +71,7 @@ export function CustomSolution() {
 
             {/* RIGHT GRAPHIC: MODULAR CODE INTERFACE BUILDER (AUTHENTIC TERMINAL) */}
             <div className="lg:col-span-5 flex justify-center">
-              <div className="w-full max-w-md bg-[#0F172A] border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-4 font-mono text-xs text-slate-300">
+              <div className="w-full max-w-md bg-[#0F172A] border border-slate-800 rounded-[20px] p-6 shadow-2xl space-y-4 font-mono text-xs text-slate-300">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-rose-500" />
@@ -95,7 +95,7 @@ export function CustomSolution() {
                     <Icon name="Code2" size={14} className="text-emerald-400" />
                     <span>Clean Code & Modular Architecture</span>
                   </div>
-                  <span className="text-emerald-400 font-bold bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800">READY</span>
+                  <span className="text-emerald-400 font-bold bg-emerald-950 px-2 py-0.5 rounded-[20px] border border-emerald-800">READY</span>
                 </div>
               </div>
             </div>

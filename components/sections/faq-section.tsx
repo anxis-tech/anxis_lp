@@ -50,7 +50,7 @@ export function FAQSection({
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* HEADER */}
         <div className="text-center space-y-4 mb-16">
-          <span className="text-xs font-extrabold uppercase tracking-widest text-[#00ABB8] bg-[#00ABB8]/10 px-4 py-1.5 rounded-full border border-[#00ABB8]/20 inline-block">
+          <span className="text-xs font-extrabold uppercase tracking-widest text-[#00ABB8] bg-[#00ABB8]/10 px-4 py-1.5 rounded-[20px] border border-[#00ABB8]/20 inline-block">
             DÚVIDAS FREQUENTES
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#07090E] tracking-tight">
@@ -69,7 +69,7 @@ export function FAQSection({
             return (
               <div
                 key={faq.id}
-                className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all duration-200"
+                className="bg-white rounded-[20px] border border-slate-200 shadow-sm overflow-hidden transition-all duration-200"
               >
                 <button
                   type="button"

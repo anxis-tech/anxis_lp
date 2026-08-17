@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { motion, AnimatePresence } from 'motion/react'
 import { Icon } from '@/components/ui/hugeicons'
 import { AnxisLogo } from '@/components/ui/anxis-logo'
+import { WhatsAppIcon } from '@/components/ui/whatsapp-icon'
 import { cn, formatWhatsAppLink } from '@/lib/utils'
 import { trackEvent } from '@/lib/analytics/events'
 
@@ -13,10 +15,11 @@ interface HeaderProps {
   ctaLabel?: string
 }
 
-export function Header({ whatsapp = '5511999999999', ctaLabel = 'Falar Conosco' }: HeaderProps) {
+export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
+  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,29 +30,42 @@ export function Header({ whatsapp = '5511999999999', ctaLabel = 'Falar Conosco' 
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Lock body scroll when mobile menu is active
+  // Close menu when clicking outside or pressing Escape
   useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false)
+      }
     }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsMenuOpen(false)
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      document.addEventListener('keydown', handleKeyDown)
+    }
+
     return () => {
-      document.body.style.overflow = ''
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [isMobileMenuOpen])
+  }, [isMenuOpen])
 
   const navLinks = [
-    { label: 'Home', href: '#', hasDropdown: false },
-    { label: 'Serviços', href: '#servicos', hasDropdown: false },
-    { label: 'Projetos', href: '#projetos', hasDropdown: false },
-    { label: 'Processo', href: '#processo', hasDropdown: false },
-    { label: 'Contato', href: '#contato', hasDropdown: false },
+    { label: 'Home', href: '#', id: 'home' },
+    { label: 'Serviços', href: '#servicos', id: 'servicos' },
+    { label: 'Projetos', href: '#projetos', id: 'projetos' },
+    { label: 'Processo', href: '#processo', id: 'processo' },
+    { label: 'Contato', href: '#contato', id: 'contato' },
   ]
 
   const handleNavClick = (href: string, label: string) => {
     setActiveSection(label.toLowerCase())
-    setIsMobileMenuOpen(false)
+    setIsMenuOpen(false)
     if (href === '#') {
       window.scrollTo({ top: 0, behavior: 'smooth' })
       return
@@ -63,131 +79,151 @@ export function Header({ whatsapp = '5511999999999', ctaLabel = 'Falar Conosco' 
   const whatsappUrl = formatWhatsAppLink(whatsapp, 'Olá! Gostaria de conversar sobre um projeto com a ANXIS.')
 
   return (
-    <header className="fixed top-3 sm:top-5 left-0 right-0 z-50 px-4 sm:px-6 lg:px-8 transition-all duration-300 pointer-events-none">
-      {/* FLOATING WHITE CAPSULE / PILL NAVBAR CONTAINER */}
-      <div
-        className={cn(
-          'max-w-7xl mx-auto bg-white/95 backdrop-blur-xl rounded-full px-5 py-2.5 sm:py-3 border border-slate-200/90 shadow-xl shadow-slate-900/5 flex items-center justify-between pointer-events-auto transition-all duration-300',
-          isScrolled ? 'shadow-2xl shadow-slate-900/10 border-slate-300/90 py-2 sm:py-2.5 bg-white/98' : ''
-        )}
-      >
-        {/* LOGO WITH COLORFUL 4-RAY ICON & TYPOGRAPHY */}
-        <Link href="/" className="relative z-10 flex items-center cursor-pointer">
-          <AnxisLogo size="md" theme="light" />
-        </Link>
-
-        {/* DESKTOP NAVIGATION LINKS */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => {
-            const isActive = activeSection === link.label.toLowerCase() || (link.label === 'Home' && activeSection === 'home')
-            return (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={(e) => {
-                  e.preventDefault()
-                  handleNavClick(link.href, link.label)
-                }}
-                className={cn(
-                  'text-xs sm:text-sm font-bold transition-all py-1 cursor-pointer relative group',
-                  isActive ? 'text-[#0F172A]' : 'text-slate-600 hover:text-slate-900'
-                )}
-              >
-                <span>{link.label}</span>
-                {isActive && (
-                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] rounded-full" />
-                )}
-              </a>
-            )
-          })}
-        </nav>
-
-        {/* DESKTOP ACTION BUTTONS */}
-        <div className="hidden md:flex items-center gap-3">
-          {/* SEARCH BUTTON */}
+    <header className="fixed top-3 sm:top-5 left-0 right-0 z-50 px-3 sm:px-6 pointer-events-none">
+      <div ref={menuRef} className="max-w-4xl mx-auto relative pointer-events-auto">
+        {/* WHITE TRANSLUCENT CAPSULE NAVBAR */}
+        <div
+          className={cn(
+            'w-full bg-white/70 backdrop-blur-md border border-white/80 rounded-[20px] px-2.5 py-1.5 sm:px-3.5 sm:py-2 shadow-lg shadow-slate-900/5 ring-1 ring-slate-900/5 flex items-center justify-between transition-all duration-300',
+            isScrolled ? 'bg-white/85 backdrop-blur-lg border-slate-200/80 shadow-xl shadow-slate-900/10 py-1.5 sm:py-2' : ''
+          )}
+        >
+          {/* LEFT: MENU BUTTON */}
           <button
             type="button"
-            onClick={() => handleNavClick('#projetos', 'Projetos')}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-100 hover:bg-slate-200/80 flex items-center justify-center text-slate-700 transition-all cursor-pointer shadow-inner"
-            title="Buscar Projetos"
+            onClick={() => setIsMenuOpen((prev) => !prev)}
+            aria-expanded={isMenuOpen}
+            aria-label="Abrir menu de navegação"
+            className={cn(
+              'flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-[20px] bg-slate-100/70 hover:bg-slate-200/80 backdrop-blur-xs text-slate-800 border border-slate-200/60 transition-all cursor-pointer select-none group',
+              isMenuOpen ? 'bg-slate-200/90 border-slate-300 ring-1 ring-slate-300' : ''
+            )}
           >
-            <Icon name="Search" size={16} />
+            <div className="flex flex-col justify-center items-center w-4 h-3.5 gap-1">
+              <span
+                className={cn(
+                  'h-0.5 w-4 bg-slate-800 rounded-full transition-transform duration-200',
+                  isMenuOpen ? 'rotate-45 translate-y-1.5' : ''
+                )}
+              />
+              <span
+                className={cn(
+                  'h-0.5 w-3 self-start bg-slate-800 rounded-full transition-opacity duration-200',
+                  isMenuOpen ? 'opacity-0' : ''
+                )}
+              />
+              <span
+                className={cn(
+                  'h-0.5 w-4 bg-slate-800 rounded-full transition-transform duration-200',
+                  isMenuOpen ? '-rotate-45 -translate-y-1' : ''
+                )}
+              />
+            </div>
+            <span className="text-xs sm:text-sm font-semibold tracking-wide text-slate-800 group-hover:text-slate-950">
+              Menu
+            </span>
           </button>
 
-          {/* CTA TALK BUTTON WITH BRAND MULTI-COLOR GRADIENT */}
-          <a
-            href="#contato"
-            onClick={(e) => {
-              e.preventDefault()
-              trackEvent('click_primary_cta', { location: 'header' })
-              handleNavClick('#contato', 'Contato')
-            }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-extrabold text-white bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] hover:opacity-90 shadow-md shadow-slate-900/10 hover:shadow-lg transition-all cursor-pointer group"
-          >
-            <span>{ctaLabel}</span>
-            <Icon name="ArrowRight" size={14} className="transition-transform group-hover:translate-x-0.5" />
-          </a>
-        </div>
-
-        {/* MOBILE HAMBURGER BUTTON */}
-        <button
-          type="button"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden relative z-50 p-2 text-slate-900 focus:outline-none cursor-pointer"
-          aria-label={isMobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
-        >
-          <Icon name={isMobileMenuOpen ? 'X' : 'Menu'} size={24} />
-        </button>
-      </div>
-
-      {/* MOBILE MENU SHEET OVERLAY */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden pointer-events-auto fixed inset-0 z-40 bg-[#FFFFFF]/98 backdrop-blur-xl flex flex-col justify-between p-6 pt-24 text-slate-900 animate-in fade-in slide-in-from-top-4 duration-200">
-          <div className="space-y-6">
-            <nav className="flex flex-col space-y-4">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    handleNavClick(link.href, link.label)
-                  }}
-                  className="text-xl font-bold text-slate-900 hover:text-slate-600 transition-colors border-b border-slate-100 pb-3"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </nav>
+          {/* CENTER: ANXIS LOGO */}
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
+            <Link
+              href="/"
+              onClick={(e) => {
+                e.preventDefault()
+                handleNavClick('#', 'Home')
+              }}
+              className="flex items-center cursor-pointer transition-transform hover:scale-105 active:scale-95"
+            >
+              <AnxisLogo size="md" theme="light" className="scale-90 sm:scale-100" />
+            </Link>
           </div>
 
-          <div className="space-y-4 pt-6 border-t border-slate-100">
+          {/* RIGHT: CTA CONTATO BUTTON (RAINBOW BRAND GRADIENT) */}
+          <div className="flex items-center">
             <a
               href="#contato"
               onClick={(e) => {
                 e.preventDefault()
-                trackEvent('click_primary_cta', { location: 'mobile_menu' })
+                trackEvent('click_primary_cta', { location: 'header' })
                 handleNavClick('#contato', 'Contato')
               }}
-              className="w-full inline-flex items-center justify-center px-6 py-3.5 rounded-full text-base font-extrabold text-white bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] shadow-lg transition-all"
+              className="inline-flex items-center justify-center px-4 sm:px-6 py-1.5 sm:py-2 rounded-[20px] text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] hover:opacity-95 active:scale-95 shadow-md shadow-orange-500/20 transition-all cursor-pointer"
             >
-              <span>{ctaLabel}</span>
-              <Icon name="ArrowRight" size={18} className="ml-2" />
-            </a>
-
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackEvent('click_whatsapp', { location: 'mobile_menu' })}
-              className="w-full inline-flex items-center justify-center px-6 py-3 rounded-full text-sm font-semibold text-slate-800 bg-slate-100 hover:bg-slate-200 transition-colors"
-            >
-              <Icon name="MessageSquare" size={18} className="mr-2 text-emerald-600" />
-              <span>Chamar no WhatsApp</span>
+              Contato
             </a>
           </div>
         </div>
-      )}
+
+        {/* VERTICALLY EXPANDING MENU (ANCHORED ON THE LEFT) */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.96 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="absolute left-0 top-[calc(100%+8px)] w-64 sm:w-72 bg-white/90 backdrop-blur-2xl border border-slate-200/80 rounded-[20px] p-2.5 sm:p-3 shadow-2xl shadow-slate-900/10 z-50 flex flex-col gap-1 overflow-hidden"
+            >
+              <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                Navegação
+              </div>
+
+              <nav className="flex flex-col gap-0.5">
+                {navLinks.map((link) => {
+                  const isActive =
+                    activeSection === link.label.toLowerCase() ||
+                    (link.label === 'Home' && activeSection === 'home')
+                  return (
+                    <a
+                      key={link.label}
+                      href={link.href}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleNavClick(link.href, link.label)
+                      }}
+                      className={cn(
+                        'flex items-center justify-between px-3.5 py-2.5 rounded-[14px] text-xs sm:text-sm font-medium transition-all cursor-pointer group',
+                        isActive
+                          ? 'bg-slate-100 text-[#0F172A] font-semibold'
+                          : 'text-slate-600 hover:text-[#0F172A] hover:bg-slate-50'
+                      )}
+                    >
+                      <span>{link.label}</span>
+                      {isActive ? (
+                        <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] shadow-xs" />
+                      ) : (
+                        <Icon
+                          name="ArrowRight"
+                          size={13}
+                          className="opacity-0 group-hover:opacity-60 transition-opacity text-slate-400"
+                        />
+                      )}
+                    </a>
+                  )
+                })}
+              </nav>
+
+              {/* WHATSAPP ACTION BUTTON IN DROPDOWN */}
+              <div className="pt-2 mt-1 border-t border-slate-100">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    trackEvent('click_whatsapp', { location: 'menu_dropdown' })
+                    setIsMenuOpen(false)
+                  }}
+                  className="flex items-center justify-center gap-2 w-full px-3.5 py-2.5 rounded-[14px] text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200 transition-colors"
+                >
+                  <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366] fill-current" />
+                  <span>Conversar no WhatsApp</span>
+                </a>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </header>
   )
 }
+

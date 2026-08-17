@@ -60,7 +60,7 @@ export function PillarsGridSection() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-200/80 text-xs font-mono text-slate-500">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-gradient-anxis bg-white px-3.5 py-1 rounded-full border border-slate-200 shadow-xs">
+              <span className="text-xs font-extrabold uppercase tracking-widest text-gradient-anxis bg-white px-3.5 py-1 rounded-[20px] border border-slate-200 shadow-xs">
                 NOSSOS SERVIÇOS
               </span>
               <span className="hidden sm:inline text-slate-300">|</span>
@@ -81,7 +81,7 @@ export function PillarsGridSection() {
               <div
                 key={idx}
                 onClick={() => scrollToContact(pillar.title)}
-                className="group relative h-[420px] sm:h-[470px] rounded-3xl overflow-hidden cursor-pointer border border-slate-200/90 hover:border-slate-300 transition-all duration-300 shadow-xl hover:shadow-2xl flex flex-col justify-between p-6 select-none bg-slate-900"
+                className="group relative h-[420px] sm:h-[470px] rounded-[20px] overflow-hidden cursor-pointer border border-slate-200/90 hover:border-slate-300 transition-all duration-300 shadow-xl hover:shadow-2xl flex flex-col justify-between p-6 select-none bg-slate-900"
               >
                 {/* BACKGROUND IMAGE WITH DUOTONE / OVERLAY */}
                 <div className="absolute inset-0 z-0">
@@ -98,7 +98,7 @@ export function PillarsGridSection() {
 
                 {/* TOP NUMBER INDICATOR */}
                 <div className="relative z-10 text-center">
-                  <span className="text-xs font-mono font-bold tracking-widest text-white bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-sm">
+                  <span className="text-xs font-mono font-bold tracking-widest text-white bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-[20px] border border-white/20 shadow-sm">
                     {pillar.number}
                   </span>
                 </div>
@@ -109,8 +109,8 @@ export function PillarsGridSection() {
                     {pillar.title}
                   </h3>
 
-                  {/* ARROW CIRCLE WITH MULTI-COLOR BRAND GRADIENT ON HOVER */}
-                  <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center mx-auto text-white group-hover:bg-gradient-to-r group-hover:from-[#FF6B00] group-hover:via-[#00C968] group-hover:to-[#0099FF] group-hover:border-transparent group-hover:shadow-lg transition-all duration-300 shadow-md">
+                  {/* ARROW BUTTON WITH MULTI-COLOR BRAND GRADIENT ON HOVER */}
+                  <div className="w-11 h-11 rounded-[20px] bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center mx-auto text-white group-hover:bg-gradient-to-r group-hover:from-[#FF6B00] group-hover:via-[#00C968] group-hover:to-[#0099FF] group-hover:border-transparent group-hover:shadow-lg transition-all duration-300 shadow-md">
                     <Icon name="ArrowRight" size={18} className="transition-transform group-hover:translate-x-1" />
                   </div>
                 </div>

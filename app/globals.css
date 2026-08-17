@@ -35,7 +35,7 @@
     --input: #E2E8F0;
     --ring: #0099FF;
 
-    --radius: 0.75rem;
+    --radius: 20px;
   }
 
   .dark {
