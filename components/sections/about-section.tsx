@@ -82,7 +82,7 @@ export function AboutSection() {
           <button
             type="button"
             onClick={scrollToContact}
-            className="inline-flex items-center justify-center px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-[#293233] hover:bg-[#1E2526] shadow-xl hover:shadow-2xl transition-all duration-200 active:scale-[0.98] cursor-pointer group"
+            className="inline-flex items-center justify-center px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-[#ffa337] hover:bg-[#e6902b] shadow-xl shadow-orange-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
           >
             <span>Falar com um especialista</span>
             <Icon name="ArrowRight" size={18} className="ml-2.5 transition-transform group-hover:translate-x-1" />

@@ -248,7 +248,7 @@ export function HeroSection({
                   trackEvent('click_primary_cta', { location: 'hero' })
                   scrollToSection('#contato')
                 }}
-                className="inline-flex items-center justify-center gap-2.5 px-8 sm:px-10 py-3.5 sm:py-4 rounded-[20px] text-base sm:text-lg font-extrabold text-white bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] hover:opacity-95 shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
+                className="inline-flex items-center justify-center gap-2.5 px-8 sm:px-10 py-3.5 sm:py-4 rounded-[20px] text-base sm:text-lg font-extrabold text-white bg-[#ffa337] hover:bg-[#e6902b] shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
               >
                 <WhatsAppIcon className="w-5 h-5 fill-current" />
                 <span>{primaryCtaText}</span>

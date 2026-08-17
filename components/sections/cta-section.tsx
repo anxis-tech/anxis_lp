@@ -91,7 +91,7 @@ export function CTASection({ whatsapp = '5511999999999' }: CTASectionProps) {
             <button
               type="button"
               onClick={scrollToContact}
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] hover:opacity-95 shadow-xl shadow-orange-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-[#ffa337] hover:bg-[#e6902b] shadow-xl shadow-orange-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
             >
               <span>Solicitar uma Proposta</span>
               <Icon name="ArrowRight" size={18} className="transition-transform group-hover:translate-x-1" />

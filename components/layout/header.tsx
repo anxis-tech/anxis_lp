@@ -147,7 +147,7 @@ export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
                 trackEvent('click_primary_cta', { location: 'header' })
                 handleNavClick('#contato', 'Contato')
               }}
-              className="inline-flex items-center justify-center px-4 sm:px-6 py-1.5 sm:py-2 rounded-[20px] text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] hover:opacity-95 active:scale-95 shadow-md shadow-orange-500/20 transition-all cursor-pointer"
+              className="inline-flex items-center justify-center px-4 sm:px-6 py-1.5 sm:py-2 rounded-[20px] text-xs sm:text-sm font-bold text-white bg-[#ffa337] hover:bg-[#e6902b] active:scale-95 shadow-md shadow-orange-500/20 transition-all cursor-pointer"
             >
               Contato
             </a>
