@@ -78,6 +78,7 @@ interface ClientProjectsTabProps {
   // Callback to notify the parent page of a deployment skew error (stale Server Action).
   // The parent shows a reload banner; this component does NOT call alert() for this error.
   onStaleDeployDetected?: () => void
+  isDarkMode?: boolean
 }
 
 export function ClientProjectsTab({
@@ -94,6 +95,7 @@ export function ClientProjectsTab({
   prefilledFromQuote,
   onClearPrefilledQuote,
   onStaleDeployDetected,
+  isDarkMode = false,
 }: ClientProjectsTabProps) {
   // Helper: detects deployment skew errors and notifies the parent page.
   const handleActionError = (err: unknown): boolean => {
@@ -578,16 +580,23 @@ export function ClientProjectsTab({
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm space-y-6 max-w-full overflow-hidden">
+    <div
+      className={cn(
+        'rounded-2xl border p-4 sm:p-6 shadow-sm space-y-6 max-w-full overflow-hidden transition-colors',
+        isDarkMode
+          ? 'bg-[#16181D] text-white border-slate-800'
+          : 'bg-white text-[#0C1D36] border-slate-200'
+      )}
+    >
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+      <div className={cn('flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
         <div>
-          <h2 className="text-xl font-extrabold text-[#0C1D36] flex items-center gap-2">
+          <h2 className={cn('text-xl font-extrabold flex items-center gap-2', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
             <Icon icon={ProjectsNavIcon} size={20} className="text-[#0075FF]" />
-            <span>Projetos de Clientes</span>
+            <span>Gestão de Contratos</span>
           </h2>
-          <p className="text-xs text-[#596579]">
-            Gestão operacional de projetos e entregas.
+          <p className="text-xs text-slate-400">
+            Contratos de clientes, escopo do projeto e faturamento.
           </p>
         </div>
       </div>
@@ -603,7 +612,12 @@ export function ClientProjectsTab({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar por projeto ou cliente..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs outline-none focus:border-[#0075FF]"
+            className={cn(
+              'w-full pl-10 pr-4 py-2.5 rounded-xl text-xs outline-none focus:border-[#0075FF] border',
+              isDarkMode
+                ? 'bg-[#1A1E26] border-slate-700 text-white placeholder:text-slate-500'
+                : 'bg-white border-slate-200 text-[#0C1D36]'
+            )}
           />
         </div>
 
@@ -611,10 +625,15 @@ export function ClientProjectsTab({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white text-[#0C1D36]"
+            className={cn(
+              'w-full px-3.5 py-2.5 rounded-xl border text-xs outline-none',
+              isDarkMode
+                ? 'bg-[#1A1E26] border-slate-700 text-white'
+                : 'bg-white border-slate-200 text-[#0C1D36]'
+            )}
           >
             <option value="todos">Todos os Estágios</option>
-            {INITIAL_KANBAN_STAGES.map((s) => (
+            {INITIAL_KANBAN_STAGES.map((s: any) => (
               <option key={s.id} value={s.name}>
                 {s.name}
               </option>
@@ -626,7 +645,12 @@ export function ClientProjectsTab({
           <select
             value={platformFilter}
             onChange={(e) => setPlatformFilter(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs bg-white text-[#0C1D36]"
+            className={cn(
+              'w-full px-3.5 py-2.5 rounded-xl border text-xs outline-none',
+              isDarkMode
+                ? 'bg-[#1A1E26] border-slate-700 text-white'
+                : 'bg-white border-slate-200 text-[#0C1D36]'
+            )}
           >
             <option value="todos">Todas as Plataformas</option>
             <option value="Next.js">Next.js</option>
@@ -640,15 +664,15 @@ export function ClientProjectsTab({
 
       {/* PROJECTS LIST TABLE */}
       {filteredProjects.length === 0 && !canViewAll ? (
-        <div className="text-center py-12 bg-slate-50 rounded-xl border border-dashed border-slate-200 space-y-2">
+        <div className={cn('text-center py-12 rounded-xl border border-dashed space-y-2', isDarkMode ? 'bg-[#181B22] border-slate-800' : 'bg-slate-50 border-slate-200')}>
           <Icon icon={MetricUserIcon} size={32} className="text-slate-400 mx-auto" />
-          <p className="text-sm font-semibold text-[#596579]">Você não possui projetos atribuídos no momento.</p>
+          <p className="text-sm font-semibold text-slate-400">Você não possui projetos atribuídos no momento.</p>
         </div>
       ) : (
-        <div className="overflow-x-auto border border-slate-200 rounded-xl max-w-full">
+        <div className={cn('overflow-x-auto border rounded-xl max-w-full', isDarkMode ? 'border-slate-800 bg-[#181B22]' : 'border-slate-200 bg-white')}>
           <table className="w-full text-left text-xs border-collapse min-w-[700px]">
             <thead>
-              <tr className="bg-[#081D3A] text-white border-b border-slate-800 font-bold uppercase tracking-wider text-[11px]">
+              <tr className={cn('border-b font-bold uppercase tracking-wider text-[11px]', isDarkMode ? 'bg-[#13161C] text-slate-300 border-slate-800' : 'bg-[#081D3A] text-white border-slate-800')}>
                 <th className="p-3.5 whitespace-nowrap">Projeto & Cliente</th>
                 <th className="p-3.5 whitespace-nowrap">Tipo & Plataforma</th>
                 <th className="p-3.5 whitespace-nowrap">Estágio Atual</th>
@@ -658,16 +682,16 @@ export function ClientProjectsTab({
                 <th className="p-3.5 text-right whitespace-nowrap">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className={cn('divide-y', isDarkMode ? 'divide-slate-800' : 'divide-slate-100')}>
               {filteredProjects.map((project) => {
                 const normStage = normalizeProjectStage(project.status)
                 const paymentStatus = project.payment_status || 'Sem link'
 
                 return (
-                  <tr key={project.id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={project.id} className={cn('transition-colors', isDarkMode ? 'hover:bg-white/5' : 'hover:bg-slate-50')}>
                     <td className="p-3.5 max-w-[220px]">
-                      <div className="font-bold text-[#0C1D36] text-sm truncate">{project.title}</div>
-                      <div className="text-[11px] text-[#596579] truncate">{project.client_name}</div>
+                      <div className={cn('font-bold text-sm truncate', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>{project.title}</div>
+                      <div className="text-[11px] text-slate-400 truncate">{project.client_name}</div>
                     </td>
                     <td className="p-3.5 whitespace-nowrap">
                       <div className="font-semibold text-[#0075FF]">{project.project_type}</div>
@@ -732,7 +756,12 @@ export function ClientProjectsTab({
                         <button
                           type="button"
                           onClick={() => onOpenProjectDetail(project)}
-                          className="w-8 h-8 rounded-xl bg-[#0C1D36] text-white hover:bg-[#0075FF] transition-all flex items-center justify-center shadow-sm"
+                          className={cn(
+                            "w-8 h-8 rounded-xl transition-all flex items-center justify-center shadow-sm cursor-pointer",
+                            isDarkMode
+                              ? "bg-[#1F2430] text-white hover:bg-[#282E3D] border border-slate-700"
+                              : "bg-[#0C1D36] text-white hover:bg-[#0075FF]"
+                          )}
                           title="Ver Detalhes do Projeto"
                         >
                           <Icon icon={ViewActionIcon} size={16} />
@@ -746,14 +775,19 @@ export function ClientProjectsTab({
                               setEditingProject(project)
                               setIsEditModalOpen(true)
                             }}
-                            className="w-8 h-8 rounded-xl border border-slate-200 bg-white text-slate-700 hover:text-[#0075FF] hover:border-[#0075FF] hover:bg-slate-50 transition-all flex items-center justify-center shadow-sm"
+                            className={cn(
+                              "w-8 h-8 rounded-xl border transition-all flex items-center justify-center shadow-sm cursor-pointer",
+                              isDarkMode
+                                ? "bg-[#1F2430] border-slate-700 text-slate-200 hover:bg-[#282E3D] hover:text-white"
+                                : "bg-white border-slate-200 text-slate-700 hover:text-[#0075FF] hover:border-[#0075FF] hover:bg-slate-50"
+                            )}
                             title="Editar Projeto"
                           >
                             <Icon icon={EditActionIcon} size={16} />
                           </button>
                         )}
 
-                        {/* BAIXAR CONTRATO EM PDF (BOTÃO EVIDENTE COM TEXTO E ÍCONE) */}
+                        {/* BAIXAR CONTRATO EM PDF */}
                         <button
                           type="button"
                           disabled={contractsMap[project.id]?.status !== 'completed'}
@@ -761,8 +795,12 @@ export function ClientProjectsTab({
                           className={cn(
                             "h-8 px-2.5 rounded-xl border transition-all flex items-center gap-1 shadow-sm text-xs font-extrabold",
                             contractsMap[project.id]?.status === 'completed'
-                              ? "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:border-rose-300 cursor-pointer"
-                              : "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed opacity-50 shadow-none"
+                              ? isDarkMode
+                                ? "border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 cursor-pointer"
+                                : "border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:border-rose-300 cursor-pointer"
+                              : isDarkMode
+                                ? "border-slate-800 bg-[#1A1E26] text-slate-600 cursor-not-allowed opacity-50 shadow-none"
+                                : "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed opacity-50 shadow-none"
                           )}
                           title={
                             contractsMap[project.id]?.status === 'completed'
@@ -774,7 +812,7 @@ export function ClientProjectsTab({
                               : "Contrato em PDF não gerado"
                           }
                         >
-                          <Icon icon={PdfActionIcon} size={14} className={contractsMap[project.id]?.status === 'completed' ? "text-rose-600" : "text-slate-400"} />
+                          <Icon icon={PdfActionIcon} size={14} className={contractsMap[project.id]?.status === 'completed' ? (isDarkMode ? "text-rose-400" : "text-rose-600") : "text-slate-400"} />
                           <span className="text-[10px] font-black tracking-tight uppercase">PDF</span>
                         </button>
                       </div>
@@ -790,9 +828,9 @@ export function ClientProjectsTab({
       {/* OVERHAULED SPACIOUS DIALOG (90% WIDTH / 90% HEIGHT) */}
       {isEditModalOpen && editingProject && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
-          <div className="bg-white rounded-3xl w-[94vw] max-w-6xl h-[92vh] shadow-2xl flex flex-col justify-between overflow-hidden animate-in zoom-in-95 border">
+          <div className={cn("rounded-3xl w-[94vw] max-w-6xl h-[92vh] shadow-2xl flex flex-col justify-between overflow-hidden animate-in zoom-in-95 border", isDarkMode ? "bg-[#16181D] border-slate-800 text-white" : "bg-white border-slate-200 text-[#0C1D36]")}>
             {/* MODAL HEADER */}
-            <div className="bg-[#081D3A] text-white p-5 border-b border-slate-800 flex items-center justify-between shrink-0">
+            <div className={cn("p-5 border-b flex items-center justify-between shrink-0", isDarkMode ? "bg-[#13161C] border-slate-800 text-white" : "bg-[#081D3A] text-white border-slate-800")}>
               <div className="flex items-center gap-3">
                 <Icon icon={ProjectsNavIcon} size={24} className="text-[#0075FF]" />
                 <div>
@@ -808,14 +846,14 @@ export function ClientProjectsTab({
               <button
                 type="button"
                 onClick={() => setIsEditModalOpen(false)}
-                className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors flex items-center justify-center"
+                className="p-2 rounded-full hover:bg-slate-800 text-slate-400 hover:text-white transition-colors flex items-center justify-center cursor-pointer"
               >
                 <Icon icon={CancelActionIcon} size={20} />
               </button>
             </div>
 
             {/* SPACIOUS TABS BAR */}
-            <div className="bg-slate-100 px-6 py-2 border-b border-slate-200 flex items-center gap-2 overflow-x-auto shrink-0 text-xs font-bold">
+            <div className={cn("px-6 py-2 border-b flex items-center gap-2 overflow-x-auto shrink-0 text-xs font-bold", isDarkMode ? "bg-[#1A1E26] border-slate-800" : "bg-slate-100 border-slate-200")}>
               {[
                 { id: 'geral', label: '1. Informações Gerais', icon: ProjectsNavIcon },
                 { id: 'contato', label: '2. Informações do cliente', icon: MetricUserIcon },

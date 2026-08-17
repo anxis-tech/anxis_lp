@@ -2,55 +2,61 @@
 
 @layer base {
   :root {
-    --background: #F8FAFC;
-    --foreground: #293233;
+    --background: #FAFBFC;
+    --foreground: #0F172A;
 
-    --anxis-dark: #293233;
-    --anxis-teal: #00ABB8;
-    --anxis-teal-dark: #00939E;
-    --anxis-teal-light: #00C4D4;
+    /* 4-Ray Logo Official Brand Palette */
+    --anxis-orange: #FF6B00;
+    --anxis-amber: #FFB800;
+    --anxis-emerald: #00C968;
+    --anxis-mint: #10B981;
+    --anxis-lime: #C4E000;
+    --anxis-citrine: #EAB308;
+    --anxis-sky: #0099FF;
+    --anxis-blue: #0284C7;
 
+    /* Neutral System Colors */
     --card: #FFFFFF;
-    --card-foreground: #293233;
+    --card-foreground: #0F172A;
 
-    --primary: #00ABB8;
+    --primary: #0099FF;
     --primary-foreground: #FFFFFF;
 
-    --secondary: #293233;
+    --secondary: #0F172A;
     --secondary-foreground: #FFFFFF;
 
     --muted: #F1F5F9;
     --muted-foreground: #64748B;
 
-    --accent: #00C4D4;
+    --accent: #0099FF;
     --accent-foreground: #FFFFFF;
 
     --border: #E2E8F0;
     --input: #E2E8F0;
-    --ring: #00ABB8;
+    --ring: #0099FF;
 
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: #293233;
+    --background: #0B0F19;
     --foreground: #F8FAFC;
 
-    --card: #293233;
+    --card: #0F172A;
     --card-foreground: #F8FAFC;
 
-    --primary: #00ABB8;
+    --primary: #0099FF;
     --primary-foreground: #FFFFFF;
 
-    --secondary: #00C4D4;
-    --secondary-foreground: #293233;
+    --secondary: #1E293B;
+    --secondary-foreground: #FFFFFF;
 
     --muted: #1E293B;
     --muted-foreground: #94A3B8;
 
-    --border: #334155;
-    --input: #334155;
-    --ring: #00C4D4;
+    --border: #1E293B;
+    --input: #1E293B;
+    --ring: #0099FF;
   }
 
   h1, h2, h3, h4, h5, h6, .font-heading {
@@ -59,31 +65,73 @@
 }
 
 @layer utilities {
-  /* ANXIS Gradient Utilities */
+  /* ANXIS Official 4-Color Logo Gradients */
   .bg-gradient-anxis {
-    background: linear-gradient(135deg, #293233 0%, #1E2526 50%, #00ABB8 100%);
+    background: linear-gradient(135deg, #FF6B00 0%, #00C968 40%, #0099FF 100%);
   }
 
-  .bg-gradient-teal {
-    background: linear-gradient(135deg, #00ABB8 0%, #00C4D4 100%);
+  .bg-gradient-anxis-horizontal {
+    background: linear-gradient(90deg, #FF6B00 0%, #FFB800 25%, #00C968 50%, #0099FF 100%);
   }
 
-  .bg-gradient-teal-glow {
-    background: radial-gradient(circle at center, rgba(0, 171, 184, 0.25) 0%, rgba(41, 50, 51, 0) 70%);
+  .bg-gradient-orange-amber {
+    background: linear-gradient(135deg, #FF6B00 0%, #FFB800 100%);
   }
 
-  .text-gradient-teal {
-    background: linear-gradient(135deg, #00ABB8 0%, #00C4D4 100%);
+  .bg-gradient-emerald-mint {
+    background: linear-gradient(135deg, #00C968 0%, #10B981 100%);
+  }
+
+  .bg-gradient-lime-citrine {
+    background: linear-gradient(135deg, #C4E000 0%, #EAB308 100%);
+  }
+
+  .bg-gradient-sky-blue {
+    background: linear-gradient(135deg, #0099FF 0%, #0284C7 100%);
+  }
+
+  /* Multi-color Brand Text Gradients */
+  .text-gradient-anxis {
+    background: linear-gradient(135deg, #FF6B00 0%, #00C968 45%, #0099FF 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
-  .shadow-glow-teal {
-    box-shadow: 0 0 25px -5px rgba(0, 171, 184, 0.4);
+  .text-gradient-blue {
+    background: linear-gradient(135deg, #0099FF 0%, #0284C7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-  .shadow-glow-teal-lg {
-    box-shadow: 0 0 50px -10px rgba(0, 171, 184, 0.5);
+  .text-gradient-orange {
+    background: linear-gradient(135deg, #FF6B00 0%, #FFB800 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gradient-emerald {
+    background: linear-gradient(135deg, #00C968 0%, #10B981 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Modern Glow Shadows */
+  .shadow-glow-anxis {
+    box-shadow: 0 0 35px -5px rgba(0, 153, 255, 0.3), 0 0 15px -2px rgba(255, 107, 0, 0.2);
+  }
+
+  .shadow-glow-blue {
+    box-shadow: 0 0 25px -5px rgba(0, 153, 255, 0.35);
+  }
+
+  .shadow-glow-blue-lg {
+    box-shadow: 0 0 50px -10px rgba(0, 153, 255, 0.45);
+  }
+
+  /* Light subtle blueprint grid */
+  .bg-anxis-grid-light {
+    background-image: radial-gradient(rgba(0, 153, 255, 0.12) 1px, transparent 1px);
+    background-size: 32px 32px;
   }
 }
 
@@ -94,7 +142,7 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #F8FAFC;
+  background: #FAFBFC;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -103,7 +151,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00ABB8;
+  background: #0099FF;
 }
 
 /* Tech Marquee Animations */

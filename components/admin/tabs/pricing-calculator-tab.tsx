@@ -43,6 +43,7 @@ interface PricingCalculatorTabProps {
   onConvertToProject?: (quote: SavedQuote) => void
   onContinueToProjectForm?: (quote: SavedQuote) => void
   initialData?: QuoteFormData
+  isDarkMode?: boolean
 }
 
 export function PricingCalculatorTab({
@@ -52,6 +53,7 @@ export function PricingCalculatorTab({
   onConvertToProject,
   onContinueToProjectForm,
   initialData,
+  isDarkMode = false,
 }: PricingCalculatorTabProps) {
   const [pricingConfig, setPricingConfig] = useState<PricingConfig>(DEFAULT_PRICING_CONFIG)
   const [isConfigOpen, setIsConfigOpen] = useState(false)
@@ -228,15 +230,20 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
   }
 
   return (
-    <div className="space-y-6 text-[#0C1D36] max-w-full overflow-hidden font-sans">
+    <div className={cn('space-y-6 max-w-full overflow-hidden font-sans transition-colors', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
       {/* HEADER & TOP CONTROLS */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div
+        className={cn(
+          'rounded-3xl border p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4',
+          isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80'
+        )}
+      >
         <div>
-          <h2 className="text-xl font-extrabold text-[#0C1D36] flex items-center gap-2">
+          <h2 className={cn('text-xl font-extrabold flex items-center gap-2', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
             <Icon icon={PricingNavIcon} size={20} className="text-[#0075FF]" />
             <span>Calculadora Comercial de Precificação</span>
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-400">
             Estimativa de orçamentos e escopo operacional em tempo real.
           </p>
         </div>
@@ -246,9 +253,14 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
             <button
               type="button"
               onClick={() => setIsConfigOpen(!isConfigOpen)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 hover:bg-slate-100 transition-colors"
+              className={cn(
+                'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer',
+                isDarkMode
+                  ? 'bg-[#1A1E26] border-slate-700 text-white hover:bg-[#282E3D]'
+                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+              )}
             >
-              <Icon icon={ConfigActionIcon} size={16} className="text-slate-600" />
+              <Icon icon={ConfigActionIcon} size={16} className={isDarkMode ? 'text-slate-300' : 'text-slate-600'} />
               <span>{isConfigOpen ? 'Fechar Configurações' : 'Configurar Valores'}</span>
             </button>
           )}
@@ -256,7 +268,12 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
           <button
             type="button"
             onClick={handleCopySummary}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-bold transition-colors"
+            className={cn(
+              'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border',
+              isDarkMode
+                ? 'bg-[#1A1E26] border-slate-700 text-white hover:bg-[#282E3D]'
+                : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+            )}
           >
             <Icon icon={DuplicateActionIcon} size={16} className="text-[#0075FF]" />
             <span>{copyFeedback ? 'Copiado!' : 'Copiar Resumo'}</span>
@@ -427,48 +444,62 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
         {/* LEFT 2 COLS: FORM STEPS */}
         <div className="lg:col-span-2 space-y-6">
           {/* ETAPA 1: DADOS DO CLIENTE E TIPO DE PROJETO */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
-            <h3 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2 border-b border-slate-100 pb-3">
-              <span className="w-6 h-6 rounded-full bg-[#0C1D36] text-white flex items-center justify-center text-xs">1</span>
+          <div
+            className={cn(
+              'rounded-3xl border p-6 shadow-sm space-y-4 transition-colors',
+              isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80'
+            )}
+          >
+            <h3 className={cn('text-sm font-extrabold flex items-center gap-2 border-b pb-3', isDarkMode ? 'text-white border-slate-800' : 'text-[#0C1D36] border-slate-100')}>
+              <span className={cn('w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold', isDarkMode ? 'bg-[#0075FF] text-white' : 'bg-[#0C1D36] text-white')}>1</span>
               <span>Dados do Cliente & Tipo de Projeto</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div>
-                <label className="block text-slate-600 font-bold mb-1">Nome do Cliente *</label>
+                <label className="block text-slate-400 font-bold mb-1">Nome do Cliente *</label>
                 <input
                   type="text"
                   value={formData.clientName}
                   onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
                   placeholder="Ex: Ana Souza"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#0C1D36]"
+                  className={cn(
+                    'w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold outline-none focus:border-[#0075FF]',
+                    isDarkMode ? 'bg-[#1A1E26] border-slate-700 text-white' : 'bg-white border-slate-200 text-[#0C1D36]'
+                  )}
                 />
               </div>
 
               <div>
-                <label className="block text-slate-600 font-bold mb-1">Empresa / Razão Social</label>
+                <label className="block text-slate-400 font-bold mb-1">Empresa / Razão Social</label>
                 <input
                   type="text"
                   value={formData.company || ''}
                   onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                   placeholder="Ex: Decor Studio Ltda"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs outline-none focus:border-[#0C1D36]"
+                  className={cn(
+                    'w-full px-3.5 py-2.5 rounded-xl border text-xs outline-none focus:border-[#0075FF]',
+                    isDarkMode ? 'bg-[#1A1E26] border-slate-700 text-white' : 'bg-white border-slate-200 text-[#0C1D36]'
+                  )}
                 />
               </div>
 
               <div>
-                <label className="block text-slate-600 font-bold mb-1">Nome Identificador do Projeto *</label>
+                <label className="block text-slate-400 font-bold mb-1">Nome Identificador do Projeto *</label>
                 <input
                   type="text"
                   value={formData.projectName}
                   onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
                   placeholder="Ex: Redesenho do Site Institucional"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#0C1D36]"
+                  className={cn(
+                    'w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold outline-none focus:border-[#0075FF]',
+                    isDarkMode ? 'bg-[#1A1E26] border-slate-700 text-white' : 'bg-white border-slate-200 text-[#0C1D36]'
+                  )}
                 />
               </div>
 
               <div>
-                <label className="block text-slate-600 font-bold mb-1">Tipo de Projeto *</label>
+                <label className="block text-slate-400 font-bold mb-1">Tipo de Projeto *</label>
                 <select
                   value={formData.projectType}
                   onChange={(e) =>
@@ -478,7 +509,10 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                       pageCount: e.target.value === 'Site institucional' ? 5 : 1,
                     })
                   }
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+                  className={cn(
+                    'w-full px-3.5 py-2.5 rounded-xl border text-xs font-bold outline-none focus:border-[#0075FF]',
+                    isDarkMode ? 'bg-[#1A1E26] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-[#0C1D36]'
+                  )}
                 >
                   {STRICT_PROJECT_TYPES.map((type) => (
                     <option key={type} value={type}>
@@ -491,9 +525,14 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
           </div>
 
           {/* ETAPA 2: MÉTRICAS E MÓDULOS */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
-            <h3 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2 border-b border-slate-100 pb-3">
-              <span className="w-6 h-6 rounded-full bg-[#0C1D36] text-white flex items-center justify-center text-xs">2</span>
+          <div
+            className={cn(
+              'rounded-3xl border p-6 shadow-sm space-y-4 transition-colors',
+              isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80'
+            )}
+          >
+            <h3 className={cn('text-sm font-extrabold flex items-center gap-2 border-b pb-3', isDarkMode ? 'text-white border-slate-800' : 'text-[#0C1D36] border-slate-100')}>
+              <span className={cn('w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold', isDarkMode ? 'bg-[#0075FF] text-white' : 'bg-[#0C1D36] text-white')}>2</span>
               <span>Métricas de Páginas & Funcionalidades</span>
             </h3>
 
@@ -502,7 +541,7 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               {!isLojaVirtual && !isBlog && !isIntegracao ? (
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-slate-600 font-bold">Páginas Padrão</label>
+                    <label className="block text-slate-400 font-bold">Páginas Padrão</label>
                     <span className="text-[10px] text-slate-400 flex items-center gap-1 font-semibold">
                       <Icon icon={LockActionIcon} size={12} className="text-amber-500" />
                       <span>Fixo para {formData.projectType}</span>
@@ -512,36 +551,39 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                     type="number"
                     disabled
                     value={formData.pageCount}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-100 text-slate-500 font-extrabold cursor-not-allowed outline-none"
+                    className={cn(
+                      'w-full px-3.5 py-2.5 rounded-xl border font-extrabold cursor-not-allowed outline-none text-xs',
+                      isDarkMode ? 'bg-[#202530] border-slate-700 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-500'
+                    )}
                   />
                 </div>
               ) : isLojaVirtual ? (
-                <div className="bg-blue-50/90 border border-blue-200 p-3.5 rounded-2xl text-blue-900 text-xs font-medium space-y-1">
+                <div className="bg-blue-500/10 border border-blue-500/20 p-3.5 rounded-2xl text-blue-400 text-xs font-medium space-y-1">
                   <div className="font-extrabold flex items-center gap-1.5 text-[#0075FF]">
                     <Icon icon={PortfolioNavIcon} size={16} />
                     <span>Loja Virtual Selecionada</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-blue-800">
+                  <p className="text-[11px] leading-relaxed text-blue-300">
                     Páginas padrão inclusas: <strong>Home, Página de Produto Único, Páginas de Categorias, Painel do Usuário e Painel Administrativo</strong>.
                   </p>
                 </div>
               ) : isBlog ? (
-                <div className="bg-purple-50/90 border border-purple-200 p-3.5 rounded-2xl text-purple-900 text-xs font-medium space-y-1">
-                  <div className="font-extrabold flex items-center gap-1.5 text-purple-700">
+                <div className="bg-purple-500/10 border border-purple-500/20 p-3.5 rounded-2xl text-purple-400 text-xs font-medium space-y-1">
+                  <div className="font-extrabold flex items-center gap-1.5 text-purple-400">
                     <Icon icon={MetricQuoteIcon} size={16} />
                     <span>Blog Selecionado</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-purple-800">
+                  <p className="text-[11px] leading-relaxed text-purple-300">
                     Páginas padrão inclusas: <strong>Home, Página do Artigo, Páginas de Categorias e Painel Administrativo de Conteúdo</strong>.
                   </p>
                 </div>
               ) : (
-                <div className="bg-emerald-50/90 border border-emerald-200 p-3.5 rounded-2xl text-emerald-900 text-xs font-medium space-y-1">
-                  <div className="font-extrabold flex items-center gap-1.5 text-emerald-700">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-3.5 rounded-2xl text-emerald-400 text-xs font-medium space-y-1">
+                  <div className="font-extrabold flex items-center gap-1.5 text-emerald-400">
                     <Icon icon={ConfigActionIcon} size={16} />
                     <span>Integração ou Funcionalidade Selecionada</span>
                   </div>
-                  <p className="text-[11px] leading-relaxed text-emerald-800">
+                  <p className="text-[11px] leading-relaxed text-emerald-300">
                     Projeto sem estrutura de páginas padrão (conectores API, módulos ou recursos sob medida).
                   </p>
                 </div>
@@ -549,13 +591,16 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
 
               {/* QUANTIDADE DE PÁGINAS ADICIONAIS */}
               <div>
-                <label className="block text-slate-600 font-bold mb-1">Páginas Adicionais (Extra)</label>
+                <label className="block text-slate-400 font-bold mb-1">Páginas Adicionais (Extra)</label>
                 <input
                   type="number"
                   min={0}
                   value={formData.additionalPageCount}
                   onChange={(e) => setFormData({ ...formData, additionalPageCount: Math.max(0, Number(e.target.value)) })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold outline-none focus:border-[#0C1D36]"
+                  className={cn(
+                    'w-full px-3.5 py-2.5 rounded-xl border text-xs font-semibold outline-none focus:border-[#0075FF]',
+                    isDarkMode ? 'bg-[#1A1E26] border-slate-700 text-white' : 'bg-white border-slate-200 text-[#0C1D36]'
+                  )}
                 />
                 <span className="text-[10px] text-slate-400 mt-1 block">
                   As páginas padrão do projeto já estão inclusas no valor base.
@@ -564,11 +609,11 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
             </div>
 
             {/* CHECKBOXES DE RECURSOS */}
-            <div className="pt-3 border-t border-slate-100 space-y-3">
-              <span className="block text-xs font-bold text-slate-700">Recursos Especiais & Módulos</span>
+            <div className={cn('pt-3 border-t space-y-3', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
+              <span className={cn('block text-xs font-bold', isDarkMode ? 'text-slate-300' : 'text-slate-700')}>Recursos Especiais & Módulos</span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {/* CHECKBOX 1: CÓDIGO PERSONALIZADO */}
-                <label className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-slate-100/80 transition-colors">
+                <label className={cn('p-3 border rounded-2xl flex items-center gap-3 cursor-pointer transition-colors', isDarkMode ? 'bg-[#1A1E26] border-slate-700 hover:bg-[#202530]' : 'bg-slate-50 border-slate-200 hover:bg-slate-100/80')}>
                   <input
                     type="checkbox"
                     checked={formData.hasCustomCode || false}
@@ -576,14 +621,14 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                     className="w-4 h-4 rounded text-[#0075FF] focus:ring-[#0075FF]"
                   />
                   <div>
-                    <span className="font-extrabold text-xs text-[#0C1D36] block">Desenvolvimento em Código Personalizado</span>
-                    <span className="text-[10px] text-slate-500">Recursos avançados fora de CMS padrão</span>
+                    <span className={cn('font-extrabold text-xs block', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>Desenvolvimento em Código Personalizado</span>
+                    <span className="text-[10px] text-slate-400">Recursos avançados fora de CMS padrão</span>
                   </div>
                 </label>
 
                 {/* CHECKBOX 2: INCLUIR MÓDULO BLOG (SE O TIPO PRINCIPAL NÃO FOR BLOG) */}
                 {formData.projectType !== 'Blog' && (
-                  <label className="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-slate-100/80 transition-colors">
+                  <label className={cn('p-3 border rounded-2xl flex items-center gap-3 cursor-pointer transition-colors', isDarkMode ? 'bg-[#1A1E26] border-slate-700 hover:bg-[#202530]' : 'bg-slate-50 border-slate-200 hover:bg-slate-100/80')}>
                     <input
                       type="checkbox"
                       checked={formData.hasBlogModule || false}
@@ -591,8 +636,8 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                       className="w-4 h-4 rounded text-[#0075FF] focus:ring-[#0075FF]"
                     />
                     <div>
-                      <span className="font-extrabold text-xs text-[#0C1D36] block">Incluir Módulo de Blog no projeto</span>
-                      <span className="text-[10px] text-slate-500">Área de artigos e gestão de conteúdo</span>
+                      <span className={cn('font-extrabold text-xs block', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>Incluir Módulo de Blog no projeto</span>
+                      <span className="text-[10px] text-slate-400">Área de artigos e gestão de conteúdo</span>
                     </div>
                   </label>
                 )}
@@ -601,20 +646,28 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
           </div>
 
           {/* ETAPA 3: CONTEÚDO, COPY E URGÊNCIA */}
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
-            <h3 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2 border-b border-slate-100 pb-3">
-              <span className="w-6 h-6 rounded-full bg-[#0C1D36] text-white flex items-center justify-center text-xs">3</span>
+          <div
+            className={cn(
+              'rounded-3xl border p-6 shadow-sm space-y-4 transition-colors',
+              isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80'
+            )}
+          >
+            <h3 className={cn('text-sm font-extrabold flex items-center gap-2 border-b pb-3', isDarkMode ? 'text-white border-slate-800' : 'text-[#0C1D36] border-slate-100')}>
+              <span className={cn('w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold', isDarkMode ? 'bg-[#0075FF] text-white' : 'bg-[#0C1D36] text-white')}>3</span>
               <span>Conteúdo, Copy & Nível de Urgência</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               {/* CONTEÚDO E COPY */}
               <div>
-                <label className="block text-slate-600 font-bold mb-1">Conteúdo e Copy *</label>
+                <label className="block text-slate-400 font-bold mb-1">Conteúdo e Copy *</label>
                 <select
                   value={formData.contentOption}
                   onChange={(e) => setFormData({ ...formData, contentOption: e.target.value as ContentCopyOption })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+                  className={cn(
+                    'w-full px-3.5 py-2.5 rounded-xl border text-xs font-bold outline-none focus:border-[#0075FF]',
+                    isDarkMode ? 'bg-[#1A1E26] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-[#0C1D36]'
+                  )}
                 >
                   {CONTENT_COPY_OPTIONS.map((opt) => (
                     <option key={opt} value={opt}>
@@ -626,11 +679,14 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
 
               {/* NÍVEL DE URGÊNCIA */}
               <div>
-                <label className="block text-slate-600 font-bold mb-1">Nível de Urgência *</label>
+                <label className="block text-slate-400 font-bold mb-1">Nível de Urgência *</label>
                 <select
                   value={formData.urgency}
                   onChange={(e) => setFormData({ ...formData, urgency: e.target.value as UrgencyOption })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 text-[#0C1D36] outline-none focus:border-[#0C1D36]"
+                  className={cn(
+                    'w-full px-3.5 py-2.5 rounded-xl border text-xs font-bold outline-none focus:border-[#0075FF]',
+                    isDarkMode ? 'bg-[#1A1E26] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-[#0C1D36]'
+                  )}
                 >
                   {URGENCY_OPTIONS.map((urg) => (
                     <option key={urg} value={urg}>
@@ -645,7 +701,7 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
 
         {/* RIGHT COL: SUMMARY & ACTION BUTTONS */}
         <div className="space-y-6">
-          <div className="bg-[#0C1D36] text-white rounded-3xl p-6 shadow-xl space-y-6 sticky top-24">
+          <div className={cn('rounded-3xl p-6 shadow-xl space-y-6 sticky top-24 border', isDarkMode ? 'bg-[#181B22] border-slate-800 text-white' : 'bg-[#0C1D36] border-slate-900 text-white')}>
             <div className="border-b border-white/10 pb-4">
               <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 font-bold">
                 Resumo do Cálculo
@@ -715,7 +771,7 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
                 <button
                   type="button"
                   onClick={() => handleSaveQuote(false)}
-                  className="w-full py-3 px-4 rounded-2xl bg-[#0075FF] hover:bg-[#168CFF] text-white font-extrabold text-xs transition-all shadow-lg flex items-center justify-center gap-2"
+                  className="w-full py-3 px-4 rounded-2xl bg-[#0075FF] hover:bg-[#168CFF] text-white font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Icon icon={SaveActionIcon} size={16} />
                   <span>Salvar Orçamento</span>
@@ -725,7 +781,12 @@ VALOR FINAL: R$ ${breakdown.finalValue.toLocaleString('pt-BR')}
               <button
                 type="button"
                 onClick={() => handleSaveQuote(true)}
-                className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-100 text-[#0C1D36] font-extrabold text-xs transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                className={cn(
+                  "w-full py-3 px-4 rounded-2xl font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border",
+                  isDarkMode
+                    ? "bg-[#202530] hover:bg-[#282E3D] text-white border-slate-700"
+                    : "bg-white hover:bg-slate-100 text-[#0C1D36] border-slate-200"
+                )}
               >
                 <Icon icon={AddActionIcon} size={16} className="text-[#0075FF]" />
                 <span>Continuar cadastro do projeto</span>

@@ -49,6 +49,7 @@ interface FinanceTabProps {
   canViewValues?: boolean
   canViewPayments?: boolean
   onOpenProjectDetail?: (project: ClientProject) => void
+  isDarkMode?: boolean
 }
 
 export function FinanceTab({
@@ -61,10 +62,9 @@ export function FinanceTab({
   canViewValues = true,
   canViewPayments = true,
   onOpenProjectDetail,
+  isDarkMode = false,
 }: FinanceTabProps) {
-  // ---------------------------------------------------------------------------
   // PERIOD FILTER STATE
-  // ---------------------------------------------------------------------------
   const [period, setPeriod] = useState<PeriodFilterOption>('este_mes')
   const [customStartDate, setCustomStartDate] = useState<string>('')
   const [customEndDate, setCustomEndDate] = useState<string>('')
@@ -79,102 +79,72 @@ export function FinanceTab({
   // Chart Grouping State
   const [chartGrouping, setChartGrouping] = useState<'dia' | 'semana' | 'mes'>('dia')
 
-  // Selected Detail Modal Project State
-  const [selectedProjectModal, setSelectedProjectModal] = useState<ClientProject | null>(null)
-
-  // ---------------------------------------------------------------------------
-  // HELPER: DATE RANGE CALCULATION
-  // ---------------------------------------------------------------------------
+  // Date Range Calculation based on Period
   const dateRange = useMemo(() => {
     const now = new Date()
-    let start = new Date()
-    let end = new Date()
+    let start: Date
+    let end: Date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)
 
     switch (period) {
       case 'hoje':
-        start.setHours(0, 0, 0, 0)
-        end.setHours(23, 59, 59, 999)
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
         break
       case 'ultimos_7_dias':
+        start = new Date(now)
         start.setDate(now.getDate() - 7)
         start.setHours(0, 0, 0, 0)
-        end.setHours(23, 59, 59, 999)
         break
       case 'este_mes':
         start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
-        end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
         break
       case 'mes_anterior':
         start = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0, 0)
         end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999)
         break
       case 'ultimos_3_meses':
-        start = new Date(now.getFullYear(), now.getMonth() - 2, 1, 0, 0, 0, 0)
-        end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+        start = new Date(now.getFullYear(), now.getMonth() - 3, 1, 0, 0, 0, 0)
         break
       case 'este_ano':
         start = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0)
-        end = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999)
         break
       case 'custom':
-        if (customStartDate) {
-          start = new Date(customStartDate + 'T00:00:00')
-        } else {
-          start = new Date(2020, 0, 1)
-        }
-        if (customEndDate) {
-          end = new Date(customEndDate + 'T23:59:59')
-        } else {
-          end = new Date()
-        }
+        start = customStartDate ? new Date(customStartDate) : new Date(2020, 0, 1)
+        end = customEndDate ? new Date(customEndDate) : new Date(2030, 11, 31)
         break
+      default:
+        start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
     }
 
     return { start, end }
   }, [period, customStartDate, customEndDate])
 
-  // Helper check if a date falls within period
-  const isInPeriod = (dateInput?: string | Date | null): boolean => {
-    if (!dateInput) return false
-    const d = new Date(dateInput)
+  // Helper to check if a date string is within the active dateRange
+  const isInPeriod = (dateStr?: string | null) => {
+    if (!dateStr) return false
+    const d = new Date(dateStr)
     if (isNaN(d.getTime())) return false
     return d >= dateRange.start && d <= dateRange.end
   }
 
-  // ---------------------------------------------------------------------------
-  // MAP DATA RELATIONSHIPS REAL TIME
-  // ---------------------------------------------------------------------------
+  // Map of payments by project_id for fast lookup
   const paymentsMapByProjectId = useMemo(() => {
     const map: Record<string, Payment> = {}
-    payments.forEach((pm) => {
-      // Pick the latest payment entry for each project
-      if (!map[pm.project_id] || new Date(pm.created_at) > new Date(map[pm.project_id].created_at)) {
-        map[pm.project_id] = pm
-      }
+    payments.forEach((p) => {
+      if (p.project_id) map[p.project_id] = p
     })
     return map
   }, [payments])
 
+  // Map of contracts by project_id
   const contractsMapByProjectId = useMemo(() => {
     const map: Record<string, Contract> = {}
     contracts.forEach((c) => {
-      if (!map[c.project_id] || new Date(c.created_at) > new Date(map[c.project_id].created_at)) {
-        map[c.project_id] = c
-      }
+      if (c.project_id) map[c.project_id] = c
     })
     return map
   }, [contracts])
 
-  // ---------------------------------------------------------------------------
-  // FILTERED PROJECTS & PAYMENTS IN PERIOD
-  // ---------------------------------------------------------------------------
-  const filteredQuotesInPeriod = useMemo(() => {
-    return quotes.filter((q) => isInPeriod(q.created_at))
-  }, [quotes, dateRange])
-
-  // ---------------------------------------------------------------------------
-  // METRIC CARDS CALCULATIONS (SECTION 3)
-  // ---------------------------------------------------------------------------
+  // MAIN METRICS ACCORDING TO PERIOD
   const metrics = useMemo(() => {
     let revenueReceived = 0
     let pendingAmount = 0
@@ -183,18 +153,18 @@ export function FinanceTab({
 
     projects.forEach((p) => {
       const pm = paymentsMapByProjectId[p.id]
-      const dateToTest = pm?.paid_at || pm?.created_at || p.updated_at
-      const isRecordInPeriod = isInPeriod(dateToTest)
-
       const isPaid = p.payment_status === 'Pago' || pm?.status === 'Pago'
-      const isPending = p.payment_status === 'Pendente' || pm?.status === 'Pendente' || (p.payment_link && !isPaid)
+      const isPending = p.payment_status === 'Pendente' || pm?.status === 'Pendente'
 
+      const paidVal = p.paid_value || (pm && pm.status === 'Pago' ? pm.expected_amount / 100 : 0)
       const approvedVal = p.approved_value || (pm ? pm.expected_amount / 100 : 0)
-      const paidVal = p.paid_value || (pm && pm.status === 'Pago' ? (pm.paid_amount || pm.expected_amount) / 100 : 0)
+
+      const paidDate = pm?.paid_at || pm?.created_at || p.updated_at
+      const isRecordInPeriod = isInPeriod(paidDate)
 
       if (isPaid) {
         if (isRecordInPeriod) {
-          revenueReceived += paidVal > 0 ? paidVal : approvedVal
+          revenueReceived += paidVal
           paidProjectsCount++
         }
       } else if (isPending) {
@@ -213,9 +183,7 @@ export function FinanceTab({
     }
   }, [projects, paymentsMapByProjectId, dateRange])
 
-  // ---------------------------------------------------------------------------
-  // REVENUE EVOLUTION CHART DATA (SECTION 4)
-  // ---------------------------------------------------------------------------
+  // REVENUE EVOLUTION CHART DATA
   const chartData = useMemo(() => {
     const points: Record<string, number> = {}
 
@@ -248,97 +216,69 @@ export function FinanceTab({
     const values = Object.values(points)
     const maxVal = Math.max(...values, 1)
 
-    return { labels, values, maxVal, points }
-  }, [projects, paymentsMapByProjectId, chartGrouping, dateRange])
+    return { labels, values, maxVal }
+  }, [projects, paymentsMapByProjectId, dateRange, chartGrouping])
 
-  // ---------------------------------------------------------------------------
-  // REVENUE BY PROJECT TYPE (SECTION 8)
-  // ---------------------------------------------------------------------------
+  // REVENUE BY PROJECT TYPE
   const revenueByType = useMemo(() => {
-    const typesMap: Record<string, { count: number; total: number }> = {
-      'Landing page': { count: 0, total: 0 },
-      'Página de vendas': { count: 0, total: 0 },
-      'Site institucional': { count: 0, total: 0 },
-      'Loja virtual': { count: 0, total: 0 },
-      'Integração ou funcionalidade': { count: 0, total: 0 },
-      'Desenvolvimento personalizado em código': { count: 0, total: 0 },
-    }
+    const typeMap: Record<string, { total: number; count: number }> = {}
 
     projects.forEach((p) => {
       const pm = paymentsMapByProjectId[p.id]
       const isPaid = p.payment_status === 'Pago' || pm?.status === 'Pago'
       if (!isPaid) return
+      if (!isInPeriod(pm?.paid_at || p.updated_at)) return
 
-      const paidDate = pm?.paid_at || pm?.created_at || p.updated_at
-      if (!isInPeriod(paidDate)) return
+      const type = p.project_type || 'Outros'
+      const amount = p.paid_value || p.approved_value || (pm ? pm.expected_amount / 100 : 0)
 
-      const typeKey = typesMap[p.project_type] ? p.project_type : 'Desenvolvimento personalizado em código'
-      const amount = p.paid_value || p.approved_value || (pm ? (pm.paid_amount || pm.expected_amount) / 100 : 0)
-
-      typesMap[typeKey].count += 1
-      typesMap[typeKey].total += amount
+      if (!typeMap[type]) {
+        typeMap[type] = { total: 0, count: 0 }
+      }
+      typeMap[type].total += amount
+      typeMap[type].count += 1
     })
 
-    return Object.entries(typesMap).map(([type, data]) => ({
+    return Object.entries(typeMap).map(([type, data]) => ({
       type,
-      count: data.count,
       total: data.total,
+      count: data.count,
     }))
   }, [projects, paymentsMapByProjectId, dateRange])
 
-  // ---------------------------------------------------------------------------
-  // REVENUE BY RESPONSIBLE USER (SECTION 9)
-  // ---------------------------------------------------------------------------
+  // REVENUE BY RESPONSIBLE USER
   const revenueByResponsible = useMemo(() => {
-    const respMap: Record<string, { name: string; totalProjects: number; paidProjects: number; revenue: number; pending: number }> = {}
-
-    // Initialize map with all team users
-    teamUsers.forEach((u) => {
-      respMap[u.user_id] = {
-        name: u.full_name,
-        totalProjects: 0,
-        paidProjects: 0,
-        revenue: 0,
-        pending: 0,
-      }
-    })
+    const respMap: Record<string, { name: string; revenue: number; pending: number; paidProjects: number; totalProjects: number }> = {}
 
     projects.forEach((p) => {
-      const respId = p.responsible_user_id
-      if (!respId) return
-
       const pm = paymentsMapByProjectId[p.id]
-      const dateToTest = pm?.paid_at || pm?.created_at || p.updated_at
-      if (!isInPeriod(dateToTest)) return
+      const isPaid = p.payment_status === 'Pago' || pm?.status === 'Pago'
+      const name = p.responsible_user_name || 'Sem responsável'
 
-      if (!respMap[respId]) {
-        respMap[respId] = {
-          name: p.responsible_user_name || 'Usuário Sem Nome',
-          totalProjects: 0,
-          paidProjects: 0,
-          revenue: 0,
-          pending: 0,
-        }
+      if (!respMap[name]) {
+        respMap[name] = { name, revenue: 0, pending: 0, paidProjects: 0, totalProjects: 0 }
       }
 
-      const isPaid = p.payment_status === 'Pago' || pm?.status === 'Pago'
-      const amount = p.approved_value || (pm ? pm.expected_amount / 100 : 0)
+      respMap[name].totalProjects += 1
 
-      respMap[respId].totalProjects += 1
       if (isPaid) {
-        respMap[respId].paidProjects += 1
-        respMap[respId].revenue += p.paid_value || amount
+        if (isInPeriod(pm?.paid_at || p.updated_at)) {
+          respMap[name].revenue += p.paid_value || p.approved_value || (pm ? pm.expected_amount / 100 : 0)
+          respMap[name].paidProjects += 1
+        }
       } else {
-        respMap[respId].pending += amount
+        respMap[name].pending += p.approved_value || (pm ? pm.expected_amount / 100 : 0)
       }
     })
 
-    return Object.values(respMap).filter((r) => r.totalProjects > 0)
-  }, [projects, paymentsMapByProjectId, teamUsers, dateRange])
+    return Object.values(respMap)
+  }, [projects, paymentsMapByProjectId, dateRange])
 
-  // ---------------------------------------------------------------------------
-  // QUOTES vs REVENUE CONVERSION (SECTION 7)
-  // ---------------------------------------------------------------------------
+  // QUOTES vs REVENUE CONVERSION
+  const filteredQuotesInPeriod = useMemo(() => {
+    return quotes.filter((q) => isInPeriod(q.created_at))
+  }, [quotes, dateRange])
+
   const quotesConversionMetrics = useMemo(() => {
     const totalCreated = filteredQuotesInPeriod.length
     let totalConverted = 0
@@ -362,9 +302,7 @@ export function FinanceTab({
     }
   }, [quotes, filteredQuotesInPeriod, dateRange])
 
-  // ---------------------------------------------------------------------------
-  // PENDENCIES & ATTENTION INDICATORS (SECTION 10)
-  // ---------------------------------------------------------------------------
+  // PENDENCIES & ATTENTION INDICATORS
   const pendencies = useMemo(() => {
     const pendingPaymentsList = projects.filter((p) => {
       const pm = paymentsMapByProjectId[p.id]
@@ -390,9 +328,7 @@ export function FinanceTab({
     }
   }, [projects, paymentsMapByProjectId, contractsMapByProjectId])
 
-  // ---------------------------------------------------------------------------
-  // RECENT PAYMENTS TABLE FILTERING (SECTION 5)
-  // ---------------------------------------------------------------------------
+  // RECENT PAYMENTS TABLE FILTERING
   const tableData = useMemo(() => {
     return projects.filter((p) => {
       const pm = paymentsMapByProjectId[p.id]
@@ -435,8 +371,8 @@ export function FinanceTab({
     })
   }, [projects, paymentsMapByProjectId, contractsMapByProjectId, searchTerm, statusFilter, responsibleFilter, projectTypeFilter, activePendencyFilter])
 
-  // Format monetary value helper
-  const formatMoney = (val?: number) => {
+  // Format currency helper
+  const formatMoney = (val?: number | null) => {
     if (!canViewValues) return '••••••'
     if (val === undefined || val === null) return 'R$ 0,00'
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)
@@ -451,28 +387,31 @@ export function FinanceTab({
   }
 
   return (
-    <div className="space-y-8 font-sans text-[#0C1D36] animate-in fade-in duration-300">
-      {/* ------------------------------------------------------------------- */}
-      {/* 1. MODULE HEADER & PERIOD FILTER BAR (SECTION 2)                    */}
-      {/* ------------------------------------------------------------------- */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-2xl bg-[#0075FF]/10 text-[#0075FF] flex items-center justify-center font-bold">
-                  <HugeiconsIcon icon={Dollar01Icon} className="w-6 h-6" strokeWidth={1.5} />
-                </div>
-                <div>
-                  <h2 className="text-xl font-extrabold text-[#0C1D36]">Módulo Financeiro</h2>
-                  <p className="text-xs text-slate-500 font-medium">
-                    Acompanhamento real de faturamento, receita recebida e cobranças da ANXIS.
-                  </p>
-                </div>
-              </div>
+    <div className={cn('space-y-8 font-sans transition-colors', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
+      {/* 1. MODULE HEADER & PERIOD FILTER BAR */}
+      <div
+        className={cn(
+          'rounded-3xl border p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6',
+          isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80'
+        )}
+      >
+        <div>
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-[#0075FF]/10 text-[#0075FF] flex items-center justify-center font-bold">
+              <HugeiconsIcon icon={Dollar01Icon} className="w-6 h-6" strokeWidth={1.5} />
             </div>
+            <div>
+              <h2 className={cn('text-xl font-extrabold', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>Módulo Financeiro</h2>
+              <p className="text-xs text-slate-400 font-medium">
+                Acompanhamento real de faturamento, receita recebida e cobranças da ANXIS.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* PERIOD SELECTOR BUTTONS */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80 flex-wrap">
+          <div className={cn('flex items-center gap-1 p-1.5 rounded-2xl border flex-wrap', isDarkMode ? 'bg-[#1A1E26] border-slate-800' : 'bg-slate-100 border-slate-200/80')}>
             {[
               { id: 'hoje', label: 'Hoje' },
               { id: 'ultimos_7_dias', label: '7 dias' },
@@ -490,7 +429,9 @@ export function FinanceTab({
                   'px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer',
                   period === op.id
                     ? 'bg-[#0075FF] text-white shadow-sm'
-                    : 'text-slate-600 hover:text-[#0C1D36] hover:bg-slate-200/60'
+                    : isDarkMode
+                      ? 'text-slate-400 hover:text-white hover:bg-[#282E3D]'
+                      : 'text-slate-600 hover:text-[#0C1D36] hover:bg-slate-200/60'
                 )}
               >
                 {op.label}
@@ -500,104 +441,96 @@ export function FinanceTab({
 
           {/* CUSTOM DATE RANGE INPUTS */}
           {period === 'custom' && (
-            <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-200 text-xs">
+            <div className={cn('flex items-center gap-2 p-2 rounded-2xl border text-xs', isDarkMode ? 'bg-[#1A1E26] border-slate-800' : 'bg-slate-50 border-slate-200')}>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="px-2.5 py-1 rounded-xl border border-slate-300 outline-none text-xs font-semibold bg-white"
+                className={cn('px-2.5 py-1 rounded-xl border outline-none text-xs font-semibold', isDarkMode ? 'bg-[#202530] border-slate-700 text-white' : 'bg-white border-slate-300')}
               />
               <span className="text-slate-400 font-bold">até</span>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="px-2.5 py-1 rounded-xl border border-slate-300 outline-none text-xs font-semibold bg-white"
+                className={cn('px-2.5 py-1 rounded-xl border outline-none text-xs font-semibold', isDarkMode ? 'bg-[#202530] border-slate-700 text-white' : 'bg-white border-slate-300')}
               />
             </div>
           )}
         </div>
       </div>
 
-      {/* ------------------------------------------------------------------- */}
-      {/* 2. MAIN METRIC CARDS (SECTION 3)                                    */}
-      {/* ------------------------------------------------------------------- */}
+      {/* 2. MAIN METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* CARD 1: RECEITA RECEBIDA */}
-        <div className="bg-white rounded-3xl p-6 border border-emerald-200/80 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-bl-full pointer-events-none" />
-          <div className="flex items-center justify-between text-emerald-600 mb-3">
+        <div className={cn('rounded-3xl p-6 border shadow-sm relative overflow-hidden group hover:shadow-md transition-all', isDarkMode ? 'bg-[#16181D] border-emerald-500/20' : 'bg-white border-emerald-200/80')}>
+          <div className="flex items-center justify-between text-emerald-500 mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider">Receita Recebida</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
               <HugeiconsIcon icon={CheckmarkCircle01Icon} className="w-5 h-5" strokeWidth={1.5} />
             </div>
           </div>
-          <div className="text-2xl font-black text-emerald-700 tracking-tight">
+          <div className="text-2xl font-black text-emerald-500 tracking-tight">
             {formatMoney(metrics.revenueReceived)}
           </div>
-          <div className="text-[11px] text-emerald-600/80 font-medium mt-1">
+          <div className="text-[11px] text-slate-400 font-medium mt-1">
             Pagamentos reais confirmados no período
           </div>
         </div>
 
         {/* CARD 2: VALORES PENDENTES */}
-        <div className="bg-white rounded-3xl p-6 border border-amber-200/80 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-bl-full pointer-events-none" />
-          <div className="flex items-center justify-between text-amber-600 mb-3">
+        <div className={cn('rounded-3xl p-6 border shadow-sm relative overflow-hidden group hover:shadow-md transition-all', isDarkMode ? 'bg-[#16181D] border-amber-500/20' : 'bg-white border-amber-200/80')}>
+          <div className="flex items-center justify-between text-amber-500 mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider">Valores Pendentes</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center">
               <HugeiconsIcon icon={Clock01Icon} className="w-5 h-5" strokeWidth={1.5} />
             </div>
           </div>
-          <div className="text-2xl font-black text-amber-700 tracking-tight">
+          <div className="text-2xl font-black text-amber-500 tracking-tight">
             {formatMoney(metrics.pendingAmount)}
           </div>
-          <div className="text-[11px] text-amber-600/80 font-medium mt-1">
+          <div className="text-[11px] text-slate-400 font-medium mt-1">
             Cobranças geradas aguardando pagamento
           </div>
         </div>
 
         {/* CARD 3: PROJETOS PAGOS */}
-        <div className="bg-white rounded-3xl p-6 border border-blue-200/80 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full pointer-events-none" />
+        <div className={cn('rounded-3xl p-6 border shadow-sm relative overflow-hidden group hover:shadow-md transition-all', isDarkMode ? 'bg-[#16181D] border-blue-500/20' : 'bg-white border-blue-200/80')}>
           <div className="flex items-center justify-between text-[#0075FF] mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider">Projetos Pagos</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
               <HugeiconsIcon icon={Briefcase01Icon} className="w-5 h-5" strokeWidth={1.5} />
             </div>
           </div>
-          <div className="text-2xl font-black text-[#0C1D36] tracking-tight">
-            {metrics.paidProjectsCount} <span className="text-xs font-semibold text-slate-500">projetos</span>
+          <div className={cn('text-2xl font-black tracking-tight', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
+            {metrics.paidProjectsCount} <span className="text-xs font-semibold text-slate-400">projetos</span>
           </div>
-          <div className="text-[11px] text-slate-500 font-medium mt-1">
+          <div className="text-[11px] text-slate-400 font-medium mt-1">
             Com pagamento total liquidado
           </div>
         </div>
 
         {/* CARD 4: PROJETOS AGUARDANDO PAGAMENTO */}
-        <div className="bg-white rounded-3xl p-6 border border-purple-200/80 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-bl-full pointer-events-none" />
-          <div className="flex items-center justify-between text-purple-600 mb-3">
+        <div className={cn('rounded-3xl p-6 border shadow-sm relative overflow-hidden group hover:shadow-md transition-all', isDarkMode ? 'bg-[#16181D] border-purple-500/20' : 'bg-white border-purple-200/80')}>
+          <div className="flex items-center justify-between text-purple-500 mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider">Aguardando Pagamento</span>
-            <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center">
               <HugeiconsIcon icon={CreditCardIcon} className="w-5 h-5" strokeWidth={1.5} />
             </div>
           </div>
-          <div className="text-2xl font-black text-[#0C1D36] tracking-tight">
-            {metrics.pendingProjectsCount} <span className="text-xs font-semibold text-slate-500">projetos</span>
+          <div className={cn('text-2xl font-black tracking-tight', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
+            {metrics.pendingProjectsCount} <span className="text-xs font-semibold text-slate-400">projetos</span>
           </div>
-          <div className="text-[11px] text-slate-500 font-medium mt-1">
+          <div className="text-[11px] text-slate-400 font-medium mt-1">
             Links ativos aguardando liquidação
           </div>
         </div>
       </div>
 
-      {/* ------------------------------------------------------------------- */}
-      {/* 3. ATTENTION INDICATORS / FINANCIAL PENDENCIES (SECTION 10)         */}
-      {/* ------------------------------------------------------------------- */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2">
+      {/* 3. ATTENTION INDICATORS / FINANCIAL PENDENCIES */}
+      <div className={cn('rounded-3xl border p-6 shadow-sm space-y-4', isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80')}>
+        <div className={cn('flex items-center justify-between border-b pb-3', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
+          <h3 className={cn('text-sm font-extrabold flex items-center gap-2', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
             <HugeiconsIcon icon={AlertCircleIcon} className="w-4.5 h-4.5 text-amber-500" strokeWidth={1.5} />
             <span>Indicadores de Atenção Financeira</span>
           </h3>
@@ -620,16 +553,18 @@ export function FinanceTab({
             className={cn(
               'p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3',
               activePendencyFilter === 'pendente'
-                ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-300'
-                : 'bg-slate-50 border-slate-200 hover:border-amber-300'
+                ? 'bg-amber-500/10 border-amber-400 ring-2 ring-amber-400/30'
+                : isDarkMode
+                  ? 'bg-[#1A1E26] border-slate-800 hover:border-amber-400'
+                  : 'bg-slate-50 border-slate-200 hover:border-amber-300'
             )}
           >
-            <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 font-bold">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0 font-bold">
               {pendencies.pendingPaymentsList.length}
             </div>
             <div>
-              <div className="font-extrabold text-[#0C1D36]">Pagamentos Pendentes</div>
-              <div className="text-[11px] text-slate-500 mt-0.5">
+              <div className={cn('font-extrabold', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>Pagamentos Pendentes</div>
+              <div className="text-[11px] text-slate-400 mt-0.5">
                 Projetos com cobrança gerada aguardando confirmação do cliente.
               </div>
             </div>
@@ -642,16 +577,18 @@ export function FinanceTab({
             className={cn(
               'p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3',
               activePendencyFilter === 'contrato_sem_cobranca'
-                ? 'bg-blue-50 border-blue-400 ring-2 ring-blue-300'
-                : 'bg-slate-50 border-slate-200 hover:border-blue-300'
+                ? 'bg-blue-500/10 border-blue-400 ring-2 ring-blue-400/30'
+                : isDarkMode
+                  ? 'bg-[#1A1E26] border-slate-800 hover:border-blue-400'
+                  : 'bg-slate-50 border-slate-200 hover:border-blue-300'
             )}
           >
-            <div className="w-8 h-8 rounded-xl bg-blue-100 text-[#0075FF] flex items-center justify-center shrink-0 font-bold">
+            <div className="w-8 h-8 rounded-xl bg-blue-500/20 text-[#0075FF] flex items-center justify-center shrink-0 font-bold">
               {pendencies.contractNoPaymentList.length}
             </div>
             <div>
-              <div className="font-extrabold text-[#0C1D36]">Contrato sem Cobrança</div>
-              <div className="text-[11px] text-slate-500 mt-0.5">
+              <div className={cn('font-extrabold', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>Contrato sem Cobrança</div>
+              <div className="text-[11px] text-slate-400 mt-0.5">
                 Projetos com PDF de contrato gerado mas sem link de pagamento.
               </div>
             </div>
@@ -664,16 +601,18 @@ export function FinanceTab({
             className={cn(
               'p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3',
               activePendencyFilter === 'falha'
-                ? 'bg-rose-50 border-rose-400 ring-2 ring-rose-300'
-                : 'bg-slate-50 border-slate-200 hover:border-rose-300'
+                ? 'bg-rose-500/10 border-rose-400 ring-2 ring-rose-400/30'
+                : isDarkMode
+                  ? 'bg-[#1A1E26] border-slate-800 hover:border-rose-400'
+                  : 'bg-slate-50 border-slate-200 hover:border-rose-300'
             )}
           >
-            <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0 font-bold">
+            <div className="w-8 h-8 rounded-xl bg-rose-500/20 text-rose-500 flex items-center justify-center shrink-0 font-bold">
               {pendencies.unconfirmedFailedList.length}
             </div>
             <div>
-              <div className="font-extrabold text-[#0C1D36]">Falhas ou Erros</div>
-              <div className="text-[11px] text-slate-500 mt-0.5">
+              <div className={cn('font-extrabold', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>Falhas ou Erros</div>
+              <div className="text-[11px] text-slate-400 mt-0.5">
                 Cobranças com erro na geração ou falha de confirmação.
               </div>
             </div>
@@ -681,22 +620,20 @@ export function FinanceTab({
         </div>
       </div>
 
-      {/* ------------------------------------------------------------------- */}
-      {/* 4. REVENUE EVOLUTION CHART (SECTION 4)                              */}
-      {/* ------------------------------------------------------------------- */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+      {/* 4. REVENUE EVOLUTION CHART */}
+      <div className={cn('rounded-3xl border p-6 shadow-sm space-y-6', isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80')}>
+        <div className={cn('flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
           <div>
-            <h3 className="text-base font-extrabold text-[#0C1D36] flex items-center gap-2">
+            <h3 className={cn('text-base font-extrabold flex items-center gap-2', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
               <HugeiconsIcon icon={ArrowUp01Icon} className="w-5 h-5 text-[#0075FF]" strokeWidth={1.5} />
               <span>Evolução da Receita no Período</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               Visualização temporal exclusiva de recebimentos reais confirmados.
             </p>
           </div>
 
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+          <div className={cn('flex items-center gap-1 p-1 rounded-xl border text-xs', isDarkMode ? 'bg-[#1A1E26] border-slate-800' : 'bg-slate-100 border-slate-200')}>
             {[
               { id: 'dia', label: 'Por Dia' },
               { id: 'semana', label: 'Por Semana' },
@@ -709,8 +646,10 @@ export function FinanceTab({
                 className={cn(
                   'px-3 py-1 rounded-lg font-bold transition-all cursor-pointer',
                   chartGrouping === g.id
-                    ? 'bg-white text-[#0075FF] shadow-xs'
-                    : 'text-slate-600 hover:text-[#0C1D36]'
+                    ? 'bg-[#0075FF] text-white shadow-xs'
+                    : isDarkMode
+                      ? 'text-slate-400 hover:text-white hover:bg-[#282E3D]'
+                      : 'text-slate-600 hover:text-[#0C1D36]'
                 )}
               >
                 {g.label}
@@ -721,7 +660,7 @@ export function FinanceTab({
 
         {/* SVG BAR CHART */}
         {chartData.labels.length === 0 ? (
-          <div className="p-12 text-center text-slate-400 font-medium text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+          <div className={cn('p-12 text-center font-medium text-xs rounded-2xl border border-dashed', isDarkMode ? 'bg-[#181B22] border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-400')}>
             Nenhum pagamento confirmado registrado no período selecionado.
           </div>
         ) : (
@@ -742,7 +681,7 @@ export function FinanceTab({
                       style={{ height: `${heightPct}%` }}
                       className="w-full max-w-[40px] bg-[#0075FF] hover:bg-[#168CFF] rounded-t-xl transition-all shadow-xs"
                     />
-                    <span className="text-[10px] font-bold text-slate-500 truncate max-w-full">
+                    <span className="text-[10px] font-bold text-slate-400 truncate max-w-full">
                       {label}
                     </span>
                   </div>
@@ -753,13 +692,11 @@ export function FinanceTab({
         )}
       </div>
 
-      {/* ------------------------------------------------------------------- */}
-      {/* 5. BREAKDOWN GRID: PROJECT TYPES & RESPONSIBLES (SECTIONS 8 & 9)    */}
-      {/* ------------------------------------------------------------------- */}
+      {/* 5. BREAKDOWN GRID: PROJECT TYPES & RESPONSIBLES */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* REVENUE BY PROJECT TYPE */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
-          <h3 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2 border-b border-slate-100 pb-3">
+        <div className={cn('rounded-3xl border p-6 shadow-sm space-y-4', isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80')}>
+          <h3 className={cn('text-sm font-extrabold flex items-center gap-2 border-b pb-3', isDarkMode ? 'text-white border-slate-800' : 'text-[#0C1D36] border-slate-100')}>
             <HugeiconsIcon icon={PieChartIcon} className="w-4.5 h-4.5 text-[#0075FF]" strokeWidth={1.5} />
             <span>Receita por Tipo de Projeto</span>
           </h3>
@@ -768,11 +705,11 @@ export function FinanceTab({
             {revenueByType.map((item) => (
               <div
                 key={item.type}
-                className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs"
+                className={cn('flex items-center justify-between p-3 rounded-2xl border text-xs', isDarkMode ? 'bg-[#181B22] border-slate-800' : 'bg-slate-50 border-slate-200/70')}
               >
                 <div>
-                  <div className="font-bold text-[#0C1D36]">{item.type}</div>
-                  <div className="text-[10px] text-slate-500 font-medium">
+                  <div className={cn('font-bold', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>{item.type}</div>
+                  <div className="text-[10px] text-slate-400 font-medium">
                     {item.count} {item.count === 1 ? 'projeto pago' : 'projetos pagos'}
                   </div>
                 </div>
@@ -785,8 +722,8 @@ export function FinanceTab({
         </div>
 
         {/* REVENUE BY RESPONSIBLE */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
-          <h3 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2 border-b border-slate-100 pb-3">
+        <div className={cn('rounded-3xl border p-6 shadow-sm space-y-4', isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80')}>
+          <h3 className={cn('text-sm font-extrabold flex items-center gap-2 border-b pb-3', isDarkMode ? 'text-white border-slate-800' : 'text-[#0C1D36] border-slate-100')}>
             <HugeiconsIcon icon={UserIcon} className="w-4.5 h-4.5 text-[#0075FF]" strokeWidth={1.5} />
             <span>Acompanhamento por Responsável</span>
           </h3>
@@ -800,20 +737,20 @@ export function FinanceTab({
               {revenueByResponsible.map((resp) => (
                 <div
                   key={resp.name}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs"
+                  className={cn('flex items-center justify-between p-3 rounded-2xl border text-xs', isDarkMode ? 'bg-[#181B22] border-slate-800' : 'bg-slate-50 border-slate-200/70')}
                 >
                   <div>
-                    <div className="font-extrabold text-[#0C1D36]">{resp.name}</div>
-                    <div className="text-[10px] text-slate-500 font-medium">
+                    <div className={cn('font-extrabold', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>{resp.name}</div>
+                    <div className="text-[10px] text-slate-400 font-medium">
                       {resp.paidProjects} de {resp.totalProjects} projetos pagos
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-black text-emerald-600 text-sm">
+                    <div className="font-black text-emerald-500 text-sm">
                       {formatMoney(resp.revenue)}
                     </div>
                     {resp.pending > 0 && (
-                      <div className="text-[10px] text-amber-600 font-semibold">
+                      <div className="text-[10px] text-amber-500 font-semibold">
                         {formatMoney(resp.pending)} pendente
                       </div>
                     )}
@@ -825,400 +762,41 @@ export function FinanceTab({
         </div>
       </div>
 
-      {/* ------------------------------------------------------------------- */}
-      {/* 6. QUOTES vs REVENUE CONVERSION (SECTION 7)                         */}
-      {/* ------------------------------------------------------------------- */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h3 className="text-sm font-extrabold text-[#0C1D36] flex items-center gap-2">
+      {/* 6. QUOTES vs REVENUE CONVERSION */}
+      <div className={cn('rounded-3xl border p-6 shadow-sm space-y-4', isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80')}>
+        <div className={cn('flex items-center justify-between border-b pb-3', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
+          <h3 className={cn('text-sm font-extrabold flex items-center gap-2', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
             <HugeiconsIcon icon={File01Icon} className="w-4.5 h-4.5 text-[#0075FF]" strokeWidth={1.5} />
             <span>Relação entre Orçamentos e Conversão</span>
           </h3>
-          <span className="text-[11px] bg-blue-50 text-[#0075FF] font-extrabold px-3 py-1 rounded-full border border-blue-200">
+          <span className="text-[11px] bg-blue-500/10 text-[#0075FF] font-extrabold px-3 py-1 rounded-full border border-blue-500/20">
             Taxa de conversão: {quotesConversionMetrics.conversionRate}%
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-            <div className="text-slate-500 font-semibold">Orçamentos Criados</div>
-            <div className="text-xl font-black text-[#0C1D36] mt-1">
+          <div className={cn('p-4 rounded-2xl border', isDarkMode ? 'bg-[#181B22] border-slate-800' : 'bg-slate-50 border-slate-200')}>
+            <div className="text-slate-400 font-semibold">Orçamentos Criados</div>
+            <div className={cn('text-xl font-black mt-1', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
               {quotesConversionMetrics.totalCreated}
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-            <div className="text-slate-500 font-semibold">Orçamentos Convertidos</div>
-            <div className="text-xl font-black text-emerald-600 mt-1">
+          <div className={cn('p-4 rounded-2xl border', isDarkMode ? 'bg-[#181B22] border-slate-800' : 'bg-slate-50 border-slate-200')}>
+            <div className="text-slate-400 font-semibold">Orçamentos Convertidos</div>
+            <div className="text-xl font-black text-emerald-500 mt-1">
               {quotesConversionMetrics.totalConverted}
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
-            <div className="text-slate-500 font-semibold">Valor dos Convertidos</div>
+          <div className={cn('p-4 rounded-2xl border', isDarkMode ? 'bg-[#181B22] border-slate-800' : 'bg-slate-50 border-slate-200')}>
+            <div className="text-slate-400 font-semibold">Valor dos Convertidos</div>
             <div className="text-xl font-black text-[#0075FF] mt-1">
               {formatMoney(quotesConversionMetrics.totalConvertedValue)}
             </div>
           </div>
         </div>
       </div>
-
-      {/* ------------------------------------------------------------------- */}
-      {/* 7. RECENT PAYMENTS & PROJECTS TABLE (SECTION 5)                      */}
-      {/* ------------------------------------------------------------------- */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div>
-            <h3 className="text-base font-extrabold text-[#0C1D36] flex items-center gap-2">
-              <HugeiconsIcon icon={Invoice01Icon} className="w-5 h-5 text-[#0075FF]" strokeWidth={1.5} />
-              <span>Histórico de Pagamentos e Projetos</span>
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Consulte transações reais, comprovantes e status financeiros dos projetos.
-            </p>
-          </div>
-        </div>
-
-        {/* SEARCH & TABLE FILTERS */}
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 text-xs">
-          <div className="relative w-full lg:w-72">
-            <HugeiconsIcon icon={Search01Icon} className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth={1.5} />
-            <input
-              type="text"
-              placeholder="Buscar cliente ou projeto..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 focus:border-[#0075FF] outline-none font-medium"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 w-full lg:w-auto flex-wrap">
-            {/* STATUS FILTER */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-slate-200 font-bold bg-slate-50 text-slate-700 outline-none"
-            >
-              <option value="todos">Todos os Status</option>
-              <option value="pago">Pago</option>
-              <option value="pendente">Pendente</option>
-              <option value="falha">Falha</option>
-            </select>
-
-            {/* RESPONSIBLE FILTER */}
-            <select
-              value={responsibleFilter}
-              onChange={(e) => setResponsibleFilter(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-slate-200 font-bold bg-slate-50 text-slate-700 outline-none"
-            >
-              <option value="todos">Todos os Responsáveis</option>
-              {teamUsers.map((u) => (
-                <option key={u.user_id} value={u.user_id}>
-                  {u.full_name}
-                </option>
-              ))}
-            </select>
-
-            {/* PROJECT TYPE FILTER */}
-            <select
-              value={projectTypeFilter}
-              onChange={(e) => setProjectTypeFilter(e.target.value)}
-              className="px-3 py-2 rounded-xl border border-slate-200 font-bold bg-slate-50 text-slate-700 outline-none"
-            >
-              <option value="todos">Todos os Tipos</option>
-              <option value="Landing page">Landing page</option>
-              <option value="Página de vendas">Página de vendas</option>
-              <option value="Site institucional">Site institucional</option>
-              <option value="Loja virtual">Loja virtual</option>
-              <option value="Integração ou funcionalidade">Integração</option>
-              <option value="Desenvolvimento personalizado em código">Dev Personalizado</option>
-            </select>
-          </div>
-        </div>
-
-        {/* PAYMENTS TABLE */}
-        <div className="overflow-x-auto border border-slate-200 rounded-2xl">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-[#081D3A] text-white border-b border-slate-800 font-bold uppercase tracking-wider text-[11px]">
-                <th className="p-3.5 whitespace-nowrap">Cliente & Projeto</th>
-                <th className="p-3.5 whitespace-nowrap">Valor Aprovado</th>
-                <th className="p-3.5 whitespace-nowrap">Status</th>
-                <th className="p-3.5 whitespace-nowrap">Data</th>
-                <th className="p-3.5 whitespace-nowrap">Responsável</th>
-                <th className="p-3.5 whitespace-nowrap">Forma / Parcelas</th>
-                <th className="p-3.5 text-right whitespace-nowrap">Ação</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 font-medium">
-              {tableData.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-400 font-medium">
-                    Nenhum registro financeiro encontrado para os filtros selecionados.
-                  </td>
-                </tr>
-              ) : (
-                tableData.map((p) => {
-                  const pm = paymentsMapByProjectId[p.id]
-                  const isPaid = p.payment_status === 'Pago' || pm?.status === 'Pago'
-                  const isFailed = pm?.status === 'Falha na geração' || pm?.status === 'Falha na confirmação'
-                  const dateStr = pm?.paid_at || pm?.created_at || p.updated_at
-                  const approvedVal = p.approved_value || (pm ? pm.expected_amount / 100 : 0)
-
-                  return (
-                    <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-3.5">
-                        <div className="font-extrabold text-[#0C1D36] text-xs">{p.client_name}</div>
-                        <div className="text-[11px] text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
-                          <span>{p.title}</span>
-                          <span className="text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded font-mono">
-                            {p.project_type}
-                          </span>
-                        </div>
-                      </td>
-
-                      <td className="p-3.5 font-extrabold text-[#0075FF]">
-                        {formatMoney(approvedVal)}
-                      </td>
-
-                      <td className="p-3.5">
-                        {isPaid ? (
-                          <span className="text-[10px] bg-emerald-50 text-emerald-700 font-extrabold px-2.5 py-1 rounded-md border border-emerald-200">
-                            Pago
-                          </span>
-                        ) : isFailed ? (
-                          <span className="text-[10px] bg-rose-50 text-rose-700 font-extrabold px-2.5 py-1 rounded-md border border-rose-200">
-                            Falha
-                          </span>
-                        ) : (
-                          <span className="text-[10px] bg-amber-50 text-amber-700 font-extrabold px-2.5 py-1 rounded-md border border-amber-200">
-                            Pendente
-                          </span>
-                        )}
-                      </td>
-
-                      <td className="p-3.5 font-mono text-[11px] text-slate-600">
-                        {formatDateBR(dateStr)}
-                      </td>
-
-                      <td className="p-3.5 font-semibold text-slate-700">
-                        {p.responsible_user_name || 'Sem responsável'}
-                      </td>
-
-                      <td className="p-3.5 text-slate-600">
-                        {pm?.capture_method ? (
-                          <span className="font-medium text-[11px]">
-                            {pm.capture_method === 'credit_card' ? 'Cartão de crédito' : pm.capture_method === 'pix' ? 'PIX' : pm.capture_method}
-                            {pm.installments && pm.installments > 1 ? ` (${pm.installments}x)` : ''}
-                          </span>
-                        ) : (
-                          <span className="text-slate-400 font-mono text-[11px]">-</span>
-                        )}
-                      </td>
-
-                      <td className="p-3.5 text-right">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedProjectModal(p)}
-                          className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-[#0075FF] hover:text-white font-bold text-slate-700 transition-colors cursor-pointer"
-                        >
-                          Ver Detalhes
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* ------------------------------------------------------------------- */}
-      {/* 8. FINANCIAL DETAIL MODAL PER PROJECT (SECTION 6)                    */}
-      {/* ------------------------------------------------------------------- */}
-      {selectedProjectModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 font-sans">
-          <div className="bg-white rounded-3xl p-6 max-w-xl w-full shadow-2xl space-y-6 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            {/* MODAL HEADER */}
-            <div className="flex items-start justify-between border-b border-slate-100 pb-4">
-              <div>
-                <span className="text-[10px] uppercase tracking-wider font-extrabold text-[#0075FF]">
-                  Detalhes Financeiros do Projeto
-                </span>
-                <h3 className="text-lg font-extrabold text-[#0C1D36] mt-0.5">
-                  {selectedProjectModal.title}
-                </h3>
-                <p className="text-xs text-slate-500 font-medium">
-                  Cliente: <strong className="text-slate-700">{selectedProjectModal.client_name}</strong>
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setSelectedProjectModal(null)}
-                className="text-slate-400 hover:text-[#0C1D36] font-bold p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* PROJECT FINANCIAL DATA GRID */}
-            {(() => {
-              const pm = paymentsMapByProjectId[selectedProjectModal.id]
-              const contract = contractsMapByProjectId[selectedProjectModal.id]
-              const quote = quotes.find((q) => q.id === selectedProjectModal.quote_id || q.converted_project_id === selectedProjectModal.id)
-              const isPaid = selectedProjectModal.payment_status === 'Pago' || pm?.status === 'Pago'
-              const approvedVal = selectedProjectModal.approved_value || (pm ? pm.expected_amount / 100 : 0)
-              const paidVal = selectedProjectModal.paid_value || (pm && pm.status === 'Pago' ? (pm.paid_amount || pm.expected_amount) / 100 : 0)
-
-              return (
-                <div className="space-y-5 text-xs">
-                  {/* VALUES GRID */}
-                  <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                    <div>
-                      <span className="text-slate-500 font-medium">Tipo do Projeto</span>
-                      <div className="font-bold text-[#0C1D36] mt-0.5">{selectedProjectModal.project_type}</div>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-500 font-medium">Responsável</span>
-                      <div className="font-bold text-[#0C1D36] mt-0.5">
-                        {selectedProjectModal.responsible_user_name || 'Sem responsável'}
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-500 font-medium">Valor Aprovado</span>
-                      <div className="font-black text-[#0075FF] text-sm mt-0.5">
-                        {formatMoney(approvedVal)}
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-500 font-medium">Valor Pago Confirmado</span>
-                      <div className="font-black text-emerald-600 text-sm mt-0.5">
-                        {formatMoney(paidVal)}
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-500 font-medium">Status do Pagamento</span>
-                      <div className="mt-1">
-                        {isPaid ? (
-                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2.5 py-0.5 rounded-full">
-                            Pago Confirmado
-                          </span>
-                        ) : (
-                          <span className="text-[10px] bg-amber-100 text-amber-800 font-extrabold px-2.5 py-0.5 rounded-full">
-                            Pendente
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-slate-500 font-medium">Data do Pagamento / Gerado</span>
-                      <div className="font-mono font-bold text-slate-700 mt-0.5">
-                        {formatDateBR(pm?.paid_at || pm?.created_at || selectedProjectModal.updated_at)}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* RELATED LINKS & DOCUMENTS */}
-                  <div className="space-y-2.5">
-                    <h4 className="font-extrabold text-[#0C1D36]">Documentos e Links Relacionados</h4>
-
-                    {/* QUOTE LINK */}
-                    {quote && (
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                        <div className="flex items-center gap-2">
-                          <HugeiconsIcon icon={File01Icon} className="w-4 h-4 text-[#0075FF]" strokeWidth={1.5} />
-                          <span className="font-bold">Orçamento Base: #{quote.id.slice(0, 8)}</span>
-                        </div>
-                        <span className="text-[11px] font-bold text-slate-600">
-                          {formatMoney(quote.form_data?.final_value)}
-                        </span>
-                      </div>
-                    )}
-
-                    {/* CONTRACT LINK */}
-                    {contract && (
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                        <div className="flex items-center gap-2">
-                          <HugeiconsIcon icon={File01Icon} className="w-4 h-4 text-emerald-600" strokeWidth={1.5} />
-                          <span className="font-bold">Contrato em PDF Gerado</span>
-                        </div>
-                        <a
-                          href={`/api/contracts/${contract.id}/download`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[11px] bg-emerald-600 text-white font-bold px-3 py-1 rounded-xl hover:bg-emerald-700 transition-colors"
-                        >
-                          Visualizar Contrato
-                        </a>
-                      </div>
-                    )}
-
-                    {/* PAYMENT LINK — ONLY SHOWN IF PAYMENT IS PENDING (SECTION 6) */}
-                    {!isPaid && (selectedProjectModal.payment_link || pm?.payment_url) && (
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-amber-50 border border-amber-200">
-                        <div className="flex items-center gap-2 text-amber-900">
-                          <HugeiconsIcon icon={Link01Icon} className="w-4 h-4 text-amber-600" strokeWidth={1.5} />
-                          <span className="font-bold">Link de Pagamento InfinitePay (Pendente)</span>
-                        </div>
-                        <a
-                          href={pm?.payment_url || selectedProjectModal.payment_link || '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[11px] bg-amber-600 text-white font-bold px-3 py-1 rounded-xl hover:bg-amber-700 transition-colors"
-                        >
-                          Abrir Link
-                        </a>
-                      </div>
-                    )}
-
-                    {/* PROOF / RECEIPT URL IF PAID */}
-                    {isPaid && pm?.receipt_url && (
-                      <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
-                        <div className="flex items-center gap-2 text-emerald-900">
-                          <HugeiconsIcon icon={CheckmarkCircle01Icon} className="w-4 h-4 text-emerald-600" strokeWidth={1.5} />
-                          <span className="font-bold">Comprovante de Pagamento InfinitePay</span>
-                        </div>
-                        <a
-                          href={pm.receipt_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[11px] bg-emerald-600 text-white font-bold px-3 py-1 rounded-xl hover:bg-emerald-700 transition-colors"
-                        >
-                          Ver Comprovante
-                        </a>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* BUTTON TO FULL PROJECT DRAWER IF AVAILABLE */}
-                  {onOpenProjectDetail && (
-                    <div className="pt-3 border-t border-slate-100 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const proj = selectedProjectModal
-                          setSelectedProjectModal(null)
-                          onOpenProjectDetail(proj)
-                        }}
-                        className="px-4 py-2 rounded-xl bg-[#0075FF] text-white font-extrabold text-xs hover:bg-[#168CFF] shadow-sm transition-all cursor-pointer"
-                      >
-                        Abrir Drawer Completo do Projeto
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
-            })()}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

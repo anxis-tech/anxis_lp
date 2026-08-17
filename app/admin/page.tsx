@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import Link from 'next/link'
+import { AnxisLogo, AnxisIcon } from '@/components/ui/anxis-logo'
 import { createClient } from '@/lib/supabase/client'
 import {
   UserProfileWithRole,
@@ -61,6 +61,8 @@ import {
   Dollar01Icon,
   Briefcase01Icon,
   PieChartIcon,
+  Sun01Icon,
+  Moon01Icon,
 } from '@hugeicons/core-free-icons'
 import { cn } from '@/lib/utils'
 
@@ -97,6 +99,27 @@ export default function AdminDashboardPage() {
   // server is already serving a new build. We show a non-invasive reload banner
   // instead of silently breaking. This is NOT triggered by real db/auth/permission errors.
   const [staleDeployDetected, setStaleDeployDetected] = useState<boolean>(false)
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false)
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('anxis_admin_theme')
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true)
+      document.documentElement.classList.add('dark')
+    }
+  }, [])
+
+  const toggleDarkMode = () => {
+    const nextState = !isDarkMode
+    setIsDarkMode(nextState)
+    if (nextState) {
+      localStorage.setItem('anxis_admin_theme', 'dark')
+      document.documentElement.classList.add('dark')
+    } else {
+      localStorage.setItem('anxis_admin_theme', 'light')
+      document.documentElement.classList.remove('dark')
+    }
+  }
 
   // Helper to wrap Server Action calls and detect deployment skew errors.
   // Only surfaces the stale-deploy banner for the specific Next.js error message.
@@ -338,8 +361,8 @@ export default function AdminDashboardPage() {
     return (
       <div className="min-h-screen bg-[#081D3A] text-white flex flex-col items-center justify-center p-6 space-y-5 font-sans relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#0075FF]/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative w-72 h-20 sm:w-96 sm:h-24 animate-pulse">
-          <Image src="/images/logo-transparente.png" alt="ANXIS Logo" fill className="object-contain" priority />
+        <div className="flex items-center justify-center py-4 animate-pulse">
+          <AnxisLogo size="lg" theme="dark" className="scale-125 sm:scale-150" />
         </div>
         <div className="flex items-center gap-2.5 text-slate-300 text-xs font-semibold bg-white/10 px-5 py-2.5 rounded-full border border-white/10 shadow-lg backdrop-blur-md">
           <HugeiconsIcon icon={Loading01Icon} className="w-4 h-4 animate-spin text-[#0075FF]" strokeWidth={1.5} />
@@ -368,16 +391,16 @@ export default function AdminDashboardPage() {
       title: 'Gestão de Projetos',
       items: [
         {
-          id: 'client_projects',
-          label: 'Projetos',
-          icon: FolderKanbanIcon,
-          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW),
-        },
-        {
           id: 'kanban_board',
-          label: 'Kanban',
+          label: 'Projetos',
           icon: KanbanIcon,
           allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.KANBAN_VIEW) || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW),
+        },
+        {
+          id: 'client_projects',
+          label: 'Contratos',
+          icon: FolderKanbanIcon,
+          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.CLIENT_PROJECTS_VIEW),
         },
       ],
     },
@@ -455,7 +478,7 @@ export default function AdminDashboardPage() {
   const currentTabObj = allAllowedTabs.find((t) => t.id === activeTab) || allAllowedTabs[0]
 
   return (
-    <div className="min-h-screen bg-[#F0F3F7] text-[#0C1D36] flex font-sans max-w-full overflow-x-hidden p-4 sm:p-6 lg:p-8">
+    <div className={cn('min-h-screen flex font-sans max-w-full overflow-x-hidden p-4 sm:p-6 lg:p-8 transition-colors duration-300', isDarkMode ? 'bg-[#0D0F12] text-white dark' : 'bg-[#F0F3F7] text-[#0C1D36]')}>
 
       {/* STALE DEPLOY BANNER — shown only when a Server Action from a previous build
           is detected. This is a deployment skew issue: the user's browser has HTML/JS
@@ -484,34 +507,37 @@ export default function AdminDashboardPage() {
           </button>
         </div>
       )}
-      {/* FLOATING LIGHT SIDEBAR */}
+      {/* FLOATING LIGHT / DARK SIDEBAR */}
       <aside
         className={cn(
-          'bg-white text-[#0C1D36] rounded-[32px] border border-slate-200/80 shadow-md flex flex-col justify-between transition-all duration-300 ease-in-out z-40 fixed top-6 left-6 bottom-6 h-[calc(100vh-48px)] hidden md:flex overflow-y-auto',
+          'rounded-[32px] border shadow-md flex flex-col justify-between transition-all duration-300 ease-in-out z-40 fixed top-6 left-6 bottom-6 h-[calc(100vh-48px)] hidden md:flex overflow-y-auto',
+          isDarkMode ? 'bg-[#16181D] text-white border-slate-800' : 'bg-white text-[#0C1D36] border-slate-200/80',
           isSidebarCollapsed ? 'w-20 p-3.5' : 'w-64 p-6'
         )}
       >
         <div className="space-y-4">
           {/* BRAND LOGO & COLLAPSE TOGGLE */}
-          <div className={cn('flex items-center pb-4 border-b border-slate-100', isSidebarCollapsed ? 'justify-center' : 'justify-between')}>
-            {!isSidebarCollapsed && (
-              <div className="flex items-center gap-2.5">
-                <div className="relative w-8 h-8 shrink-0">
-                  <Image src="/images/Icon--Colorido.png" alt="ANXIS Logo" fill className="object-contain" priority />
-                </div>
-                <span className="font-black text-lg text-[#0C1D36] tracking-tight">ANXIS</span>
-              </div>
+          <div className={cn('flex items-center pb-4 border-b', isDarkMode ? 'border-slate-800' : 'border-slate-100', isSidebarCollapsed ? 'flex-col gap-3 items-center' : 'justify-between')}>
+            {!isSidebarCollapsed ? (
+              <AnxisLogo size="md" theme={isDarkMode ? 'dark' : 'light'} />
+            ) : (
+              <AnxisIcon size={28} />
             )}
 
             {/* TOP COLLAPSE TOGGLE BUTTON */}
             <button
               type="button"
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className="p-2 rounded-xl text-slate-400 hover:text-[#0C1D36] hover:bg-slate-100 transition-all border border-slate-200/60 cursor-pointer"
+              className={cn(
+                'p-2 rounded-xl transition-all border cursor-pointer',
+                isDarkMode
+                  ? 'border-slate-800 text-slate-400 hover:text-white hover:bg-[#282E3D]'
+                  : 'border-slate-200/60 text-slate-400 hover:text-[#0C1D36] hover:bg-slate-100'
+              )}
               title={isSidebarCollapsed ? 'Expandir Menu' : 'Recolher Menu'}
             >
               {isSidebarCollapsed ? (
-                <HugeiconsIcon icon={PanelLeftOpenIcon} className="w-5 h-5 text-[#0C1D36]" strokeWidth={1.5} />
+                <HugeiconsIcon icon={PanelLeftOpenIcon} className={cn('w-5 h-5', isDarkMode ? 'text-white' : 'text-[#0C1D36]')} strokeWidth={1.5} />
               ) : (
                 <HugeiconsIcon icon={PanelLeftCloseIcon} className="w-5 h-5 text-slate-400" strokeWidth={1.5} />
               )}
@@ -546,8 +572,12 @@ export default function AdminDashboardPage() {
                             'w-full flex items-center rounded-2xl text-xs font-bold transition-all text-left group cursor-pointer',
                             isSidebarCollapsed ? 'justify-center p-3.5' : 'justify-between px-4 py-3',
                             isActive
-                              ? 'bg-[#0C1D36] text-white shadow-lg shadow-[#0C1D36]/20 font-extrabold'
-                              : 'text-slate-500 hover:bg-slate-100 hover:text-[#0C1D36]'
+                              ? isDarkMode
+                                ? 'bg-[#282E3D] text-white border border-slate-700/60 shadow-sm font-extrabold'
+                                : 'bg-[#0C1D36] text-white shadow-lg shadow-[#0C1D36]/20 font-extrabold'
+                              : isDarkMode
+                                ? 'text-slate-400 hover:bg-[#282E3D] hover:text-white'
+                                : 'text-slate-500 hover:bg-slate-100 hover:text-[#0C1D36]'
                           )}
                         >
                           <div className="flex items-center gap-3">
@@ -556,7 +586,11 @@ export default function AdminDashboardPage() {
                               strokeWidth={1.5}
                               className={cn(
                                 'w-5 h-5 shrink-0',
-                                isActive ? 'text-white' : 'text-slate-400 group-hover:text-[#0C1D36]'
+                                isActive
+                                  ? 'text-white'
+                                  : isDarkMode
+                                    ? 'text-slate-400 group-hover:text-white'
+                                    : 'text-slate-400 group-hover:text-[#0C1D36]'
                               )}
                             />
                             {!isSidebarCollapsed && <span>{tab.label}</span>}
@@ -575,16 +609,42 @@ export default function AdminDashboardPage() {
           </nav>
         </div>
 
-        {/* SIDEBAR FOOTER USER CARD */}
-        <div className="pt-4 border-t border-slate-100">
+        {/* SIDEBAR FOOTER & THEME TOGGLE */}
+        <div className={cn('pt-4 border-t space-y-2', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
+          {/* THEME TOGGLE BUTTON */}
+          <button
+            type="button"
+            onClick={toggleDarkMode}
+            className={cn(
+              'w-full flex items-center justify-between rounded-2xl text-xs font-bold transition-all cursor-pointer',
+              isSidebarCollapsed ? 'p-2.5 justify-center' : 'px-3 py-2.5',
+              isDarkMode
+                ? 'bg-[#202530] text-amber-300 border border-slate-700 hover:bg-slate-800'
+                : 'bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200'
+            )}
+            title="Alternar Modo Claro / Modo Escuro (ClickUp)"
+          >
+            <div className="flex items-center gap-2.5">
+              <HugeiconsIcon icon={isDarkMode ? Sun01Icon : Moon01Icon} className="w-5 h-5 text-amber-400 shrink-0" strokeWidth={1.5} />
+              {!isSidebarCollapsed && (
+                <span>{isDarkMode ? 'Modo Escuro' : 'Modo Claro'}</span>
+              )}
+            </div>
+            {!isSidebarCollapsed && (
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/10 border border-current">
+                {isDarkMode ? 'Dark' : 'Light'}
+              </span>
+            )}
+          </button>
+
           {!isSidebarCollapsed ? (
-            <div className="flex items-center justify-between p-2 rounded-2xl bg-slate-50 border border-slate-100">
+            <div className={cn('flex items-center justify-between p-2 rounded-2xl border', isDarkMode ? 'bg-[#181B22] border-slate-800 text-white' : 'bg-slate-50 border-slate-100 text-[#0C1D36]')}>
               <div className="flex items-center gap-2.5 overflow-hidden">
-                <div className="w-8 h-8 rounded-full bg-[#0C1D36] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[#0075FF] text-white flex items-center justify-center font-bold text-xs shrink-0">
                   {userProfile?.full_name?.charAt(0) || 'A'}
                 </div>
                 <div className="overflow-hidden text-xs">
-                  <div className="font-bold text-[#0C1D36] truncate">{userProfile?.full_name}</div>
+                  <div className="font-bold truncate">{userProfile?.full_name}</div>
                   <div className="text-[10px] text-slate-400 capitalize">{userProfile?.role_slug || 'Usuário'}</div>
                 </div>
               </div>
@@ -644,6 +704,7 @@ export default function AdminDashboardPage() {
                     setActiveTab('client_projects')
                   }}
                   onLogout={handleLogout}
+                  isDarkMode={isDarkMode}
                 />
               )}
 
@@ -655,6 +716,7 @@ export default function AdminDashboardPage() {
                   canEdit={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_EDIT)}
                   canDelete={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_DELETE)}
                   canCreate={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PORTFOLIO_CREATE)}
+                  isDarkMode={isDarkMode}
                 />
               )}
 
@@ -681,6 +743,7 @@ export default function AdminDashboardPage() {
                   prefilledFromQuote={prefilledFromQuote}
                   onClearPrefilledQuote={() => setPrefilledFromQuote(null)}
                   onStaleDeployDetected={() => setStaleDeployDetected(true)}
+                  isDarkMode={isDarkMode}
                 />
               )}
 
@@ -700,6 +763,7 @@ export default function AdminDashboardPage() {
                     setSelectedDetailProject(p)
                     setDrawerTab('geral')
                   }}
+                  isDarkMode={isDarkMode}
                 />
               )}
 
@@ -718,6 +782,7 @@ export default function AdminDashboardPage() {
                     setCalculatorInitialData(undefined)
                     setActiveTab('pricing_calculator')
                   }}
+                  isDarkMode={isDarkMode}
                 />
               )}
 
@@ -734,6 +799,7 @@ export default function AdminDashboardPage() {
                     handleContinueToProjectForm(newQuote)
                   }}
                   initialData={calculatorInitialData}
+                  isDarkMode={isDarkMode}
                 />
               )}
 
@@ -747,6 +813,7 @@ export default function AdminDashboardPage() {
                   onProfilePermissionsUpdated={() => {
                     initAdminSession()
                   }}
+                  isDarkMode={isDarkMode}
                 />
               )}
 
@@ -765,6 +832,7 @@ export default function AdminDashboardPage() {
                     setSelectedDetailProject(p)
                     setDrawerTab('geral')
                   }}
+                  isDarkMode={isDarkMode}
                 />
               )}
 
@@ -781,6 +849,7 @@ export default function AdminDashboardPage() {
                     setSelectedDetailProject(p)
                     setDrawerTab('geral')
                   }}
+                  isDarkMode={isDarkMode}
                 />
               )}
 
@@ -802,6 +871,7 @@ export default function AdminDashboardPage() {
                   onStartProjectForLead={(lead, quote) => {
                     setActiveTab('client_projects')
                   }}
+                  isDarkMode={isDarkMode}
                 />
               )}
             </>
@@ -812,28 +882,33 @@ export default function AdminDashboardPage() {
       {/* PROJECT DETAIL DRAWER */}
       {selectedDetailProject && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end font-sans">
-          <div className="bg-white w-full max-w-2xl h-full shadow-2xl overflow-y-auto flex flex-col justify-between animate-in slide-in-from-right duration-300">
+          <div
+            className={cn(
+              'w-full max-w-2xl h-full shadow-2xl overflow-y-auto flex flex-col justify-between animate-in slide-in-from-right duration-300 transition-colors',
+              isDarkMode ? 'bg-[#16181D] text-white border-l border-slate-800' : 'bg-white text-[#0C1D36]'
+            )}
+          >
             <div className="p-6 space-y-6 flex-1">
               {/* DRAWER HEADER */}
-              <div className="flex items-start justify-between border-b border-slate-100 pb-4">
+              <div className={cn('flex items-start justify-between border-b pb-4', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#0075FF] bg-[#0075FF]/10 px-2.5 py-0.5 rounded">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#0099FF] bg-[#0099FF]/20 px-2.5 py-0.5 rounded border border-[#0099FF]/30">
                     {selectedDetailProject.project_type} • {selectedDetailProject.platform}
                   </span>
-                  <h3 className="text-xl font-extrabold text-[#0C1D36] mt-1">{selectedDetailProject.title}</h3>
-                  <p className="text-xs text-[#596579]">{selectedDetailProject.client_name} ({selectedDetailProject.company || 'N/A'})</p>
+                  <h3 className={cn('text-xl font-extrabold mt-1', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>{selectedDetailProject.title}</h3>
+                  <p className={cn('text-xs', isDarkMode ? 'text-slate-400' : 'text-[#596579]')}>{selectedDetailProject.client_name} ({selectedDetailProject.company || 'N/A'})</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedDetailProject(null)}
-                  className="p-2 rounded-full hover:bg-slate-100 text-slate-500 cursor-pointer"
+                  className={cn('p-2 rounded-full cursor-pointer transition-colors', isDarkMode ? 'hover:bg-slate-800 text-slate-400' : 'hover:bg-slate-100 text-slate-500')}
                 >
                   <HugeiconsIcon icon={Cancel01Icon} className="w-5 h-5" strokeWidth={1.5} />
                 </button>
               </div>
 
               {/* DRAWER SUB-NAVIGATION TABS */}
-              <div className="flex items-center gap-2 border-b border-slate-200 pb-2 text-xs font-bold overflow-x-auto">
+              <div className={cn('flex items-center gap-2 border-b pb-2 text-xs font-bold overflow-x-auto', isDarkMode ? 'border-slate-800' : 'border-slate-200')}>
                 {[
                   { id: 'geral', label: 'Geral' },
                   { id: 'contato', label: 'Contato' },
@@ -849,7 +924,13 @@ export default function AdminDashboardPage() {
                     onClick={() => setDrawerTab(t.id as any)}
                     className={cn(
                       'px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap cursor-pointer',
-                      drawerTab === t.id ? 'bg-[#0C1D36] text-white' : 'text-slate-600 hover:bg-slate-100'
+                      drawerTab === t.id
+                        ? isDarkMode
+                          ? 'bg-[#0099FF] text-white'
+                          : 'bg-[#0C1D36] text-white'
+                        : isDarkMode
+                          ? 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                          : 'text-slate-600 hover:bg-slate-100'
                     )}
                   >
                     {t.label}

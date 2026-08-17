@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import { AnxisLogo } from '@/components/ui/anxis-logo'
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   LockIcon,
@@ -58,14 +58,8 @@ export default function AdminLoginPage() {
         {/* Ambient Glow */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#0075FF]/20 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative w-72 h-20 sm:w-96 sm:h-24 animate-pulse">
-          <Image
-            src="/images/logo-transparente.png"
-            alt="ANXIS Logo"
-            fill
-            className="object-contain"
-            priority
-          />
+        <div className="flex items-center justify-center py-4 animate-pulse">
+          <AnxisLogo size="lg" theme="dark" className="scale-125 sm:scale-150" />
         </div>
 
         <div className="flex flex-col items-center gap-3 bg-[#0B2F63]/80 border border-[#BBC4D1]/20 p-6 rounded-3xl shadow-2xl backdrop-blur-md max-w-sm w-full text-center">
@@ -95,15 +89,9 @@ export default function AdminLoginPage() {
         <div className="absolute -top-20 -right-20 w-48 h-48 bg-[#0075FF]/20 rounded-full blur-2xl pointer-events-none" />
 
         {/* LOGO & TITLE */}
-        <div className="text-center space-y-3">
-          <div className="relative w-48 h-12 mx-auto">
-            <Image
-              src="/images/logo-transparente.png"
-              alt="ANXIS Logo"
-              fill
-              className="object-contain"
-              priority
-            />
+        <div className="text-center space-y-4">
+          <div className="flex justify-center">
+            <AnxisLogo size="lg" theme="dark" />
           </div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0075FF]/20 text-[#168CFF] text-[11px] font-bold">
             <HugeiconsIcon icon={Shield01Icon} className="w-3.5 h-3.5" strokeWidth={1.5} />

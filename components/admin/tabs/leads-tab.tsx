@@ -52,6 +52,7 @@ interface LeadsTabProps {
   canCreateQuote?: boolean
   onStartQuoteForLead?: (lead: Lead) => void
   onStartProjectForLead?: (lead: Lead, quote?: SavedQuote | null) => void
+  isDarkMode?: boolean
 }
 
 const PROJECT_TYPES_LIST = [
@@ -92,6 +93,7 @@ export function LeadsTab({
   canCreateQuote = true,
   onStartQuoteForLead,
   onStartProjectForLead,
+  isDarkMode = false,
 }: LeadsTabProps) {
   // Loading & Data State
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -321,19 +323,24 @@ export function LeadsTab({
   }
 
   return (
-    <div className="space-y-8 font-sans text-[#0C1D36] animate-in fade-in duration-300">
+    <div className={cn('space-y-8 font-sans transition-colors', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
       {/* ------------------------------------------------------------------- */}
       {/* 1. MODULE HEADER & DASHBOARD METRICS CARDS (SECTION 13)             */}
       {/* ------------------------------------------------------------------- */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      <div
+        className={cn(
+          'rounded-3xl border p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6',
+          isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80'
+        )}
+      >
         <div>
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-[#0075FF]/10 text-[#0075FF] flex items-center justify-center font-bold">
               <HugeiconsIcon icon={Mail01Icon} className="w-6 h-6" strokeWidth={1.5} />
             </div>
             <div>
-              <h2 className="text-xl font-extrabold text-[#0C1D36]">Módulo de Leads</h2>
-              <p className="text-xs text-slate-500 font-medium">
+              <h2 className={cn('text-xl font-extrabold', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>Módulo de Leads</h2>
+              <p className="text-xs text-slate-400 font-medium">
                 Centralização comercial, contatos da Landing Page e histórico de atendimento.
               </p>
             </div>
@@ -342,13 +349,16 @@ export function LeadsTab({
 
         {/* PERIOD FILTER SELECTOR & NEW LEAD BUTTON */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-2xl border border-slate-200">
-            <HugeiconsIcon icon={Calendar01Icon} className="w-4 h-4 text-slate-500 ml-1" strokeWidth={1.5} />
-            <span className="text-xs font-bold text-slate-600">Período:</span>
+          <div className={cn('flex items-center gap-2 p-2 rounded-2xl border', isDarkMode ? 'bg-[#1A1E26] border-slate-800' : 'bg-slate-50 border-slate-200')}>
+            <HugeiconsIcon icon={Calendar01Icon} className="w-4 h-4 text-slate-400 ml-1" strokeWidth={1.5} />
+            <span className="text-xs font-bold text-slate-400">Período:</span>
             <select
               value={periodFilter}
               onChange={(e) => setPeriodFilter(e.target.value)}
-              className="px-3 py-1.5 rounded-xl border border-slate-300 font-extrabold text-xs bg-white outline-none cursor-pointer text-[#0075FF]"
+              className={cn(
+                'px-3 py-1.5 rounded-xl border font-extrabold text-xs outline-none cursor-pointer text-[#0075FF]',
+                isDarkMode ? 'bg-[#202530] border-slate-700 text-[#00C4D4]' : 'bg-white border-slate-300'
+              )}
             >
               <option value="todos">Todo o Período</option>
               <option value="hoje">Hoje</option>
@@ -375,60 +385,58 @@ export function LeadsTab({
       {/* 4 METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* CARD 1: RECEBIDOS */}
-        <div className="bg-white rounded-3xl p-6 border border-blue-200/80 shadow-sm relative overflow-hidden">
+        <div className={cn('rounded-3xl p-6 border shadow-sm relative overflow-hidden', isDarkMode ? 'bg-[#16181D] border-blue-500/20' : 'bg-white border-blue-200/80')}>
           <div className="flex items-center justify-between text-[#0075FF] mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider">Leads Recebidos</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center">
               <HugeiconsIcon icon={Mail01Icon} className="w-5 h-5" strokeWidth={1.5} />
             </div>
           </div>
-          <div className="text-2xl font-black text-[#0C1D36] tracking-tight">{metrics.totalReceived}</div>
-          <div className="text-[11px] text-slate-500 font-medium mt-1">Total no período</div>
+          <div className={cn('text-2xl font-black tracking-tight', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>{metrics.totalReceived}</div>
+          <div className="text-[11px] text-slate-400 font-medium mt-1">Total no período</div>
         </div>
 
         {/* CARD 2: EM CONTATO */}
-        <div className="bg-white rounded-3xl p-6 border border-amber-200/80 shadow-sm relative overflow-hidden">
-          <div className="flex items-center justify-between text-amber-600 mb-3">
+        <div className={cn('rounded-3xl p-6 border shadow-sm relative overflow-hidden', isDarkMode ? 'bg-[#16181D] border-amber-500/20' : 'bg-white border-amber-200/80')}>
+          <div className="flex items-center justify-between text-amber-500 mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider">Em Atendimento</span>
-            <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center">
               <HugeiconsIcon icon={Clock01Icon} className="w-5 h-5" strokeWidth={1.5} />
             </div>
           </div>
-          <div className="text-2xl font-black text-amber-700 tracking-tight">{metrics.totalInContact}</div>
-          <div className="text-[11px] text-amber-600/80 font-medium mt-1">Novos e em contato</div>
+          <div className="text-2xl font-black text-amber-500 tracking-tight">{metrics.totalInContact}</div>
+          <div className="text-[11px] text-amber-500/80 font-medium mt-1">Novos e em contato</div>
         </div>
 
         {/* CARD 3: ORÇAMENTOS */}
-        <div className="bg-white rounded-3xl p-6 border border-purple-200/80 shadow-sm relative overflow-hidden">
-          <div className="flex items-center justify-between text-purple-600 mb-3">
+        <div className={cn('rounded-3xl p-6 border shadow-sm relative overflow-hidden', isDarkMode ? 'bg-[#16181D] border-purple-500/20' : 'bg-white border-purple-200/80')}>
+          <div className="flex items-center justify-between text-purple-500 mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider">Em Orçamento</span>
-            <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center">
               <HugeiconsIcon icon={Calculator01Icon} className="w-5 h-5" strokeWidth={1.5} />
             </div>
           </div>
-          <div className="text-2xl font-black text-purple-700 tracking-tight">{metrics.totalQuotes}</div>
-          <div className="text-[11px] text-purple-600/80 font-medium mt-1">Orçamentos gerados</div>
+          <div className="text-2xl font-black text-purple-500 tracking-tight">{metrics.totalQuotes}</div>
+          <div className="text-[11px] text-purple-500/80 font-medium mt-1">Orçamentos gerados</div>
         </div>
 
         {/* CARD 4: FECHADOS */}
-        <div className="bg-white rounded-3xl p-6 border border-emerald-200/80 shadow-sm relative overflow-hidden">
-          <div className="flex items-center justify-between text-emerald-600 mb-3">
+        <div className={cn('rounded-3xl p-6 border shadow-sm relative overflow-hidden', isDarkMode ? 'bg-[#16181D] border-emerald-500/20' : 'bg-white border-emerald-200/80')}>
+          <div className="flex items-center justify-between text-emerald-500 mb-3">
             <span className="text-xs font-extrabold uppercase tracking-wider">Leads Fechados</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
               <HugeiconsIcon icon={CheckmarkCircle01Icon} className="w-5 h-5" strokeWidth={1.5} />
             </div>
           </div>
-          <div className="text-2xl font-black text-emerald-700 tracking-tight">{metrics.totalClosed}</div>
-          <div className="text-[11px] text-emerald-600/80 font-medium mt-1">Convertidos em projetos</div>
+          <div className="text-2xl font-black text-emerald-500 tracking-tight">{metrics.totalClosed}</div>
+          <div className="text-[11px] text-emerald-500/80 font-medium mt-1">Convertidos em projetos</div>
         </div>
       </div>
 
-      {/* ------------------------------------------------------------------- */}
-      {/* 2. SEARCH, QUICK FILTERS AND LEADS TABLE (SECTION 5)                */}
-      {/* ------------------------------------------------------------------- */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-6">
-        {/* QUICK FILTERS BUTTONS */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+      {/* 2. SEARCH, QUICK FILTERS AND LEADS TABLE */}
+      <div className={cn('rounded-3xl border p-6 shadow-sm space-y-6', isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80')}>
+        {/* QUICK FILTERS BUTTONS WITH LIGHTER GRAY HOVER */}
+        <div className={cn('flex flex-wrap items-center justify-between gap-4 border-b pb-4', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
           <div className="flex flex-wrap items-center gap-1.5">
             {[
               { id: 'todos', label: 'Todos' },
@@ -444,10 +452,12 @@ export function LeadsTab({
                 type="button"
                 onClick={() => setQuickFilter(f.id)}
                 className={cn(
-                  'px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer',
+                  'px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer border',
                   quickFilter === f.id
-                    ? 'bg-[#0C1D36] text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-[#0C1D36]'
+                    ? 'bg-[#0075FF] text-white shadow-sm border-transparent'
+                    : isDarkMode
+                      ? 'bg-[#1A1E26] text-slate-400 border-slate-800 hover:bg-[#282E3D] hover:text-white'
+                      : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200 hover:text-[#0C1D36]'
                 )}
               >
                 {f.label}
@@ -478,7 +488,12 @@ export function LeadsTab({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Buscar nome, empresa, e-mail, WhatsApp..."
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#0075FF] font-medium bg-slate-50/50"
+              className={cn(
+                'w-full pl-10 pr-3.5 py-2.5 rounded-xl border outline-none font-medium text-xs',
+                isDarkMode
+                  ? 'bg-[#1A1E26] border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00C4D4]'
+                  : 'bg-slate-50/50 border-slate-200 text-[#0C1D36] focus:border-[#0075FF]'
+              )}
             />
           </div>
 
@@ -486,7 +501,12 @@ export function LeadsTab({
           <select
             value={commercialFilter}
             onChange={(e) => setCommercialFilter(e.target.value)}
-            className="px-3.5 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#0075FF] font-bold bg-slate-50/50"
+            className={cn(
+              'px-3.5 py-2.5 rounded-xl border outline-none font-bold text-xs',
+              isDarkMode
+                ? 'bg-[#1A1E26] border-slate-700 text-white focus:border-[#00C4D4]'
+                : 'bg-slate-50/50 border-slate-200 text-[#0C1D36] focus:border-[#0075FF]'
+            )}
           >
             <option value="todos">Todos os Comerciais</option>
             {teamUsers.map((u) => (
@@ -500,7 +520,12 @@ export function LeadsTab({
           <select
             value={projectTypeFilter}
             onChange={(e) => setProjectTypeFilter(e.target.value)}
-            className="px-3.5 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#0075FF] font-bold bg-slate-50/50"
+            className={cn(
+              'px-3.5 py-2.5 rounded-xl border outline-none font-bold text-xs',
+              isDarkMode
+                ? 'bg-[#1A1E26] border-slate-700 text-white focus:border-[#00C4D4]'
+                : 'bg-slate-50/50 border-slate-200 text-[#0C1D36] focus:border-[#0075FF]'
+            )}
           >
             <option value="todos">Todos os Tipos de Projeto</option>
             {PROJECT_TYPES_LIST.map((t) => (
@@ -520,7 +545,7 @@ export function LeadsTab({
                 setCommercialFilter('todos')
                 setProjectTypeFilter('todos')
               }}
-              className="px-3.5 py-2.5 rounded-xl bg-rose-50 text-rose-600 font-bold hover:bg-rose-100 transition-colors text-xs"
+              className="px-3.5 py-2.5 rounded-xl bg-rose-500/10 text-rose-500 font-bold hover:bg-rose-500/20 transition-colors text-xs cursor-pointer border border-rose-500/20"
             >
               Limpar Filtros
             </button>
@@ -528,10 +553,10 @@ export function LeadsTab({
         </div>
 
         {/* LEADS TABLE */}
-        <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white">
+        <div className={cn('overflow-x-auto border rounded-2xl', isDarkMode ? 'border-slate-800 bg-[#181B22]' : 'border-slate-200 bg-white')}>
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-100 text-slate-700 border-b border-slate-200 font-bold uppercase tracking-wider text-[10px]">
+              <tr className={cn('border-b font-bold uppercase tracking-wider text-[10px]', isDarkMode ? 'bg-[#13161C] text-slate-300 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200')}>
                 <th className="p-3.5">Nome & Empresa</th>
                 <th className="p-3.5">Tipo de Projeto</th>
                 <th className="p-3.5">Origem</th>
@@ -541,7 +566,7 @@ export function LeadsTab({
                 <th className="p-3.5 text-right">Ações</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 font-medium">
+            <tbody className={cn('divide-y font-medium', isDarkMode ? 'divide-slate-800' : 'divide-slate-100')}>
               {isLoading ? (
                 <tr>
                   <td colSpan={7} className="p-12 text-center text-slate-400 font-medium text-xs">
@@ -560,17 +585,17 @@ export function LeadsTab({
                   const statusStyle = STATUS_COLOR_MAP[lead.status] || STATUS_COLOR_MAP.Novo
 
                   return (
-                    <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={lead.id} className={cn('transition-colors', isDarkMode ? 'hover:bg-white/5' : 'hover:bg-slate-50')}>
                       {/* NAME & CONTACT */}
                       <td className="p-3.5">
-                        <div className="font-extrabold text-[#0C1D36] text-xs">{lead.name}</div>
-                        {lead.company && <div className="text-[11px] text-slate-500">{lead.company}</div>}
+                        <div className={cn('font-extrabold text-xs', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>{lead.name}</div>
+                        {lead.company && <div className="text-[11px] text-slate-400">{lead.company}</div>}
                         <div className="text-[10px] text-slate-400 font-mono mt-0.5">{lead.whatsapp}</div>
                       </td>
 
                       {/* PROJECT TYPE */}
                       <td className="p-3.5">
-                        <span className="text-[10px] bg-slate-100 text-slate-700 font-bold px-2.5 py-1 rounded-md">
+                        <span className={cn('text-[10px] font-bold px-2.5 py-1 rounded-md border', isDarkMode ? 'bg-[#202530] text-slate-300 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200')}>
                           {lead.project_type}
                         </span>
                       </td>
@@ -581,8 +606,8 @@ export function LeadsTab({
                           className={cn(
                             'text-[10px] font-bold px-2 py-0.5 rounded-full',
                             lead.source === 'Landing Page'
-                              ? 'bg-blue-50 text-[#0075FF] border border-blue-200'
-                              : 'bg-purple-50 text-purple-700 border border-purple-200'
+                              ? 'bg-blue-500/10 text-[#0075FF] border border-blue-500/20'
+                              : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
                           )}
                         >
                           {lead.source}
@@ -596,10 +621,10 @@ export function LeadsTab({
                       <td className="p-3.5">
                         {lead.commercial_user_name ? (
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-[#081D3A] text-white flex items-center justify-center font-bold text-[10px]">
+                            <div className="w-6 h-6 rounded-full bg-[#0075FF] text-white flex items-center justify-center font-bold text-[10px]">
                               {lead.commercial_user_name.charAt(0)}
                             </div>
-                            <span className="font-bold text-[#0C1D36] text-xs">{lead.commercial_user_name}</span>
+                            <span className={cn('font-bold text-xs', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>{lead.commercial_user_name}</span>
                           </div>
                         ) : (
                           <span className="text-slate-400 italic text-[11px]">Sem responsável</span>
@@ -621,7 +646,7 @@ export function LeadsTab({
                       </td>
 
                       {/* DATE */}
-                      <td className="p-3.5 text-slate-500 text-[11px] font-medium">
+                      <td className="p-3.5 text-slate-400 text-[11px] font-medium">
                         {formatDateBR(lead.created_at)}
                       </td>
 
@@ -630,7 +655,7 @@ export function LeadsTab({
                         <button
                           type="button"
                           onClick={() => openLeadDrawer(lead)}
-                          className="px-3 py-1.5 rounded-lg bg-[#0075FF] text-white font-extrabold hover:bg-[#168CFF] transition-colors text-[11px]"
+                          className="px-3 py-1.5 rounded-lg bg-[#0075FF] text-white font-extrabold hover:bg-[#168CFF] transition-colors text-[11px] cursor-pointer"
                         >
                           Abrir Lead
                         </button>

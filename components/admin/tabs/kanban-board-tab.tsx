@@ -13,10 +13,30 @@ import {
   CheckedSquareStatusIcon,
 } from '@/lib/icons/status'
 import { cn } from '@/lib/utils'
+import {
+  ListFilter,
+  Kanban,
+  Calendar,
+  BarChart2,
+  Table as TableIcon,
+  ChevronDown,
+  ChevronRight,
+  Paperclip,
+  MessageSquare,
+  Flag,
+  User,
+  Plus,
+  Search,
+  Filter,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  MoreHorizontal
+} from 'lucide-react'
 
 // Date Formatter Helper (converts 2026-08-30 to 30/08/2026)
 export function formatDateBR(dateStr?: string) {
-  if (!dateStr) return 'A definir'
+  if (!dateStr) return '-'
   if (dateStr.includes('/')) return dateStr
   const parts = dateStr.split('-')
   if (parts.length === 3) {
@@ -25,7 +45,7 @@ export function formatDateBR(dateStr?: string) {
   return dateStr
 }
 
-// EXACT 4 STAGES SPECIFIED BY USER
+// EXPORT INITIAL_KANBAN_STAGES FOR BACKWARD COMPATIBILITY
 export const INITIAL_KANBAN_STAGES: KanbanStage[] = [
   { id: 'ks-1', name: 'Novo projeto', slug: 'novo-projeto', color: '#0075FF', display_order: 1, is_active: true, is_initial: true },
   { id: 'ks-2', name: 'Em desenvolvimento', slug: 'em-desenvolvimento', color: '#3B82F6', display_order: 2, is_active: true },
@@ -43,6 +63,23 @@ export function normalizeProjectStage(statusString?: string): string {
   return 'Novo projeto'
 }
 
+// CLICKUP STATUS STAGES
+export const KANBAN_STAGES_CLICKUP: { name: string; key: string; color: string; badgeBgLight: string; badgeBgDark: string; textHex: string }[] = [
+  { name: 'PENDENTE', key: 'pendente', color: '#EAB308', badgeBgLight: 'bg-amber-50 text-amber-700 border-amber-200', badgeBgDark: 'bg-amber-500/20 text-amber-300 border-amber-500/40', textHex: '#F59E0B' },
+  { name: 'EM PROGRESSO', key: 'em-progresso', color: '#8B5CF6', badgeBgLight: 'bg-purple-50 text-purple-700 border-purple-200', badgeBgDark: 'bg-purple-500/20 text-purple-300 border-purple-500/40', textHex: '#A855F7' },
+  { name: 'FEITO', key: 'feito', color: '#10B981', badgeBgLight: 'bg-emerald-50 text-emerald-700 border-emerald-200', badgeBgDark: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40', textHex: '#10B981' },
+  { name: 'CONCLUÍDO', key: 'concluido', color: '#06B6D4', badgeBgLight: 'bg-cyan-50 text-cyan-700 border-cyan-200', badgeBgDark: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40', textHex: '#06B6D4' },
+]
+
+export function normalizeClickUpStage(statusString?: string): string {
+  if (!statusString) return 'PENDENTE'
+  const lower = statusString.toLowerCase().trim()
+  if (lower.includes('conclui') || lower.includes('concluíd') || lower.includes('finaliz')) return 'CONCLUÍDO'
+  if (lower.includes('feito') || lower.includes('entreg') || lower.includes('aprov')) return 'FEITO'
+  if (lower.includes('desenvolv') || lower.includes('progresso') || lower.includes('andamento') || lower.includes('revis')) return 'EM PROGRESSO'
+  return 'PENDENTE'
+}
+
 interface KanbanBoardTabProps {
   projects: ClientProject[]
   onUpdateProjects: (updated: ClientProject[]) => void
@@ -51,6 +88,7 @@ interface KanbanBoardTabProps {
   canMoveKanban?: boolean
   canViewAll?: boolean
   onOpenProjectDetail?: (project: ClientProject) => void
+  isDarkMode?: boolean
 }
 
 export function KanbanBoardTab({
@@ -61,10 +99,13 @@ export function KanbanBoardTab({
   canMoveKanban = true,
   canViewAll = true,
   onOpenProjectDetail,
+  isDarkMode = false,
 }: KanbanBoardTabProps) {
+  const [viewMode, setViewMode] = useState<'quadro' | 'lista'>('quadro')
   const [searchTerm, setSearchTerm] = useState('')
   const [quickFilter, setQuickFilter] = useState('todos')
   const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null)
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
 
   const currentUserId = userProfile?.user_id
 
@@ -93,12 +134,6 @@ export function KanbanBoardTab({
       const now = new Date()
       return deadlineDate < now && p.status !== 'Concluído'
     }
-    if (quickFilter === 'em_andamento') {
-      return p.status === 'Em desenvolvimento' || p.status === 'Aguardando revisão'
-    }
-    if (quickFilter === 'concluidos') {
-      return p.status === 'Concluído'
-    }
 
     return true
   })
@@ -121,15 +156,17 @@ export function KanbanBoardTab({
     const projectId = e.dataTransfer.getData('text/plain') || draggedProjectId
     if (!projectId) return
 
-    const stageObj = INITIAL_KANBAN_STAGES.find((s) => s.name === stageName)
+    let statusMapped: ClientProjectStatus = 'Novo projeto'
+    if (stageName === 'EM PROGRESSO') statusMapped = 'Em desenvolvimento'
+    if (stageName === 'FEITO') statusMapped = 'Aguardando revisão'
+    if (stageName === 'CONCLUÍDO') statusMapped = 'Concluído'
 
     const updated = projects.map((p) => {
       if (p.id === projectId) {
         return {
           ...p,
-          kanban_stage_id: stageObj?.id || p.kanban_stage_id,
           kanban_stage_name: stageName,
-          status: stageName as ClientProjectStatus,
+          status: statusMapped,
           updated_at: new Date().toISOString(),
         }
       }
@@ -140,80 +177,176 @@ export function KanbanBoardTab({
     setDraggedProjectId(null)
   }
 
-  const handleSelectStageChange = (projectId: string, newStageName: string) => {
-    if (!canMoveKanban) return
-    const stageObj = INITIAL_KANBAN_STAGES.find((s) => s.name === newStageName)
-
-    const updated = projects.map((p) => {
-      if (p.id === projectId) {
-        return {
-          ...p,
-          kanban_stage_id: stageObj?.id || p.kanban_stage_id,
-          kanban_stage_name: newStageName,
-          status: newStageName as ClientProjectStatus,
-          updated_at: new Date().toISOString(),
-        }
-      }
-      return p
-    })
-
-    onUpdateProjects(updated)
+  const toggleGroupCollapse = (stageName: string) => {
+    setCollapsedGroups((prev) => ({ ...prev, [stageName]: !prev[stageName] }))
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-sm space-y-6 max-w-full overflow-hidden font-sans">
-      {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
-        <div>
-          <h2 className="text-xl font-extrabold text-[#0C1D36] flex items-center gap-2">
-            <Icon icon={KanbanNavIcon} size={20} className="text-[#0075FF]" />
-            <span>Kanban de Projetos</span>
-          </h2>
-          <p className="text-xs text-[#596579]">
-            Acompanhamento do fluxo de trabalho dos projetos.
-          </p>
+    <div
+      className={cn(
+        'rounded-3xl border transition-colors duration-300 space-y-4 p-4 sm:p-6 font-sans min-h-[750px]',
+        isDarkMode
+          ? 'bg-[#12141A] text-white border-slate-800 shadow-2xl'
+          : 'bg-white text-[#0C1D36] border-slate-200/80 shadow-sm'
+      )}
+    >
+      {/* 1. CLICKUP TOP HEADER & VIEW SWITCHER */}
+      <div
+        className={cn(
+          'flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b pb-4',
+          isDarkMode ? 'border-slate-800' : 'border-slate-100'
+        )}
+      >
+        {/* LEFT VIEW SWITCHER TABS */}
+        <div className="flex items-center gap-1.5 overflow-x-auto text-xs font-semibold select-none">
+          <span className={cn('font-mono text-[11px] mr-2 flex items-center gap-1 shrink-0', isDarkMode ? 'text-slate-400' : 'text-slate-500')}>
+            <Icon icon={KanbanNavIcon} size={16} className="text-[#0099FF]" />
+            <span>Espaço da equipe / <strong>Projetos</strong></span>
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setViewMode('lista')}
+            className={cn(
+              'px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shrink-0 cursor-pointer',
+              viewMode === 'lista'
+                ? isDarkMode
+                  ? 'bg-white/10 text-white font-bold border border-white/20'
+                  : 'bg-[#0C1D36] text-white font-bold shadow-md'
+                : isDarkMode
+                  ? 'text-slate-400 hover:text-white hover:bg-white/5'
+                  : 'text-slate-600 hover:text-[#0C1D36] hover:bg-slate-100'
+            )}
+          >
+            <ListFilter className="w-4 h-4 text-emerald-400" />
+            <span>Lista</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setViewMode('quadro')}
+            className={cn(
+              'px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-all shrink-0 cursor-pointer',
+              viewMode === 'quadro'
+                ? isDarkMode
+                  ? 'bg-[#0099FF] text-white font-bold shadow-md'
+                  : 'bg-[#0C1D36] text-white font-bold shadow-md'
+                : isDarkMode
+                  ? 'text-slate-400 hover:text-white hover:bg-white/5'
+                  : 'text-slate-600 hover:text-[#0C1D36] hover:bg-slate-100'
+            )}
+          >
+            <Kanban className="w-4 h-4 text-white" />
+            <span>Quadro</span>
+          </button>
+
+          <button
+            type="button"
+            className="px-3 py-1.5 rounded-xl text-slate-400 flex items-center gap-1.5 cursor-not-allowed opacity-60 shrink-0"
+            title="Visualização Calendário"
+          >
+            <Calendar className="w-4 h-4 text-amber-500" />
+            <span>Calendário</span>
+          </button>
+
+          <button
+            type="button"
+            className="px-3 py-1.5 rounded-xl text-slate-400 flex items-center gap-1.5 cursor-not-allowed opacity-60 shrink-0"
+            title="Visualização Gantt"
+          >
+            <BarChart2 className="w-4 h-4 text-rose-500" />
+            <span>Gantt</span>
+          </button>
+
+          <button
+            type="button"
+            className="px-3 py-1.5 rounded-xl text-slate-400 flex items-center gap-1.5 cursor-not-allowed opacity-60 shrink-0"
+            title="Visualização Tabela"
+          >
+            <TableIcon className="w-4 h-4 text-cyan-500" />
+            <span>Tabela</span>
+          </button>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-100 px-3 py-1.5 rounded-xl shrink-0">
-          <Icon icon={PermissionsNavIcon} size={16} className="text-[#0075FF]" />
-          <span>{canViewAll ? 'Visão Geral' : 'Seus Projetos Atribuídos'}</span>
+        {/* RIGHT CLICKUP ACTIONS: SEARCH & ADD TASK */}
+        <div className="flex items-center gap-3">
+          {/* SEARCH INPUT */}
+          <div className="relative w-48 sm:w-60">
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Pesquisar tarefas..."
+              className={cn(
+                'w-full pl-8 pr-3 py-1.5 rounded-xl text-xs outline-none focus:border-[#0075FF]',
+                isDarkMode
+                  ? 'bg-[#1A1E26] border border-slate-700/80 text-white placeholder:text-slate-500'
+                  : 'bg-slate-50 border border-slate-200 text-[#0C1D36] placeholder:text-slate-400'
+              )}
+            />
+          </div>
+
+          {/* ADD TASK BUTTON */}
+          {onOpenProjectDetail && (
+            <button
+              type="button"
+              onClick={() => filteredProjects[0] && onOpenProjectDetail(filteredProjects[0])}
+              className="px-3.5 py-1.5 rounded-xl bg-[#0099FF] hover:bg-[#00939E] text-white text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Tarefa</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* FILTERS & SEARCH */}
-      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-        <div className="relative w-full lg:w-80">
-          <span className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400">
-            <Icon icon={SearchActionIcon} size={16} />
+      {/* 2. TOOLBAR PRESETS & FILTERS */}
+      <div className="flex items-center justify-between gap-3 text-xs text-slate-500 overflow-x-auto pb-1">
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              'px-2.5 py-1 rounded-lg border text-[11px] font-semibold',
+              isDarkMode
+                ? 'bg-[#1A1E26] border-slate-700 text-slate-300'
+                : 'bg-slate-100 border-slate-200 text-slate-700'
+            )}
+          >
+            Grupo: Status
           </span>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por projeto ou cliente..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs outline-none focus:border-[#0075FF]"
-          />
+          <span
+            className={cn(
+              'px-2.5 py-1 rounded-lg border text-[11px] font-medium',
+              isDarkMode
+                ? 'bg-[#1A1E26] border-slate-700 text-slate-400'
+                : 'bg-slate-100 border-slate-200 text-slate-600'
+            )}
+          >
+            Subtarefas
+          </span>
         </div>
 
         {/* QUICK PRESETS */}
-        <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 lg:pb-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           {[
-            { id: 'todos', label: 'Todos os Projetos' },
+            { id: 'todos', label: 'Todos' },
             { id: 'meus', label: 'Meus Projetos' },
             { id: 'sem_responsavel', label: 'Sem Responsável' },
             { id: 'atrasados', label: 'Atrasados ⚠️' },
-            { id: 'em_andamento', label: 'Em Andamento' },
-            { id: 'concluidos', label: 'Concluídos' },
           ].map((preset) => (
             <button
               key={preset.id}
               type="button"
               onClick={() => setQuickFilter(preset.id)}
               className={cn(
-                'px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors shrink-0',
+                'px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors shrink-0 cursor-pointer',
                 quickFilter === preset.id
-                  ? 'bg-[#081D3A] text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? isDarkMode
+                    ? 'bg-white/15 text-white border border-white/20 font-bold'
+                    : 'bg-[#0C1D36] text-white font-bold shadow-sm'
+                  : isDarkMode
+                    ? 'bg-[#1A1E26] text-slate-400 hover:text-white border border-slate-800'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
               )}
             >
               {preset.label}
@@ -222,48 +355,71 @@ export function KanbanBoardTab({
         </div>
       </div>
 
-      {/* KANBAN BOARD CONTAINER WITH STRICT INTERNAL SCROLL ONLY */}
-      {filteredProjects.length === 0 && !canViewAll ? (
-        <div className="text-center py-16 bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-3">
-          <Icon icon={MetricUserIcon} size={40} className="text-slate-400 mx-auto" />
-          <h3 className="text-base font-bold text-[#0C1D36]">Nenhum projeto foi atribuído a você no momento.</h3>
-          <p className="text-xs text-[#596579] max-w-sm mx-auto">
-            Assim que um gestor ou administrador atribuir um projeto à sua conta, ele aparecerá aqui no seu Kanban.
-          </p>
-        </div>
-      ) : (
-        /* STRICT WRAPPER: PREVENTS WHOLE-PAGE OVERFLOW, KEEPS INTERNAL SCROLL */
-        <div className="w-full max-w-full overflow-x-auto rounded-2xl border border-slate-200/80 bg-slate-50/50 p-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 min-w-[720px] xl:min-w-0">
-            {INITIAL_KANBAN_STAGES.map((stage) => {
+      {/* 3. MAIN WORKSPACE VIEW MODE: QUADRO (KANBAN) VS LISTA (CLICKUP LIST VIEW) */}
+      {viewMode === 'quadro' ? (
+        /* ================= QUADRO (KANBAN VIEW) ================= */
+        <div className="w-full overflow-x-auto pt-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 min-w-[850px] lg:min-w-0">
+            {KANBAN_STAGES_CLICKUP.map((stage) => {
               const stageProjects = filteredProjects.filter((p) => {
-                const normalized = normalizeProjectStage(p.status)
+                const normalized = normalizeClickUpStage(p.status)
                 return normalized === stage.name
               })
 
+              const badgeStyle = isDarkMode ? stage.badgeBgDark : stage.badgeBgLight
+
               return (
                 <div
-                  key={stage.id}
+                  key={stage.key}
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDropOnStage(e, stage.name)}
-                  className="bg-white rounded-2xl border border-slate-200/80 p-3.5 flex flex-col justify-between space-y-3 min-h-[460px] shadow-sm"
+                  className={cn(
+                    'rounded-2xl border p-3.5 flex flex-col justify-between space-y-3 min-h-[550px] shadow-sm',
+                    isDarkMode
+                      ? 'bg-[#181B22] border-slate-800/80 shadow-lg'
+                      : 'bg-slate-50/80 border-slate-200/80'
+                  )}
                 >
-                  {/* STAGE HEADER */}
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                  {/* CLICKUP STAGE COLUMN HEADER */}
+                  <div className={cn('flex items-center justify-between border-b pb-3', isDarkMode ? 'border-slate-800' : 'border-slate-200/80')}>
                     <div className="flex items-center gap-2">
-                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: stage.color }} />
-                      <span className="font-extrabold text-[#0C1D36] text-xs uppercase tracking-wider">{stage.name}</span>
+                      <span className={cn('px-2.5 py-0.5 rounded-md text-[11px] font-extrabold border', badgeStyle)}>
+                        {stage.name}
+                      </span>
+                      <span className="text-xs font-mono font-bold text-slate-400">
+                        {stageProjects.length}
+                      </span>
                     </div>
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                      {stageProjects.length}
-                    </span>
+
+                    <button
+                      type="button"
+                      className="text-slate-400 hover:text-slate-700 transition-colors p-1"
+                      title="Opções de Coluna"
+                    >
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
                   </div>
 
-                  {/* CARDS CONTAINER */}
-                  <div className="flex-1 space-y-3 overflow-y-auto max-h-[540px] pr-1">
+                  {/* ADD TASK TOP BUTTON */}
+                  <button
+                    type="button"
+                    onClick={() => onOpenProjectDetail && filteredProjects[0] && onOpenProjectDetail(filteredProjects[0])}
+                    className={cn(
+                      'w-full py-2 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 border border-dashed',
+                      isDarkMode
+                        ? 'bg-white/5 hover:bg-white/10 text-slate-300 border-slate-700/80'
+                        : 'bg-white hover:bg-slate-100 text-slate-600 border-slate-300'
+                    )}
+                  >
+                    <Plus className="w-3.5 h-3.5 text-[#0099FF]" />
+                    <span>Adicionar Tarefa</span>
+                  </button>
+
+                  {/* CARDS LIST */}
+                  <div className="flex-1 space-y-3 overflow-y-auto max-h-[580px] pr-1">
                     {stageProjects.length === 0 ? (
-                      <div className="h-32 rounded-xl border border-dashed border-slate-200 flex items-center justify-center text-[11px] text-slate-400 font-medium italic">
-                        Sem projetos nesta etapa
+                      <div className="h-32 rounded-xl border border-dashed border-slate-300/60 flex items-center justify-center text-[11px] text-slate-400 font-medium italic">
+                        Nenhuma tarefa nesta etapa
                       </div>
                     ) : (
                       stageProjects.map((project) => (
@@ -273,70 +429,86 @@ export function KanbanBoardTab({
                           onDragStart={(e) => handleDragStart(e, project.id)}
                           onClick={() => onOpenProjectDetail && onOpenProjectDetail(project)}
                           className={cn(
-                            'p-3.5 rounded-xl border bg-white shadow-sm hover:shadow-md transition-all space-y-2.5 cursor-pointer relative group',
-                            draggedProjectId === project.id ? 'opacity-40 border-dashed border-[#0075FF]' : 'border-slate-200 hover:border-[#0075FF]'
+                            'p-4 rounded-xl border shadow-sm hover:border-[#0099FF] hover:shadow-md transition-all space-y-3 cursor-pointer relative group',
+                            isDarkMode
+                              ? 'bg-[#202530] border-slate-700/80'
+                              : 'bg-white border-slate-200',
+                            draggedProjectId === project.id ? 'opacity-40 border-dashed border-[#0099FF]' : ''
                           )}
                         >
-                          <div className="flex items-start justify-between gap-2">
-                            <span className="font-extrabold text-[#0C1D36] text-xs group-hover:text-[#0075FF] transition-colors leading-snug">
+                          {/* TASK TITLE */}
+                          <div className="space-y-1">
+                            <h4
+                              className={cn(
+                                'font-extrabold text-xs group-hover:text-[#0099FF] transition-colors leading-snug',
+                                isDarkMode ? 'text-white' : 'text-[#0C1D36]'
+                              )}
+                            >
                               {project.title}
-                            </span>
+                            </h4>
+                            <div className="text-[11px] text-slate-400 truncate font-medium">
+                              Em [{project.client_name}] - {(project as any).segment || (project as any).niche || 'Projeto Web'}
+                            </div>
                           </div>
 
-                          <div className="text-[11px] text-slate-500 font-medium truncate">
-                            {project.client_name}
-                          </div>
+                          {/* CLICKUP ICONS & METADATA BAR */}
+                          <div className={cn('flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
+                            <div className="flex items-center gap-2.5">
+                              {/* ATTACHMENT COUNT */}
+                              <div className="flex items-center gap-1 text-slate-400" title="Anexos">
+                                <Paperclip className="w-3.5 h-3.5" />
+                                <span>{project.files?.length || 1}</span>
+                              </div>
 
-                          {/* METADATA CHIPS */}
-                          <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 pt-1">
+                              {/* COMMENTS COUNT */}
+                              <div className="flex items-center gap-1 text-slate-400" title="Comentários">
+                                <MessageSquare className="w-3.5 h-3.5" />
+                                <span>3</span>
+                              </div>
+
+                              {/* PRIORITY FLAG */}
+                              <div className="flex items-center gap-1 text-blue-400" title="Prioridade Normal">
+                                <Flag className="w-3.5 h-3.5 fill-blue-400" />
+                              </div>
+                            </div>
+
+                            {/* DUE DATE BADGE */}
                             {project.deadline && (
-                              <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded border border-slate-100">
-                                <Icon icon={DateStatusIcon} size={12} className="text-slate-400" />
-                                <span className="font-mono font-semibold">{formatDateBR(project.deadline)}</span>
-                              </div>
-                            )}
-
-                            {project.files && project.files.length > 0 && (
-                              <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded border border-slate-100">
-                                <Icon icon={FileAttachmentStatusIcon} size={12} className="text-slate-400" />
-                                <span>{project.files.length}</span>
-                              </div>
-                            )}
-
-                            {project.tasks && project.tasks.length > 0 && (
-                              <div className="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded border border-slate-100">
-                                <Icon icon={CheckedSquareStatusIcon} size={12} className="text-slate-400" />
-                                <span>
-                                  {project.tasks.filter((t) => t.status === 'Concluída').length}/{project.tasks.length}
-                                </span>
+                              <div className="flex items-center gap-1 text-emerald-400 font-mono text-[10px] font-bold">
+                                <Clock className="w-3 h-3" />
+                                <span>{formatDateBR(project.deadline)}</span>
                               </div>
                             )}
                           </div>
 
-                          {/* FOOTER USER ASSIGNED & QUICK SELECT STAGE */}
-                          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                            <div className="flex items-center gap-1.5 overflow-hidden">
-                              <div className="w-5 h-5 rounded-full bg-[#081D3A] text-white flex items-center justify-center text-[9px] font-bold shrink-0">
-                                {project.responsible_user_name ? project.responsible_user_name.charAt(0) : '?'}
+                          {/* USER AVATAR & QUICK STAGE SELECTOR */}
+                          <div className="flex items-center justify-between text-[11px] pt-1">
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-5 h-5 rounded-full bg-[#0099FF] text-white flex items-center justify-center text-[9px] font-bold shrink-0 shadow">
+                                {project.responsible_user_name ? project.responsible_user_name.charAt(0) : 'A'}
                               </div>
-                              <span className="text-slate-600 font-semibold truncate max-w-[90px]">
+                              <span className={cn('font-semibold truncate max-w-[100px] text-[10px]', isDarkMode ? 'text-slate-300' : 'text-slate-700')}>
                                 {project.responsible_user_name || 'Sem resp.'}
                               </span>
                             </div>
 
-                            {/* SELECTOR STAGE FOR MOBILE/TOUCH */}
                             {canMoveKanban && (
                               <select
                                 value={stage.name}
                                 onClick={(e) => e.stopPropagation()}
                                 onChange={(e) => {
                                   e.stopPropagation()
-                                  handleSelectStageChange(project.id, e.target.value)
+                                  handleDropOnStage(e as any, e.target.value)
                                 }}
-                                className="text-[10px] bg-slate-100 text-[#0C1D36] font-bold rounded px-1.5 py-0.5 border border-slate-200 outline-none"
+                                className={cn(
+                                  'text-[10px] font-bold rounded px-2 py-0.5 border outline-none',
+                                  isDarkMode
+                                    ? 'bg-[#16181D] text-slate-300 border-slate-700'
+                                    : 'bg-slate-100 text-slate-700 border-slate-200'
+                                )}
                               >
-                                {INITIAL_KANBAN_STAGES.map((s) => (
-                                  <option key={s.id} value={s.name}>
+                                {KANBAN_STAGES_CLICKUP.map((s) => (
+                                  <option key={s.key} value={s.name}>
                                     {s.name}
                                   </option>
                                 ))}
@@ -351,6 +523,180 @@ export function KanbanBoardTab({
               )
             })}
           </div>
+        </div>
+      ) : (
+        /* ================= LISTA (CLICKUP LIST VIEW) ================= */
+        <div className="space-y-6 pt-2 overflow-x-auto">
+          {KANBAN_STAGES_CLICKUP.map((stage) => {
+            const stageProjects = filteredProjects.filter((p) => {
+              const normalized = normalizeClickUpStage(p.status)
+              return normalized === stage.name
+            })
+
+            const isCollapsed = collapsedGroups[stage.name]
+            const badgeStyle = isDarkMode ? stage.badgeBgDark : stage.badgeBgLight
+
+            return (
+              <div
+                key={stage.key}
+                className={cn(
+                  'rounded-2xl border overflow-hidden shadow-sm',
+                  isDarkMode ? 'bg-[#181B22] border-slate-800' : 'bg-white border-slate-200'
+                )}
+              >
+                {/* STAGE LIST GROUP HEADER */}
+                <div
+                  onClick={() => toggleGroupCollapse(stage.name)}
+                  className={cn(
+                    'px-4 py-3 border-b flex items-center justify-between cursor-pointer select-none',
+                    isDarkMode ? 'bg-[#1C202B] border-slate-800' : 'bg-slate-100/90 border-slate-200'
+                  )}
+                >
+                  <div className="flex items-center gap-2">
+                    {isCollapsed ? <ChevronRight className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                    <span className={cn('px-2.5 py-0.5 rounded-md text-[11px] font-extrabold border', badgeStyle)}>
+                      {stage.name}
+                    </span>
+                    <span className="text-xs font-mono font-bold text-slate-400">
+                      {stageProjects.length}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onOpenProjectDetail && filteredProjects[0] && onOpenProjectDetail(filteredProjects[0])
+                    }}
+                    className="text-xs font-bold text-[#0099FF] hover:underline flex items-center gap-1"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Adicionar Tarefa</span>
+                  </button>
+                </div>
+
+                {/* TABLE OF TASKS IN STAGE */}
+                {!isCollapsed && (
+                  <div className="w-full overflow-x-auto">
+                    <table className="w-full text-left text-xs font-sans border-collapse">
+                      <thead>
+                        <tr
+                          className={cn(
+                            'border-b text-[11px] font-mono uppercase tracking-wider',
+                            isDarkMode
+                              ? 'border-slate-800 text-slate-400 bg-[#13161C]'
+                              : 'border-slate-200 text-slate-500 bg-slate-50'
+                          )}
+                        >
+                          <th className="py-3 px-4 font-bold">Nome</th>
+                          <th className="py-3 px-4 font-bold">Responsável</th>
+                          <th className="py-3 px-4 font-bold">Vencimento</th>
+                          <th className="py-3 px-4 font-bold">Prioridade</th>
+                          <th className="py-3 px-4 font-bold">Status</th>
+                          <th className="py-3 px-4 font-bold">Comentários</th>
+                          <th className="py-3 px-4 font-bold text-right">Ação</th>
+                        </tr>
+                      </thead>
+                      <tbody className={cn('divide-y', isDarkMode ? 'divide-slate-800/80' : 'divide-slate-100')}>
+                        {stageProjects.length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="py-6 text-center text-slate-400 italic text-xs">
+                              Nenhuma tarefa registrada nesta etapa.
+                            </td>
+                          </tr>
+                        ) : (
+                          stageProjects.map((project) => (
+                            <tr
+                              key={project.id}
+                              onClick={() => onOpenProjectDetail && onOpenProjectDetail(project)}
+                              className={cn(
+                                'transition-colors cursor-pointer group',
+                                isDarkMode ? 'hover:bg-white/5' : 'hover:bg-slate-50'
+                              )}
+                            >
+                              {/* NAME COLUMN */}
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle2 className="w-4 h-4 text-slate-400 group-hover:text-[#0099FF] transition-colors" />
+                                  <div>
+                                    <span
+                                      className={cn(
+                                        'font-extrabold text-xs group-hover:text-[#0099FF] transition-colors',
+                                        isDarkMode ? 'text-white' : 'text-[#0C1D36]'
+                                      )}
+                                    >
+                                      {project.title}
+                                    </span>
+                                    <div className="text-[10px] text-slate-400">
+                                      Em [{project.client_name}]
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+
+                              {/* RESPONSIBLE */}
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 rounded-full bg-[#0099FF] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                                    {project.responsible_user_name ? project.responsible_user_name.charAt(0) : 'A'}
+                                  </div>
+                                  <span className={cn('font-semibold text-xs', isDarkMode ? 'text-slate-300' : 'text-slate-700')}>
+                                    {project.responsible_user_name || 'Sem resp.'}
+                                  </span>
+                                </div>
+                              </td>
+
+                              {/* DUE DATE */}
+                              <td className="py-3 px-4 font-mono text-emerald-500 font-bold text-xs">
+                                {formatDateBR(project.deadline)}
+                              </td>
+
+                              {/* PRIORITY */}
+                              <td className="py-3 px-4">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20 text-[10px] font-bold">
+                                  <Flag className="w-3 h-3 fill-blue-500" />
+                                  <span>Normal</span>
+                                </span>
+                              </td>
+
+                              {/* STATUS */}
+                              <td className="py-3 px-4">
+                                <span className={cn('px-2.5 py-0.5 rounded text-[10px] font-extrabold border', badgeStyle)}>
+                                  {stage.name}
+                                </span>
+                              </td>
+
+                              {/* COMMENTS */}
+                              <td className="py-3 px-4 text-slate-400">
+                                <div className="flex items-center gap-1.5">
+                                  <MessageSquare className="w-3.5 h-3.5" />
+                                  <span>3</span>
+                                </div>
+                              </td>
+
+                              {/* ACTION */}
+                              <td className="py-3 px-4 text-right">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    onOpenProjectDetail && onOpenProjectDetail(project)
+                                  }}
+                                  className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                                >
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>

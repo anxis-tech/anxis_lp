@@ -293,6 +293,7 @@ interface UsersPermissionsTabProps {
   canManageRoles?: boolean
   canManagePermissions?: boolean
   onProfilePermissionsUpdated?: () => void
+  isDarkMode?: boolean
 }
 
 export function UsersPermissionsTab({
@@ -301,6 +302,7 @@ export function UsersPermissionsTab({
   canManageRoles = true,
   canManagePermissions = true,
   onProfilePermissionsUpdated,
+  isDarkMode = false,
 }: UsersPermissionsTabProps) {
   const [userList, setUserList] = useState<UserProfileWithRole[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -439,16 +441,23 @@ export function UsersPermissionsTab({
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-6 font-sans text-[#0C1D36]">
+    <div
+      className={cn(
+        'rounded-3xl border p-6 shadow-sm space-y-6 font-sans transition-colors',
+        isDarkMode
+          ? 'bg-[#16181D] text-white border-slate-800'
+          : 'bg-white text-[#0C1D36] border-slate-200/80'
+      )}
+    >
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className={cn('flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
         <div>
-          <h2 className="text-lg font-extrabold text-[#0C1D36] flex items-center gap-2">
+          <h2 className={cn('text-lg font-extrabold flex items-center gap-2', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
             <HugeiconsIcon icon={Shield01Icon} className="w-5 h-5 text-[#0075FF]" strokeWidth={1.5} />
             <span>Gerenciamento de Usuários e Permissões</span>
           </h2>
-          <p className="text-xs text-slate-500 mt-1">
-            Cargos são estritamente <strong className="text-slate-700">organizacionais</strong>. O acesso de cada usuário a abas e ações é controlado exclusivamente por suas <strong className="text-[#0075FF]">Permissões Individuais</strong> salvas no banco.
+          <p className="text-xs text-slate-400 mt-1">
+            Cargos são estritamente <strong className={isDarkMode ? 'text-slate-300' : 'text-slate-700'}>organizacionais</strong>. O acesso de cada usuário a abas e ações é controlado exclusivamente por suas <strong className="text-[#0075FF]">Permissões Individuais</strong> salvas no banco.
           </p>
         </div>
       </div>
@@ -462,7 +471,12 @@ export function UsersPermissionsTab({
             placeholder="Buscar por nome ou e-mail..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:border-[#0075FF] outline-none transition-colors"
+            className={cn(
+              'w-full pl-9 pr-4 py-2 text-xs rounded-xl border outline-none transition-colors',
+              isDarkMode
+                ? 'bg-[#1A1E26] border-slate-700 text-white placeholder:text-slate-500'
+                : 'bg-white border-slate-200 text-[#0C1D36] focus:border-[#0075FF]'
+            )}
           />
         </div>
 
@@ -473,8 +487,12 @@ export function UsersPermissionsTab({
               type="button"
               onClick={() => setRoleFilter(role)}
               className={cn(
-                'px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors',
-                roleFilter === role ? 'bg-[#0C1D36] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                'px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors cursor-pointer',
+                roleFilter === role
+                  ? 'bg-[#0075FF] text-white shadow-sm'
+                  : isDarkMode
+                    ? 'bg-[#1A1E26] text-slate-400 hover:text-white border border-slate-800'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               )}
             >
               {role}
@@ -484,17 +502,17 @@ export function UsersPermissionsTab({
       </div>
 
       {/* USERS TABLE */}
-      <div className="overflow-x-auto border border-slate-200 rounded-2xl">
+      <div className={cn('overflow-x-auto border rounded-2xl', isDarkMode ? 'border-slate-800 bg-[#181B22]' : 'border-slate-200 bg-white')}>
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="bg-[#081D3A] text-white border-b border-slate-800 font-bold uppercase tracking-wider text-[11px]">
+            <tr className={cn('border-b font-bold uppercase tracking-wider text-[11px]', isDarkMode ? 'bg-[#13161C] text-slate-300 border-slate-800' : 'bg-[#081D3A] text-white border-slate-800')}>
               <th className="p-3.5 whitespace-nowrap">Usuário</th>
               <th className="p-3.5 whitespace-nowrap">Cargo Organizacional</th>
               <th className="p-3.5 whitespace-nowrap">Status das Permissões</th>
               <th className="p-3.5 text-right whitespace-nowrap">Ações de Permissão</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 font-medium">
+          <tbody className={cn('divide-y font-medium', isDarkMode ? 'divide-slate-800' : 'divide-slate-100')}>
             {isLoading ? (
               <tr>
                 <td colSpan={4} className="p-8 text-center">

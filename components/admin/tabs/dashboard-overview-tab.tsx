@@ -24,6 +24,7 @@ interface DashboardOverviewTabProps {
   onNavigateToTab: (tabId: string) => void
   onOpenCreateModal: () => void
   onLogout?: () => void
+  isDarkMode?: boolean
 }
 
 export function DashboardOverviewTab({
@@ -31,6 +32,7 @@ export function DashboardOverviewTab({
   userProfile,
   onOpenProjectDetail,
   onNavigateToTab,
+  isDarkMode = false,
 }: DashboardOverviewTabProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('todos')
@@ -86,18 +88,18 @@ export function DashboardOverviewTab({
   const getStatusPillStyle = (stage: string) => {
     switch (stage) {
       case 'Concluído':
-        return 'bg-emerald-500/10 text-emerald-600 border border-emerald-200 font-extrabold'
+        return 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-extrabold'
       case 'Em desenvolvimento':
         return 'bg-[#0075FF]/10 text-[#0075FF] border border-[#0075FF]/20 font-extrabold'
       case 'Aguardando revisão':
-        return 'bg-purple-500/10 text-purple-600 border border-purple-200 font-extrabold'
+        return 'bg-purple-500/10 text-purple-500 border border-purple-500/20 font-extrabold'
       default:
-        return 'bg-amber-500/10 text-amber-600 border border-amber-200 font-extrabold'
+        return 'bg-amber-500/10 text-amber-500 border border-amber-500/20 font-extrabold'
     }
   }
 
   return (
-    <div className="space-y-4 text-[#0C1D36] max-w-full overflow-hidden font-sans">
+    <div className={cn('space-y-4 max-w-full overflow-hidden font-sans', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
       {/* TOP HEADER ROW: BUSCA + LINK SITE AO VIVO */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* CAMPOS DE BUSCA ARREDONDADO */}
@@ -108,7 +110,12 @@ export function DashboardOverviewTab({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar projetos ou clientes..."
-            className="w-full pl-11 pr-5 py-3 rounded-full border border-slate-200/80 text-xs bg-white shadow-sm outline-none focus:border-[#0C1D36] focus:ring-1 focus:ring-[#0C1D36] transition-all placeholder:text-slate-400 font-medium"
+            className={cn(
+              'w-full pl-11 pr-5 py-3 rounded-full text-xs shadow-sm outline-none transition-all placeholder:text-slate-400 font-medium border',
+              isDarkMode
+                ? 'bg-[#181B22] border-slate-800 text-white focus:border-[#00C4D4]'
+                : 'bg-white border-slate-200/80 text-[#0C1D36] focus:border-[#0C1D36]'
+            )}
           />
         </div>
 
@@ -118,7 +125,12 @@ export function DashboardOverviewTab({
             href="/"
             target="_blank"
             rel="noreferrer"
-            className="bg-white hover:bg-slate-100 p-2.5 rounded-full border border-slate-200/80 shadow-sm text-[#0075FF] transition-all cursor-pointer"
+            className={cn(
+              'p-2.5 rounded-full border shadow-sm transition-all cursor-pointer',
+              isDarkMode
+                ? 'bg-[#181B22] border-slate-800 text-[#00C4D4] hover:bg-slate-800'
+                : 'bg-white border-slate-200/80 text-[#0075FF] hover:bg-slate-100'
+            )}
             title="Ver Site Ao Vivo"
           >
             <HugeiconsIcon icon={Globe02Icon} className="w-4 h-4" strokeWidth={1.5} />
@@ -241,11 +253,16 @@ export function DashboardOverviewTab({
       {/* LOWER ROW: TABELA DE ÚLTIMOS PROJETOS + SESSÃO "PROJETOS AGUARDANDO PAGAMENTO" */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* TABELA DE ÚLTIMOS PROJETOS */}
-        <div className="lg:col-span-2 bg-white rounded-[32px] border border-slate-200/80 p-6 shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div
+          className={cn(
+            'lg:col-span-2 rounded-[32px] border p-6 shadow-sm space-y-4',
+            isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80'
+          )}
+        >
+          <div className={cn('flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
             <div>
-              <h3 className="text-base font-extrabold text-[#0C1D36]">Últimos Projetos</h3>
-              <p className="text-xs text-slate-500">Acompanhamento das entregas e contratos mais recentes.</p>
+              <h3 className={cn('text-base font-extrabold', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>Últimos Projetos</h3>
+              <p className="text-xs text-slate-400">Acompanhamento das entregas e contratos mais recentes.</p>
             </div>
 
             {/* FILTROS LIMPOS COM ESPAÇAMENTO CONFORTÁVEL DAS BORDAS */}
@@ -254,7 +271,12 @@ export function DashboardOverviewTab({
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="pl-4 pr-9 py-2 rounded-full border border-slate-200 text-xs font-extrabold bg-slate-50 text-[#0C1D36] appearance-none outline-none focus:border-[#0075FF] cursor-pointer transition-all shadow-sm"
+                  className={cn(
+                    'pl-4 pr-9 py-2 rounded-full border text-xs font-extrabold appearance-none outline-none cursor-pointer transition-all shadow-sm',
+                    isDarkMode
+                      ? 'bg-[#1C202B] border-slate-700 text-white'
+                      : 'bg-slate-50 border-slate-200 text-[#0C1D36]'
+                  )}
                 >
                   <option value="todos">Status: Todos</option>
                   <option value="Novo projeto">Novo projeto</option>
@@ -262,14 +284,19 @@ export function DashboardOverviewTab({
                   <option value="Aguardando revisão">Aguardando revisão</option>
                   <option value="Concluído">Concluído</option>
                 </select>
-                <HugeiconsIcon icon={ArrowDown01Icon} className="w-3.5 h-3.5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#0C1D36] pointer-events-none" strokeWidth={1.5} />
+                <HugeiconsIcon icon={ArrowDown01Icon} className={cn('w-3.5 h-3.5 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none', isDarkMode ? 'text-white' : 'text-[#0C1D36]')} strokeWidth={1.5} />
               </div>
 
               <div className="relative">
                 <select
                   value={responsibleFilter}
                   onChange={(e) => setResponsibleFilter(e.target.value)}
-                  className="pl-4 pr-9 py-2 rounded-full border border-slate-200 text-xs font-extrabold bg-slate-50 text-[#0C1D36] appearance-none outline-none focus:border-[#0075FF] cursor-pointer transition-all shadow-sm"
+                  className={cn(
+                    'pl-4 pr-9 py-2 rounded-full border text-xs font-extrabold appearance-none outline-none cursor-pointer transition-all shadow-sm',
+                    isDarkMode
+                      ? 'bg-[#1C202B] border-slate-700 text-white'
+                      : 'bg-slate-50 border-slate-200 text-[#0C1D36]'
+                  )}
                 >
                   <option value="todos">Responsável: Todos</option>
                   {uniqueResponsibles.map((resp) => (
@@ -278,7 +305,7 @@ export function DashboardOverviewTab({
                     </option>
                   ))}
                 </select>
-                <HugeiconsIcon icon={ArrowDown01Icon} className="w-3.5 h-3.5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#0C1D36] pointer-events-none" strokeWidth={1.5} />
+                <HugeiconsIcon icon={ArrowDown01Icon} className={cn('w-3.5 h-3.5 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none', isDarkMode ? 'text-white' : 'text-[#0C1D36]')} strokeWidth={1.5} />
               </div>
             </div>
           </div>
@@ -287,14 +314,14 @@ export function DashboardOverviewTab({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse min-w-[480px]">
               <thead>
-                <tr className="text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100">
+                <tr className={cn('font-bold uppercase tracking-wider text-[10px] border-b', isDarkMode ? 'text-slate-400 border-slate-800' : 'text-slate-400 border-slate-100')}>
                   <th className="pb-3 whitespace-nowrap">Projeto & Cliente</th>
                   <th className="pb-3 whitespace-nowrap">Prazo</th>
                   <th className="pb-3 whitespace-nowrap">Status</th>
                   <th className="pb-3 text-right whitespace-nowrap">Ação</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-medium">
+              <tbody className={cn('divide-y font-medium', isDarkMode ? 'divide-slate-800/80' : 'divide-slate-100')}>
                 {filteredProjects.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="py-8 text-center text-slate-400 italic">
@@ -307,17 +334,17 @@ export function DashboardOverviewTab({
                     const pillClass = getStatusPillStyle(normStage)
 
                     return (
-                      <tr key={project.id} className="hover:bg-slate-50/80 transition-colors">
+                      <tr key={project.id} className={cn('transition-colors', isDarkMode ? 'hover:bg-[#202530]' : 'hover:bg-slate-50/80')}>
                         {/* PROJETO & CLIENTE */}
                         <td className="py-3.5 max-w-[240px]">
-                          <div className="font-extrabold text-[#0C1D36] text-xs truncate">
+                          <div className={cn('font-extrabold text-xs truncate', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
                             {project.title}
                           </div>
-                          <div className="text-[11px] text-slate-500 truncate">{project.client_name}</div>
+                          <div className="text-[11px] text-slate-400 truncate">{project.client_name}</div>
                         </td>
 
                         {/* PRAZO FORMATADO */}
-                        <td className="py-3.5 text-slate-600 font-semibold whitespace-nowrap">
+                        <td className={cn('py-3.5 font-semibold whitespace-nowrap', isDarkMode ? 'text-slate-300' : 'text-slate-600')}>
                           {formatDateBR(project.deadline)}
                         </td>
 
@@ -338,7 +365,7 @@ export function DashboardOverviewTab({
                           <button
                             type="button"
                             onClick={() => onOpenProjectDetail(project)}
-                            className="p-2 rounded-full bg-[#0C1D36] hover:bg-[#0075FF] text-white transition-colors shadow-sm inline-flex items-center justify-center cursor-pointer"
+                            className="p-2 rounded-full bg-[#0075FF] hover:bg-blue-600 text-white transition-colors shadow-sm inline-flex items-center justify-center cursor-pointer"
                             title="Ver Detalhes do Projeto"
                           >
                             <HugeiconsIcon icon={EyeIcon} className="w-3.5 h-3.5" strokeWidth={1.5} />
@@ -353,69 +380,63 @@ export function DashboardOverviewTab({
           </div>
         </div>
 
-        {/* COLUNA DA DIREITA: PROJETOS AGUARDANDO PAGAMENTO */}
-        <div className="bg-white rounded-[32px] border border-slate-200/80 p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        {/* DIREITA: PROJETOS AGUARDANDO PAGAMENTO */}
+        <div
+          className={cn(
+            'rounded-[32px] border p-6 shadow-sm flex flex-col justify-between space-y-4',
+            isDarkMode ? 'bg-[#16181D] border-slate-800' : 'bg-white border-slate-200/80'
+          )}
+        >
+          <div className={cn('flex items-center justify-between border-b pb-4', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
             <div>
-              <h3 className="text-base font-extrabold text-[#0C1D36] flex items-center gap-2">
-                <HugeiconsIcon icon={CreditCardIcon} className="w-4 h-4 text-amber-500" strokeWidth={1.5} />
-                <span>Aguardando Pagamento</span>
-              </h3>
-              <p className="text-[11px] text-slate-500">Links e faturas pendentes de confirmação.</p>
+              <h3 className={cn('text-base font-extrabold', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>Aguardando Ajuste/Aprovação</h3>
+              <p className="text-xs text-slate-400">Projetos que necessitam de ação comercial ou revisão.</p>
             </div>
-            <HugeiconsIcon icon={More01Icon} className="w-4 h-4 text-slate-400 cursor-pointer" strokeWidth={1.5} />
+            <HugeiconsIcon icon={CreditCardIcon} className="w-5 h-5 text-amber-500" strokeWidth={1.5} />
           </div>
 
-          <div className="space-y-3">
+          {/* LISTA DE CARDS DE COBRANÇA */}
+          <div className="space-y-3 flex-1 overflow-y-auto max-h-[300px] pr-1">
             {awaitingPaymentProjects.length === 0 ? (
-              <div className="p-6 text-center text-slate-400 italic text-xs">
-                Nenhum pagamento pendente no momento.
+              <div className="text-center py-8 text-slate-400 text-xs italic">
+                Nenhum projeto pendente no momento.
               </div>
             ) : (
-              awaitingPaymentProjects.map((item, i) => {
-                const itemValue = (12500 + i * 3500).toLocaleString('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                })
-
-                return (
-                  <div
-                    key={item.id || i}
-                    onClick={() => onOpenProjectDetail(item)}
-                    className="p-3.5 bg-slate-50 hover:bg-slate-100/80 rounded-2xl border border-slate-200/60 transition-colors cursor-pointer space-y-2"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="overflow-hidden">
-                        <div className="font-extrabold text-xs text-[#0C1D36] truncate">
-                          {item.title}
-                        </div>
-                        <div className="text-[11px] text-slate-500 truncate">{item.client_name}</div>
-                      </div>
-
-                      <span className="text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full shrink-0">
-                        Pendente
-                      </span>
+              awaitingPaymentProjects.map((proj) => (
+                <div
+                  key={proj.id}
+                  onClick={() => onOpenProjectDetail(proj)}
+                  className={cn(
+                    'p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between group',
+                    isDarkMode
+                      ? 'bg-[#1C202B] border-slate-800 hover:border-[#00C4D4]'
+                      : 'bg-slate-50 border-slate-100 hover:border-[#0075FF]'
+                  )}
+                >
+                  <div className="overflow-hidden pr-2 space-y-0.5">
+                    <div className={cn('font-bold text-xs group-hover:text-[#00C4D4] transition-colors truncate', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
+                      {proj.title}
                     </div>
-
-                    <div className="flex items-center justify-between pt-1 border-t border-slate-200/40 text-xs">
-                      <span className="font-extrabold text-[#0C1D36]">{itemValue}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          alert(`Notificação de cobrança enviada para o cliente ${item.client_name}!`)
-                        }}
-                        className="text-[10px] font-bold text-[#0075FF] hover:underline flex items-center gap-1 cursor-pointer"
-                      >
-                        <HugeiconsIcon icon={MailSend01Icon} className="w-3 h-3" strokeWidth={1.5} />
-                        <span>Cobrar</span>
-                      </button>
-                    </div>
+                    <div className="text-[11px] text-slate-400 truncate">{proj.client_name}</div>
                   </div>
-                )
-              })
+
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase bg-amber-500/10 text-amber-500 border border-amber-500/20 shrink-0">
+                    Avisar
+                  </span>
+                </div>
+              ))
             )}
           </div>
+
+          {/* BOTÃO DISPARAR COBRANÇA DE LEMBRETE */}
+          <button
+            type="button"
+            onClick={() => onNavigateToTab('finance_overview')}
+            className="w-full py-3 px-4 rounded-2xl bg-[#0075FF] hover:bg-blue-600 text-white font-extrabold text-xs transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <HugeiconsIcon icon={MailSend01Icon} className="w-4 h-4" strokeWidth={1.5} />
+            <span>Gerenciar Cobranças Financeiras</span>
+          </button>
         </div>
       </div>
     </div>

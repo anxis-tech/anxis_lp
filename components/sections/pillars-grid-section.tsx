@@ -9,7 +9,7 @@ export function PillarsGridSection() {
     {
       number: '01',
       title: 'Design UI/UX',
-      subtitle: 'Interfaces modernas, responsivas e focadas na experiência do usuário.',
+      subtitle: 'Interfaces autorais, responsivas e focadas na melhor experiência do usuário.',
       image: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?q=80&w=800&auto=format&fit=crop',
       alt: 'UI/UX Design e prototipagem na ANXIS',
     },
@@ -34,90 +34,96 @@ export function PillarsGridSection() {
       image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop',
       alt: 'Performance de carregamento e SEO',
     },
+    {
+      number: '05',
+      title: 'Branding & Identidade',
+      subtitle: 'Criação de marcas marcantes, logotipos, guias de estilo e identidade visual autoral.',
+      image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=800&auto=format&fit=crop',
+      alt: 'Branding e criação de identidade visual na ANXIS',
+    },
   ]
 
   const scrollToContact = (title: string) => {
     trackEvent('click_primary_cta', { location: 'pillar_card', title })
-    const el = document.querySelector('#servicos')
+    const el = document.querySelector('#contato')
     if (el) el.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (
-    <section className="bg-[#293233] text-white py-10 sm:py-14 border-y border-white/10 relative overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="absolute top-0 right-1/4 w-[600px] h-[400px] bg-[#00ABB8]/10 rounded-full blur-[140px] pointer-events-none" />
+    <section id="servicos" className="w-full bg-gradient-to-b from-[#FFFFFF] via-[#FFFDF8] to-[#F8FAFC] text-[#0F172A] py-20 sm:py-28 border-y border-slate-200/80 relative overflow-hidden">
+      {/* Ambient warm background glows */}
+      <div className="absolute top-0 right-1/4 w-[700px] h-[500px] bg-[#FF6B00]/6 rounded-full blur-[170px] pointer-events-none" />
+      <div className="absolute bottom-0 left-10 w-[500px] h-[400px] bg-[#00C968]/6 rounded-full blur-[160px] pointer-events-none" />
 
-      <div className="max-w-[96%] lg:max-w-[98%] mx-auto px-2 sm:px-4 relative z-10 space-y-6">
-        {/* TOP BAR / METADATA HEADER (MATCHING REFERENCE IMAGE TOP BAR) */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-4 border-b border-white/10 text-xs font-mono text-slate-400">
-          <div className="flex items-center gap-6">
-            <span className="text-white font-bold tracking-wider">anxis_digital</span>
-            <span className="hidden sm:inline text-slate-500">|</span>
-            <a href="mailto:contato@anxis.com.br" className="hover:text-[#00C4D4] transition-colors">
-              contato@anxis.com.br
-            </a>
-          </div>
+      <div className="w-full relative z-10 space-y-8">
+        {/* HEADER BAR ALIGNED WITH STANDARD PAGE WIDTH (MAX-W-7XL) */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-200/80 text-xs font-mono text-slate-500">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-extrabold uppercase tracking-widest text-gradient-anxis bg-white px-3.5 py-1 rounded-full border border-slate-200 shadow-xs">
+                NOSSOS SERVIÇOS
+              </span>
+              <span className="hidden sm:inline text-slate-300">|</span>
+              <span className="text-slate-600 font-sans text-xs font-medium">Soluções digitais de alta conversão</span>
+            </div>
 
-          <div className="flex items-center gap-3">
-            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300">
-              Sites Institucionais
-            </span>
-            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300">
-              E-commerce
-            </span>
-            <span className="px-3 py-1 rounded-full bg-[#00ABB8]/20 border border-[#00ABB8]/40 text-[#00C4D4] font-bold">
-              Código Sob Medida
-            </span>
+            <div className="hidden sm:flex items-center gap-2 text-xs text-slate-600 font-sans font-medium">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>5 Especialidades Digitais</span>
+            </div>
           </div>
         </div>
 
-        {/* 4 PILLARS GRID WITH REDUCED GAP AND LARGER TALLER CARDS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {pillars.map((pillar, idx) => (
-            <div
-              key={idx}
-              onClick={() => scrollToContact(pillar.title)}
-              className="group relative h-[440px] sm:h-[480px] rounded-[2rem] overflow-hidden cursor-pointer border border-white/10 hover:border-[#00ABB8]/60 transition-all duration-300 shadow-2xl flex flex-col justify-between p-7 select-none"
-            >
-              {/* BACKGROUND IMAGE WITH DUOTONE / OVERLAY */}
-              <div className="absolute inset-0 z-0">
-                <Image
-                  src={pillar.image}
-                  alt={pillar.alt}
-                  fill
-                  className="object-cover grayscale brightness-50 group-hover:scale-105 group-hover:brightness-65 transition-all duration-500"
-                  unoptimized
-                />
-                {/* DARK GRADIENT OVERLAY WITH CYAN ACCENT GLOW AT BOTTOM ON HOVER */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/90 group-hover:to-[#00ABB8]/50 transition-colors duration-500" />
-              </div>
+        {/* 5 CARDS GRID STRETCHING CLOSE TO SCREEN EDGES */}
+        <div className="w-full max-w-[99%] mx-auto px-2 sm:px-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 relative z-10">
+            {pillars.map((pillar, idx) => (
+              <div
+                key={idx}
+                onClick={() => scrollToContact(pillar.title)}
+                className="group relative h-[420px] sm:h-[470px] rounded-3xl overflow-hidden cursor-pointer border border-slate-200/90 hover:border-slate-300 transition-all duration-300 shadow-xl hover:shadow-2xl flex flex-col justify-between p-6 select-none bg-slate-900"
+              >
+                {/* BACKGROUND IMAGE WITH DUOTONE / OVERLAY */}
+                <div className="absolute inset-0 z-0">
+                  <Image
+                    src={pillar.image}
+                    alt={pillar.alt}
+                    fill
+                    className="object-cover brightness-65 group-hover:scale-105 group-hover:brightness-75 transition-all duration-500"
+                    unoptimized
+                  />
+                  {/* DARK GRADIENT OVERLAY */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/90 transition-colors duration-500" />
+                </div>
 
-              {/* TOP NUMBER INDICATOR */}
-              <div className="relative z-10 text-center">
-                <span className="text-xs font-mono font-bold tracking-widest text-slate-300 bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10">
-                  {pillar.number}
-                </span>
-              </div>
+                {/* TOP NUMBER INDICATOR */}
+                <div className="relative z-10 text-center">
+                  <span className="text-xs font-mono font-bold tracking-widest text-white bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-sm">
+                    {pillar.number}
+                  </span>
+                </div>
 
-              {/* CENTER TITLE & ARROW CTA (MATCHING REFERENCE IMAGE) */}
-              <div className="relative z-10 text-center space-y-5 my-auto">
-                <h3 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-heading group-hover:text-[#00C4D4] transition-colors">
-                  {pillar.title}
-                </h3>
+                {/* CENTER TITLE & ARROW CTA */}
+                <div className="relative z-10 text-center space-y-4 my-auto">
+                  <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight font-heading group-hover:text-white transition-colors leading-tight">
+                    {pillar.title}
+                  </h3>
 
-                <div className="w-11 h-11 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center mx-auto text-white group-hover:bg-[#00ABB8] group-hover:text-white transition-all duration-300 shadow-md">
-                  <Icon name="ArrowRight" size={20} className="transition-transform group-hover:translate-x-0.5" />
+                  {/* ARROW CIRCLE WITH MULTI-COLOR BRAND GRADIENT ON HOVER */}
+                  <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center mx-auto text-white group-hover:bg-gradient-to-r group-hover:from-[#FF6B00] group-hover:via-[#00C968] group-hover:to-[#0099FF] group-hover:border-transparent group-hover:shadow-lg transition-all duration-300 shadow-md">
+                    <Icon name="ArrowRight" size={18} className="transition-transform group-hover:translate-x-1" />
+                  </div>
+                </div>
+
+                {/* BOTTOM SUBTITLE DESCRIPTION */}
+                <div className="relative z-10 text-center pt-2">
+                  <p className="text-xs text-slate-200 font-medium line-clamp-3 leading-relaxed">
+                    {pillar.subtitle}
+                  </p>
                 </div>
               </div>
-
-              {/* BOTTOM SUBTITLE DESCRIPTION */}
-              <div className="relative z-10 text-center pt-2">
-                <p className="text-xs sm:text-sm text-slate-300 font-medium line-clamp-2 leading-relaxed">
-                  {pillar.subtitle}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>

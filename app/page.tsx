@@ -1,17 +1,13 @@
 import { Metadata } from 'next'
 import { Header } from '@/components/layout/header'
 import { HeroSection } from '@/components/sections/hero-section'
-import { PillarsGridSection } from '@/components/sections/pillars-grid-section'
 import { TechMarquee } from '@/components/sections/tech-marquee'
+import { PerformanceImpactSection } from '@/components/sections/performance-impact-section'
 import { ProjectPreviewBar } from '@/components/sections/project-preview-bar'
-import { AboutSection } from '@/components/sections/about-section'
-import { CredibilityBar } from '@/components/sections/credibility-bar'
-import { ServicesSection } from '@/components/sections/services-section'
-import { PortfolioSection } from '@/components/sections/portfolio-section'
-import { CustomSolution } from '@/components/sections/custom-solution'
 import { ProcessSection } from '@/components/sections/process-section'
+import { PillarsGridSection } from '@/components/sections/pillars-grid-section'
+import { CustomSolution } from '@/components/sections/custom-solution'
 import { TestimonialsSection } from '@/components/sections/testimonials-section'
-import { FAQSection } from '@/components/sections/faq-section'
 import { CTASection } from '@/components/sections/cta-section'
 import { ContactForm } from '@/components/sections/contact-form'
 import { Footer } from '@/components/layout/footer'
@@ -147,53 +143,41 @@ export default async function HomePage() {
         googleAdsId={settings.google_ads_id}
       />
 
-      <main className="min-h-screen bg-[#F8FAFC] text-[#293233] antialiased selection:bg-[#00ABB8] selection:text-white">
+      <main className="min-h-screen bg-[#FAFBFC] text-[#0F172A] antialiased selection:bg-[#0099FF] selection:text-white">
         {/* 1. HEADER MINIMALISTA */}
         <Header whatsapp={settings.whatsapp} ctaLabel={settings.primary_cta_label} />
 
         {/* 2. HERO GRANDE */}
         <HeroSection primaryCtaText={settings.primary_cta_label} />
 
-        {/* 3. NOVA SEÇÃO DE PILARES / CARDS (DIRETAMENTE ABAIXO DA HERO) */}
-        <PillarsGridSection />
-
-        {/* 4. MARQUEE DE TECNOLOGIAS & LOGOS */}
+        {/* 3. LOGOS MARQUEE (TICKER MINIMALISTA LOGO ABAIXO DA HERO) */}
         <TechMarquee technologies={technologies} />
 
-        {/* 5. PREVIEW DE PROJETOS DESTAQUE */}
+        {/* 4. SEÇÃO DE IMPACTO DE PERFORMANCE & BARRAS COMPARATIVAS */}
+        <PerformanceImpactSection />
+
+        {/* 5. DEMONSTRAÇÃO DE PROJETOS REAIS & PORTFÓLIO CONSOLIDADO */}
         <ProjectPreviewBar projects={projects} />
 
-        {/* 6. SEÇÃO INSTITUCIONAL (SOBRE A ANXIS) */}
-        <AboutSection />
+        {/* 6. METODOLOGIA E PROCESSO (POSICIONADO NO LUGAR DA SEÇÃO DE SOBRE) */}
+        <ProcessSection />
 
-        {/* FAIXA DE CREDIBILIDADE */}
-        <CredibilityBar />
-
-        {/* 7. SERVIÇOS (FUNDO ESCURO #293233 EM 2 COLUNAS) */}
-        <ServicesSection services={services} />
+        {/* 7. DOBRA OFICIAL DE NOSSOS SERVIÇOS (5 CARDS: DESIGN UI/UX, DESENVOLVIMENTO, LOJAS VIRTUAIS, PERFORMANCE & SEO, BRANDING & DESIGN) */}
+        <PillarsGridSection />
 
         {/* SOLUÇÃO PERSONALIZADA EM CÓDIGO */}
         <CustomSolution />
 
-        {/* 8. PROJETOS (FUNDO CLARO #F8FAFC COM SIDEBAR) */}
-        <PortfolioSection projects={projects} />
-
-        {/* PROCESSO DE TRABALHO */}
-        <ProcessSection />
-
-        {/* 9. CTA DE CONTATO (#00ABB8) */}
-        <CTASection whatsapp={settings.whatsapp} />
-
-        {/* DEPOIMENTOS */}
+        {/* DEPOIMENTOS (REPOSICIONADO PARA FICAR ACIMA DA DOBRA VAMOS TRABALHAR JUNTOS) */}
         <TestimonialsSection testimonials={testimonials} />
 
-        {/* PERGUNTAS FREQUENTES */}
-        <FAQSection faqs={faqs} />
+        {/* 8. CTA DE CONTATO - VAMOS TRABALHAR JUNTOS */}
+        <CTASection whatsapp={settings.whatsapp} />
 
-        {/* FORMULÁRIO DE CONTATO */}
-        <ContactForm />
+        {/* 9. UNIFIED FAQ & FORMULÁRIO DE CONTATO (50/50 SPLIT) */}
+        <ContactForm faqs={faqs} whatsapp={settings.whatsapp} />
 
-        {/* 10. FOOTER (#293233) */}
+        {/* 10. FOOTER OBSIDIAN DARK */}
         <Footer
           companyName={settings.company_name}
           email={settings.email}

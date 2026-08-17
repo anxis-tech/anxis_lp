@@ -23,6 +23,7 @@ interface HomePortfolioTabProps {
   canEdit: boolean
   canDelete: boolean
   canCreate: boolean
+  isDarkMode?: boolean
 }
 
 export function HomePortfolioTab({
@@ -31,6 +32,7 @@ export function HomePortfolioTab({
   canEdit = true,
   canDelete = true,
   canCreate = true,
+  isDarkMode = false,
 }: HomePortfolioTabProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('todos')
@@ -103,15 +105,22 @@ export function HomePortfolioTab({
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-sm space-y-6 max-w-full overflow-hidden font-sans">
+    <div
+      className={cn(
+        'rounded-3xl border p-5 sm:p-6 shadow-sm space-y-6 max-w-full overflow-hidden font-sans transition-colors',
+        isDarkMode
+          ? 'bg-[#16181D] text-white border-slate-800'
+          : 'bg-white text-[#0C1D36] border-slate-200/80'
+      )}
+    >
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+      <div className={cn('flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4', isDarkMode ? 'border-slate-800' : 'border-slate-100')}>
         <div>
-          <h2 className="text-xl font-extrabold text-[#0C1D36] flex items-center gap-2">
+          <h2 className={cn('text-xl font-extrabold flex items-center gap-2', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>
             <Icon icon={PortfolioNavIcon} size={20} className="text-[#0075FF]" />
             <span>Portfólio da Home</span>
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-400">
             Gerenciamento dos cases e projetos em destaque na página inicial.
           </p>
         </div>
@@ -128,7 +137,7 @@ export function HomePortfolioTab({
               })
               setIsModalOpen(true)
             }}
-            className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#0075FF] hover:bg-[#168CFF] shadow-md transition-all shrink-0 flex items-center gap-1.5"
+            className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#0075FF] hover:bg-[#168CFF] shadow-md transition-all shrink-0 flex items-center gap-1.5 cursor-pointer"
           >
             <Icon icon={AddActionIcon} size={16} />
             <span>Adicionar Projeto à Home</span>
@@ -147,7 +156,12 @@ export function HomePortfolioTab({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Buscar por nome ou cliente..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs outline-none focus:border-[#0075FF]"
+            className={cn(
+              'w-full pl-10 pr-4 py-2.5 rounded-xl border text-xs outline-none focus:border-[#0075FF]',
+              isDarkMode
+                ? 'bg-[#1A1E26] border-slate-700 text-white placeholder:text-slate-500'
+                : 'bg-white border-slate-200 text-[#0C1D36]'
+            )}
           />
         </div>
 
@@ -158,10 +172,12 @@ export function HomePortfolioTab({
               type="button"
               onClick={() => setSelectedCategory(cat)}
               className={cn(
-                'px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors whitespace-nowrap',
+                'px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-colors whitespace-nowrap cursor-pointer',
                 selectedCategory === cat
-                  ? 'bg-[#081D3A] text-white'
-                  : 'bg-slate-100 text-[#596579] hover:bg-slate-200'
+                  ? 'bg-[#0075FF] text-white shadow-sm'
+                  : isDarkMode
+                    ? 'bg-[#1A1E26] text-slate-400 hover:text-white border border-slate-800'
+                    : 'bg-slate-100 text-[#596579] hover:bg-slate-200'
               )}
             >
               {cat}
@@ -175,11 +191,16 @@ export function HomePortfolioTab({
         {filtered.map((project) => (
           <div
             key={project.id}
-            className="bg-[#F7F8FA] border border-slate-200 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition-all"
+            className={cn(
+              'border rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-sm hover:shadow-md transition-all',
+              isDarkMode
+                ? 'bg-[#181B22] border-slate-800'
+                : 'bg-[#F7F8FA] border-slate-200'
+            )}
           >
             <div className="space-y-3">
               {/* IMAGE PREVIEW */}
-              <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
+              <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-slate-900 border border-slate-700">
                 <img
                   src={project.desktop_image_url}
                   alt={project.title}
@@ -192,86 +213,72 @@ export function HomePortfolioTab({
 
               <div>
                 <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-[#0C1D36]">{project.title}</h3>
+                  <h3 className={cn('text-base font-bold', isDarkMode ? 'text-white' : 'text-[#0C1D36]')}>{project.title}</h3>
                   {project.is_featured && (
-                    <span className="text-[10px] bg-amber-500/10 text-amber-600 font-bold px-2 py-0.5 rounded flex items-center gap-1">
+                    <span className="text-[10px] bg-amber-500/10 text-amber-500 font-bold px-2 py-0.5 rounded flex items-center gap-1">
                       <Icon icon={StarActionIcon} size={12} /> Destaque
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-[#596579] mt-1 line-clamp-2">{project.short_description}</p>
-              </div>
-
-              <div className="flex flex-wrap gap-1">
-                {project.technologies.map((t, idx) => (
-                  <span key={idx} className="bg-white border border-slate-200 text-[10px] font-medium px-2 py-0.5 rounded">
-                    {t}
-                  </span>
-                ))}
+                <p className="text-xs text-slate-400 mt-1 line-clamp-2">{project.short_description}</p>
               </div>
             </div>
 
             {/* CARD ACTIONS */}
-            <div className="pt-3 border-t border-slate-200 flex items-center justify-between">
-              <span className="text-[11px] text-[#596579] font-medium">{project.client} • {project.year}</span>
+            <div className={cn('flex items-center justify-between pt-3 border-t text-xs', isDarkMode ? 'border-slate-800' : 'border-slate-200')}>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleToggleVisibility(project.id)}
+                  className={cn(
+                    'p-2 rounded-lg transition-colors cursor-pointer',
+                    project.is_visible
+                      ? 'text-emerald-500 bg-emerald-500/10'
+                      : 'text-slate-400 bg-slate-100 hover:bg-slate-200'
+                  )}
+                  title={project.is_visible ? 'Visível na Home' : 'Oculto na Home'}
+                >
+                  <Icon icon={project.is_visible ? ViewActionIcon : HideActionIcon} size={16} />
+                </button>
 
-              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => handleToggleFeatured(project.id)}
+                  className={cn(
+                    'p-2 rounded-lg transition-colors cursor-pointer',
+                    project.is_featured
+                      ? 'text-amber-500 bg-amber-500/10'
+                      : 'text-slate-400 bg-slate-100 hover:bg-slate-200'
+                  )}
+                  title={project.is_featured ? 'Remover Destaque' : 'Marcar Destaque'}
+                >
+                  <Icon icon={StarActionIcon} size={16} />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
                 {canEdit && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleFeatured(project.id)}
-                      className={cn(
-                        'p-2 rounded-lg border text-xs font-bold transition-colors flex items-center justify-center',
-                        project.is_featured
-                          ? 'bg-amber-50 border-amber-200 text-amber-600'
-                          : 'bg-white border-slate-200 text-slate-400'
-                      )}
-                      title="Alternar Destaque"
-                    >
-                      <Icon icon={StarActionIcon} size={14} />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleToggleVisibility(project.id)}
-                      className={cn(
-                        'p-2 rounded-lg border text-xs font-bold transition-colors flex items-center justify-center',
-                        project.is_visible
-                          ? 'bg-emerald-50 border-emerald-200 text-emerald-600'
-                          : 'bg-rose-50 border-rose-200 text-rose-600'
-                      )}
-                      title={project.is_visible ? 'Publicado' : 'Oculto'}
-                    >
-                      {project.is_visible ? (
-                        <Icon icon={ViewActionIcon} size={14} />
-                      ) : (
-                        <Icon icon={HideActionIcon} size={14} />
-                      )}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingProject(project)
-                        setIsModalOpen(true)
-                      }}
-                      className="p-2 rounded-lg border border-slate-200 bg-white text-slate-700 hover:text-[#0075FF] transition-colors flex items-center justify-center"
-                      title="Editar"
-                    >
-                      <Icon icon={EditActionIcon} size={14} />
-                    </button>
-                  </>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingProject(project)
+                      setIsModalOpen(true)
+                    }}
+                    className="p-2 rounded-lg bg-blue-500/10 text-[#0075FF] hover:bg-blue-500/20 transition-colors cursor-pointer"
+                    title="Editar Projeto"
+                  >
+                    <Icon icon={EditActionIcon} size={16} />
+                  </button>
                 )}
 
                 {canDelete && (
                   <button
                     type="button"
                     onClick={() => handleDeleteProject(project.id)}
-                    className="p-2 rounded-lg border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors flex items-center justify-center"
-                    title="Excluir"
+                    className="p-2 rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500/20 transition-colors cursor-pointer"
+                    title="Excluir Projeto"
                   >
-                    <Icon icon={DeleteActionIcon} size={14} />
+                    <Icon icon={DeleteActionIcon} size={16} />
                   </button>
                 )}
               </div>
@@ -280,94 +287,101 @@ export function HomePortfolioTab({
         ))}
       </div>
 
-      {/* EDIT MODAL */}
-      {isModalOpen && editingProject && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl space-y-4 animate-in zoom-in-95 border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-extrabold text-base text-[#0C1D36]">
-                {editingProject.id ? 'Editar Case do Portfólio' : 'Adicionar Novo Case à Home'}
+      {/* EDIT / CREATE MODAL */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div
+            className={cn(
+              'w-full max-w-xl rounded-3xl p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto border',
+              isDarkMode ? 'bg-[#16181D] text-white border-slate-800' : 'bg-white text-[#0C1D36] border-slate-200'
+            )}
+          >
+            <div className="flex items-center justify-between border-b pb-3 border-slate-700">
+              <h3 className="text-lg font-bold">
+                {editingProject?.id ? 'Editar Case da Home' : 'Novo Case para a Home'}
               </h3>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-full text-slate-400 hover:bg-slate-100 flex items-center justify-center"
+                className="p-1.5 rounded-full hover:bg-slate-700 text-slate-400"
               >
                 <Icon icon={CancelActionIcon} size={18} />
               </button>
             </div>
 
-            <div className="space-y-4 text-xs">
+            <div className="space-y-3 text-xs">
               <div>
-                <label className="block font-bold mb-1">Título do Projeto *</label>
+                <label className="block text-slate-400 font-bold mb-1">Título do Projeto</label>
                 <input
                   type="text"
-                  value={editingProject.title || ''}
+                  value={editingProject?.title || ''}
                   onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
-                  placeholder="Ex: Decor Studio - E-commerce de Luxo"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200"
+                  placeholder="Ex: E-commerce Nike Brasil"
+                  className={cn(
+                    'w-full px-3.5 py-2.5 rounded-xl border text-xs outline-none',
+                    isDarkMode ? 'bg-[#1A1E26] border-slate-700 text-white' : 'bg-white border-slate-200 text-[#0C1D36]'
+                  )}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold mb-1">Cliente</label>
-                  <input
-                    type="text"
-                    value={editingProject.client || ''}
-                    onChange={(e) => setEditingProject({ ...editingProject, client: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold mb-1">Categoria</label>
-                  <select
-                    value={editingProject.category || 'institucional'}
-                    onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white"
-                  >
-                    <option value="institucional">Institucional</option>
-                    <option value="e-commerce">E-commerce</option>
-                    <option value="landing-page">Landing Page</option>
-                    <option value="personalizado">Personalizado</option>
-                  </select>
-                </div>
+              <div>
+                <label className="block text-slate-400 font-bold mb-1">Categoria</label>
+                <select
+                  value={editingProject?.category || 'institucional'}
+                  onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value as any })}
+                  className={cn(
+                    'w-full px-3.5 py-2.5 rounded-xl border text-xs outline-none',
+                    isDarkMode ? 'bg-[#1A1E26] border-slate-700 text-white' : 'bg-white border-slate-200 text-[#0C1D36]'
+                  )}
+                >
+                  <option value="institucional">Institucional</option>
+                  <option value="e-commerce">E-commerce</option>
+                  <option value="landing-page">Landing Page</option>
+                  <option value="personalizado">Personalizado</option>
+                </select>
               </div>
 
               <div>
-                <label className="block font-bold mb-1">Descrição Curta</label>
+                <label className="block text-slate-400 font-bold mb-1">Descrição Curta</label>
                 <textarea
-                  rows={2}
-                  value={editingProject.short_description || ''}
+                  rows={3}
+                  value={editingProject?.short_description || ''}
                   onChange={(e) => setEditingProject({ ...editingProject, short_description: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200"
+                  placeholder="Resumo do projeto para o card público..."
+                  className={cn(
+                    'w-full px-3.5 py-2.5 rounded-xl border text-xs outline-none',
+                    isDarkMode ? 'bg-[#1A1E26] border-slate-700 text-white' : 'bg-white border-slate-200 text-[#0C1D36]'
+                  )}
                 />
               </div>
 
               <div>
-                <label className="block font-bold mb-1">URL Imagem Desktop</label>
+                <label className="block text-slate-400 font-bold mb-1">URL da Imagem Desktop</label>
                 <input
                   type="text"
-                  value={editingProject.desktop_image_url || ''}
+                  value={editingProject?.desktop_image_url || ''}
                   onChange={(e) => setEditingProject({ ...editingProject, desktop_image_url: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 font-mono text-[11px]"
+                  placeholder="/images/hero-desktop.webp ou https://..."
+                  className={cn(
+                    'w-full px-3.5 py-2.5 rounded-xl border text-xs outline-none',
+                    isDarkMode ? 'bg-[#1A1E26] border-slate-700 text-white' : 'bg-white border-slate-200 text-[#0C1D36]'
+                  )}
                 />
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-700">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 rounded-xl border border-slate-200 font-bold text-slate-700 text-xs"
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-700 text-slate-200 hover:bg-slate-600"
               >
                 Cancelar
               </button>
               <button
                 type="button"
                 onClick={handleSaveModal}
-                className="px-5 py-2 rounded-xl bg-[#0075FF] hover:bg-[#168CFF] text-white font-bold text-xs shadow-md"
+                className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-[#0075FF] hover:bg-blue-600 shadow-md"
               >
                 Salvar Case
               </button>
