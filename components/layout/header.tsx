@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
-import { Icon } from '@/components/ui/hugeicons'
+import { HugeiconsIcon, Icon } from '@/components/ui/hugeicons'
+import { FileText } from 'lucide-react'
 import { AnxisLogo } from '@/components/ui/anxis-logo'
 import { WhatsAppIcon } from '@/components/ui/whatsapp-icon'
 import { cn, formatWhatsAppLink } from '@/lib/utils'
@@ -138,7 +139,7 @@ export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
             </Link>
           </div>
 
-          {/* RIGHT: CTA CONTATO BUTTON (RAINBOW BRAND GRADIENT) */}
+          {/* RIGHT: CTA FORM BUTTON (SQUARE WITH SUBTLE ROUNDING) */}
           <div className="flex items-center">
             <a
               href="#contato"
@@ -147,9 +148,11 @@ export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
                 trackEvent('click_primary_cta', { location: 'header' })
                 handleNavClick('#contato', 'Contato')
               }}
-              className="inline-flex items-center justify-center px-4 sm:px-6 py-1.5 sm:py-2 rounded-[20px] text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 active:scale-95 shadow-md shadow-blue-600/20 transition-all cursor-pointer"
+              title="Solicitar Proposta"
+              aria-label="Ir para formulário de contato"
+              className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[8px] text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 active:scale-95 shadow-md shadow-blue-600/20 transition-all cursor-pointer group"
             >
-              Contato
+              <FileText className="w-4 h-4 text-white transition-transform group-hover:scale-110" />
             </a>
           </div>
         </div>

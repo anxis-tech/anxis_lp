@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import { motion } from 'motion/react'
-import { WhatsAppIcon } from '@/components/ui/whatsapp-icon'
 import { HeroProjectCarousel } from '@/components/sections/hero-project-carousel'
 import { Project } from '@/types/database.types'
 import { INITIAL_PROJECTS } from '@/lib/constants/initial-data'
@@ -248,9 +247,8 @@ export function HeroSection({
                   trackEvent('click_primary_cta', { location: 'hero' })
                   scrollToSection('#contato')
                 }}
-                className="inline-flex items-center justify-center gap-2.5 px-8 sm:px-10 py-3.5 sm:py-4 rounded-[20px] text-base sm:text-lg font-extrabold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 shadow-xl shadow-blue-600/25 hover:shadow-2xl hover:shadow-blue-600/35 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
+                className="inline-flex items-center justify-center px-8 sm:px-10 py-3.5 sm:py-4 rounded-[20px] text-base sm:text-lg font-extrabold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 shadow-xl shadow-blue-600/25 hover:shadow-2xl hover:shadow-blue-600/35 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
               >
-                <WhatsAppIcon className="w-5 h-5 fill-current" />
                 <span>{primaryCtaText}</span>
               </button>
 
