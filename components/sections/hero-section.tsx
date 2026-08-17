@@ -146,10 +146,10 @@ export function HeroSection({
         <div className="flex flex-col items-center text-center space-y-6 sm:space-y-8">
           {/* HERO UPPER CONTENT CONTAINER (HEADLINE, SUBTITLE, CTA, SOCIAL PROOF & FIGMA CURSORS) */}
           <div className="relative w-full max-w-4xl mx-auto flex flex-col items-center text-center space-y-4 sm:space-y-6">
-            {/* FIGMA LIVE CURSOR 1: DESIGN & UX (TOP-RIGHT OF HEADLINE) */}
+            {/* FIGMA LIVE CURSOR 1: DESIGN & UX (ORANGE TONE FIGMA CURSOR) */}
             <FigmaLiveCursor
               name="Design & UX"
-              color="#4E9B9B"
+              color="#FF7A1A"
               positionClass="-top-4 sm:-top-2 right-[2%] sm:right-0 md:-right-6 lg:-right-10"
               pointerSide="top-right"
               delay={0.5}
@@ -248,7 +248,7 @@ export function HeroSection({
                   trackEvent('click_primary_cta', { location: 'hero' })
                   scrollToSection('#contato')
                 }}
-                className="inline-flex items-center justify-center gap-2.5 px-8 sm:px-10 py-3.5 sm:py-4 rounded-[20px] text-base sm:text-lg font-extrabold text-white bg-[#ffa337] hover:bg-[#e6902b] shadow-xl shadow-orange-500/20 hover:shadow-2xl hover:shadow-orange-500/30 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
+                className="inline-flex items-center justify-center gap-2.5 px-8 sm:px-10 py-3.5 sm:py-4 rounded-[20px] text-base sm:text-lg font-extrabold text-white bg-gradient-to-r from-[#209686] via-[#25ab99] to-[#2cd1bb] hover:opacity-95 shadow-xl shadow-teal-500/25 hover:shadow-2xl hover:shadow-teal-500/35 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
               >
                 <WhatsAppIcon className="w-5 h-5 fill-current" />
                 <span>{primaryCtaText}</span>

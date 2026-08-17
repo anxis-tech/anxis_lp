@@ -359,7 +359,7 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[20px] text-sm font-extrabold text-white bg-[#ffa337] hover:bg-[#e6902b] shadow-xl shadow-orange-500/15 transition-all duration-200 disabled:opacity-50 cursor-pointer group"
+                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[20px] text-sm font-extrabold text-white bg-gradient-to-r from-[#209686] via-[#25ab99] to-[#2cd1bb] hover:opacity-95 shadow-xl shadow-teal-500/20 transition-all duration-200 disabled:opacity-50 cursor-pointer group"
                     >
                       {isSubmitting ? (
                         <>

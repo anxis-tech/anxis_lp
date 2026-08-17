@@ -61,7 +61,7 @@ export function CustomSolution() {
                 <button
                   type="button"
                   onClick={scrollToContact}
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-[#ffa337] hover:bg-[#e6902b] shadow-xl shadow-orange-500/20 transition-all duration-200 cursor-pointer group"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-gradient-to-r from-[#209686] via-[#25ab99] to-[#2cd1bb] hover:opacity-95 shadow-xl shadow-teal-500/25 transition-all duration-200 cursor-pointer group"
                 >
                   <span>Conversar sobre um projeto personalizado</span>
                   <Icon name="ArrowRight" size={18} className="transition-transform group-hover:translate-x-1" />
