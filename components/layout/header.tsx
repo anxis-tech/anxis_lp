@@ -147,7 +147,7 @@ export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
                 trackEvent('click_primary_cta', { location: 'header' })
                 handleNavClick('#contato', 'Contato')
               }}
-              className="inline-flex items-center justify-center px-4 sm:px-6 py-1.5 sm:py-2 rounded-[20px] text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#209686] to-[#25ab99] hover:opacity-95 active:scale-95 shadow-md shadow-teal-500/20 transition-all cursor-pointer"
+              className="inline-flex items-center justify-center px-4 sm:px-6 py-1.5 sm:py-2 rounded-[20px] text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 active:scale-95 shadow-md shadow-blue-600/20 transition-all cursor-pointer"
             >
               Contato
             </a>
@@ -190,7 +190,7 @@ export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
                     >
                       <span>{link.label}</span>
                       {isActive ? (
-                        <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] shadow-xs" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#086ec5] shadow-xs" />
                       ) : (
                         <Icon
                           name="ArrowRight"

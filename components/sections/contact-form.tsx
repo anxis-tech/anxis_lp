@@ -141,16 +141,16 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                       type="button"
                       onClick={() => toggleAccordion(faq.id)}
                       aria-expanded={isOpen}
-                      className="w-full text-left px-5 py-4 flex items-center justify-between gap-3 font-extrabold text-sm sm:text-base text-[#2f2f2f] hover:text-[#0099FF] transition-colors focus:outline-none cursor-pointer"
+                      className="w-full text-left px-5 py-4 flex items-center justify-between gap-3 font-extrabold text-sm sm:text-base text-[#2f2f2f] hover:text-[#086ec5] transition-colors focus:outline-none cursor-pointer"
                     >
                       <span className="flex items-center gap-3">
-                        <Icon name="Filter" size={16} className="text-amber-500 shrink-0" />
+                        <Icon name="Filter" size={16} className="text-[#086ec5] shrink-0" />
                         <span>{faq.question}</span>
                       </span>
                       <ChevronDown
                         className={cn(
                           'w-4 h-4 text-slate-400 shrink-0 transition-transform duration-300',
-                          isOpen ? 'transform rotate-180 text-emerald-500' : ''
+                          isOpen ? 'transform rotate-180 text-[#086ec5]' : ''
                         )}
                       />
                     </button>
@@ -189,7 +189,7 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
             <div className="bg-white rounded-[20px] p-6 sm:p-8 border border-slate-200 shadow-2xl relative space-y-6">
               {/* FORM HEADER */}
               <div className="space-y-2">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-gradient-anxis bg-slate-100 px-3.5 py-1.5 rounded-[20px] border border-slate-200 inline-block">
+                <span className="text-xs font-extrabold uppercase tracking-widest text-[#086ec5] bg-slate-100 px-3.5 py-1.5 rounded-[20px] border border-slate-200 inline-block">
                   SOLICITE UMA PROPOSTA
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-black text-[#2f2f2f] tracking-tight font-heading">
@@ -203,7 +203,7 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
               {/* SUCCESS STATE */}
               {isSuccess ? (
                 <div className="text-center py-12 space-y-4 animate-in zoom-in-95 duration-300">
-                  <div className="w-16 h-16 bg-gradient-to-r from-[#00C968] to-[#0099FF] text-white rounded-[20px] flex items-center justify-center mx-auto shadow-lg">
+                  <div className="w-16 h-16 bg-[#086ec5] text-white rounded-[20px] flex items-center justify-center mx-auto shadow-lg">
                     <Icon name="Check" size={32} />
                   </div>
                   <div className="space-y-1.5 max-w-sm mx-auto">
@@ -359,7 +359,7 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[20px] text-sm font-extrabold text-white bg-gradient-to-r from-[#209686] via-[#25ab99] to-[#2cd1bb] hover:opacity-95 shadow-xl shadow-teal-500/20 transition-all duration-200 disabled:opacity-50 cursor-pointer group"
+                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[20px] text-sm font-extrabold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 shadow-xl shadow-blue-600/25 transition-all duration-200 disabled:opacity-50 cursor-pointer group"
                     >
                       {isSubmitting ? (
                         <>

@@ -19,7 +19,7 @@
     --card: #FFFFFF;
     --card-foreground: #0F172A;
 
-    --primary: #0099FF;
+    --primary: #086ec5;
     --primary-foreground: #FFFFFF;
 
     --secondary: #0F172A;
@@ -28,12 +28,12 @@
     --muted: #F1F5F9;
     --muted-foreground: #64748B;
 
-    --accent: #0099FF;
+    --accent: #086ec5;
     --accent-foreground: #FFFFFF;
 
     --border: #E2E8F0;
     --input: #E2E8F0;
-    --ring: #0099FF;
+    --ring: #086ec5;
 
     --radius: 20px;
   }
@@ -45,7 +45,7 @@
     --card: #0F172A;
     --card-foreground: #F8FAFC;
 
-    --primary: #0099FF;
+    --primary: #086ec5;
     --primary-foreground: #FFFFFF;
 
     --secondary: #1E293B;
@@ -56,7 +56,7 @@
 
     --border: #1E293B;
     --input: #1E293B;
-    --ring: #0099FF;
+    --ring: #086ec5;
   }
 
   h1, h2, h3, h4, h5, h6, .font-heading {
@@ -65,13 +65,13 @@
 }
 
 @layer utilities {
-  /* ANXIS Official 4-Color Logo Gradients */
+  /* ANXIS Blue Primary Gradients */
   .bg-gradient-anxis {
-    background: linear-gradient(135deg, #FF6B00 0%, #00C968 40%, #0099FF 100%);
+    background: linear-gradient(135deg, #086ec5 0%, #0a7ee0 100%);
   }
 
   .bg-gradient-anxis-horizontal {
-    background: linear-gradient(90deg, #FF6B00 0%, #FFB800 25%, #00C968 50%, #0099FF 100%);
+    background: linear-gradient(90deg, #086ec5 0%, #0a7ee0 100%);
   }
 
   .bg-gradient-orange-amber {
@@ -87,12 +87,12 @@
   }
 
   .bg-gradient-sky-blue {
-    background: linear-gradient(135deg, #0099FF 0%, #0284C7 100%);
+    background: linear-gradient(135deg, #086ec5 0%, #0a7ee0 100%);
   }
 
   /* Multi-color Brand Text Gradients */
   .text-gradient-anxis {
-    background: linear-gradient(135deg, #FF6B00 0%, #00C968 45%, #0099FF 100%);
+    background: linear-gradient(135deg, #086ec5 0%, #0a7ee0 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }

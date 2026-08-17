@@ -11,49 +11,49 @@ export function ProcessSection() {
       title: 'Briefing & Diagnóstico',
       icon: 'FileText',
       description: 'Alinhamento de objetivos, estudo do negócio, público-alvo e levantamento de requisitos para a estrutura técnica.',
-      badgeGradient: 'from-[#FF6B00] to-[#FFB800]',
-      iconBg: 'bg-orange-500/10 text-[#FF6B00] group-hover:bg-[#FF6B00]',
-      borderColor: 'group-hover:border-orange-400',
+      badgeGradient: 'from-[#086ec5] to-[#0a7ee0]',
+      iconBg: 'bg-[#086ec5]/10 text-[#086ec5] group-hover:bg-[#086ec5]',
+      borderColor: 'group-hover:border-[#086ec5]',
     },
     {
       stepBadge: 'Passo 02',
       title: 'Prototipagem UI/UX',
       icon: 'Layers',
       description: 'Criação do visual e protótipo interativo da interface, focando na usabilidade, navegabilidade e alta conversão.',
-      badgeGradient: 'from-[#00C968] to-[#10B981]',
-      iconBg: 'bg-emerald-500/10 text-emerald-600 group-hover:bg-emerald-600',
-      borderColor: 'group-hover:border-emerald-400',
+      badgeGradient: 'from-[#086ec5] to-[#0a7ee0]',
+      iconBg: 'bg-[#086ec5]/10 text-[#086ec5] group-hover:bg-[#086ec5]',
+      borderColor: 'group-hover:border-[#086ec5]',
     },
     {
       stepBadge: 'Passo 03',
       title: 'Validação & Ajustes',
       icon: 'ShieldCheck',
       description: 'Apresentação detalhada da prototipagem para validação com o cliente, permitindo refinamentos antes da codificação.',
-      badgeGradient: 'from-[#C4E000] to-[#EAB308]',
-      iconBg: 'bg-lime-500/10 text-lime-700 group-hover:bg-lime-600',
-      borderColor: 'group-hover:border-lime-400',
+      badgeGradient: 'from-[#086ec5] to-[#0a7ee0]',
+      iconBg: 'bg-[#086ec5]/10 text-[#086ec5] group-hover:bg-[#086ec5]',
+      borderColor: 'group-hover:border-[#086ec5]',
     },
     {
       stepBadge: 'Passo 04',
       title: 'Desenvolvimento & Lançamento',
       icon: 'Code2',
       description: 'Implementação da aplicação em código limpo de alta performance (Next.js/React), otimização SEO e lançamento.',
-      badgeGradient: 'from-[#0099FF] to-[#0284C7]',
-      iconBg: 'bg-sky-500/10 text-[#0099FF] group-hover:bg-[#0099FF]',
-      borderColor: 'group-hover:border-[#0099FF]',
+      badgeGradient: 'from-[#086ec5] to-[#0a7ee0]',
+      iconBg: 'bg-[#086ec5]/10 text-[#086ec5] group-hover:bg-[#086ec5]',
+      borderColor: 'group-hover:border-[#086ec5]',
     },
   ]
 
   return (
     <section id="processo" className="py-24 sm:py-32 bg-[#FAFBFC] text-[#0F172A] relative border-b border-slate-200/80 overflow-hidden">
-      {/* Multi-color ambient background glows */}
-      <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#0099FF]/5 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute top-1/2 right-1/4 translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#FF6B00]/5 rounded-full blur-[160px] pointer-events-none" />
+      {/* Blue ambient background glows */}
+      <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#086ec5]/5 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute top-1/2 right-1/4 translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#086ec5]/4 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16 sm:space-y-20">
         {/* HEADER */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#0099FF] bg-[#0099FF]/10 px-4 py-1.5 rounded-[20px] border border-[#0099FF]/20 inline-block font-bold">
+          <span className="text-xs font-mono uppercase tracking-[0.25em] text-[#086ec5] bg-[#086ec5]/10 px-4 py-1.5 rounded-[20px] border border-[#086ec5]/20 inline-block font-bold">
             METODOLOGIA & PROCESSO
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2f2f2f] tracking-tight font-heading">

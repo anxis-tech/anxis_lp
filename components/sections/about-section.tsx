@@ -42,7 +42,7 @@ export function AboutSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* CENTERED HEADER */}
         <div className="text-center max-w-3xl mx-auto space-y-6 mb-20">
-          <span className="text-xs font-extrabold uppercase tracking-widest text-[#00ABB8] bg-[#00ABB8]/10 px-4 py-1.5 rounded-[20px] border border-[#00ABB8]/20 inline-block">
+          <span className="text-xs font-extrabold uppercase tracking-widest text-[#086ec5] bg-[#086ec5]/10 px-4 py-1.5 rounded-[20px] border border-[#086ec5]/20 inline-block">
             SOBRE A ANXIS
           </span>
 
@@ -60,13 +60,13 @@ export function AboutSection() {
           {pillars.map((pillar, idx) => (
             <div
               key={idx}
-              className="p-8 rounded-[20px] bg-[#F8FAFC] border border-slate-200/90 hover:border-[#00ABB8]/50 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
+              className="p-8 rounded-[20px] bg-[#F8FAFC] border border-slate-200/90 hover:border-[#086ec5]/50 hover:shadow-xl transition-all duration-300 group flex flex-col justify-between"
             >
               <div className="space-y-4">
-                <div className="w-14 h-14 rounded-[14px] bg-[#00ABB8]/10 border border-[#00ABB8]/20 flex items-center justify-center text-[#00939E] group-hover:bg-[#00ABB8] group-hover:text-white transition-all duration-300">
+                <div className="w-14 h-14 rounded-[14px] bg-[#086ec5]/10 border border-[#086ec5]/20 flex items-center justify-center text-[#086ec5] group-hover:bg-[#086ec5] group-hover:text-white transition-all duration-300">
                   <Icon name={pillar.icon} size={28} />
                 </div>
-                <h3 className="text-lg font-bold text-[#293233] group-hover:text-[#00939E] transition-colors">
+                <h3 className="text-lg font-bold text-[#293233] group-hover:text-[#086ec5] transition-colors">
                   {pillar.title}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -82,7 +82,7 @@ export function AboutSection() {
           <button
             type="button"
             onClick={scrollToContact}
-            className="inline-flex items-center justify-center px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-gradient-to-r from-[#209686] via-[#25ab99] to-[#2cd1bb] hover:opacity-95 shadow-xl shadow-teal-500/25 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
+            className="inline-flex items-center justify-center px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 shadow-xl shadow-blue-600/25 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
           >
             <span>Falar com um especialista</span>
             <Icon name="ArrowRight" size={18} className="ml-2.5 transition-transform group-hover:translate-x-1" />

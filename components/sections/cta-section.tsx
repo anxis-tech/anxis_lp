@@ -27,10 +27,10 @@ export function CTASection({ whatsapp = '5511999999999' }: CTASectionProps) {
     <section className="py-16 sm:py-24 bg-[#FAFBFC] relative overflow-hidden px-4 sm:px-6 lg:px-8">
       {/* BOXED OUTER WARM CARD CONTAINER */}
       <div className="max-w-7xl mx-auto bg-gradient-to-br from-[#FFF7ED]/80 via-[#FFFFFF] to-[#EFF6FF]/90 rounded-[20px] p-8 sm:p-12 lg:p-16 border border-orange-200/60 shadow-2xl shadow-slate-900/5 relative overflow-hidden text-[#2f2f2f] min-h-[500px] flex flex-col justify-between">
-        {/* TECHNICAL BLUEPRINT GRID OVERLAY & MULTI-COLOR AURORA GLOWS */}
+        {/* TECHNICAL BLUEPRINT GRID OVERLAY & BLUE AURORA GLOWS */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[20px]">
-          <div className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-[#0099FF]/15 via-[#FF6B00]/15 to-[#00C968]/15 rounded-full blur-[170px]" />
-          <div className="absolute inset-0 bg-[radial-gradient(#FF6B00_1.2px,transparent_1.2px)] [background-size:36px_36px] opacity-[0.05]" />
+          <div className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-[#086ec5]/10 rounded-full blur-[170px]" />
+          <div className="absolute inset-0 bg-[radial-gradient(#086ec5_1.2px,transparent_1.2px)] [background-size:36px_36px] opacity-[0.05]" />
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:4rem_4rem]" />
         </div>
 
@@ -41,7 +41,7 @@ export function CTASection({ whatsapp = '5511999999999' }: CTASectionProps) {
             transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
             className="w-[260px] sm:w-[320px] aspect-square relative flex items-center justify-center"
           >
-            <AnxisIcon size={240} className="drop-shadow-[0_20px_60px_rgba(255,107,0,0.25)]" />
+            <AnxisIcon size={240} className="drop-shadow-[0_20px_60px_rgba(8,110,197,0.25)]" />
           </motion.div>
         </div>
 
@@ -49,7 +49,7 @@ export function CTASection({ whatsapp = '5511999999999' }: CTASectionProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
           {/* TOP LEFT PERSUASIVE TITLE */}
           <div className="lg:col-span-6 space-y-4 text-left">
-            <span className="text-xs font-mono uppercase tracking-[0.2em] px-3.5 py-1.5 rounded-[20px] bg-white border border-slate-200 shadow-xs inline-block font-extrabold text-gradient-anxis">
+            <span className="text-xs font-mono uppercase tracking-[0.2em] px-3.5 py-1.5 rounded-[20px] bg-white border border-slate-200 shadow-xs inline-block font-extrabold text-[#086ec5]">
               VAMOS TRABALHAR JUNTOS
             </span>
 
@@ -66,7 +66,7 @@ export function CTASection({ whatsapp = '5511999999999' }: CTASectionProps) {
           <div className="lg:col-span-6 text-left lg:text-right pt-4 lg:pt-0">
             <h3 className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#2f2f2f] tracking-tight leading-[1.05] font-heading">
               Resultados Reais <br className="hidden sm:inline" />
-              <span className="text-gradient-anxis">para sua Empresa.</span>
+              <span className="text-[#086ec5]">para sua Empresa.</span>
             </h3>
           </div>
         </div>
@@ -91,7 +91,7 @@ export function CTASection({ whatsapp = '5511999999999' }: CTASectionProps) {
             <button
               type="button"
               onClick={scrollToContact}
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-gradient-to-r from-[#209686] via-[#25ab99] to-[#2cd1bb] hover:opacity-95 shadow-xl shadow-teal-500/25 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 shadow-xl shadow-blue-600/25 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
             >
               <span>Solicitar uma Proposta</span>
               <Icon name="ArrowRight" size={18} className="transition-transform group-hover:translate-x-1" />

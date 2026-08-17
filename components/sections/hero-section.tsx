@@ -137,9 +137,9 @@ export function HeroSection({
 
         {/* Soft diffused multi-chroma ambient glows */}
         <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-to-b from-slate-200/30 via-slate-100/10 to-transparent rounded-full blur-[120px]" />
-        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[350px] bg-[#0099FF]/3 rounded-full blur-[140px]" />
-        <div className="absolute top-1/3 right-1/4 translate-x-1/2 -translate-y-1/2 w-[450px] h-[350px] bg-[#00C968]/3 rounded-full blur-[140px]" />
-        <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-[450px] h-[250px] bg-[#FF6B00]/3 rounded-full blur-[130px]" />
+        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[350px] bg-[#086ec5]/4 rounded-full blur-[140px]" />
+        <div className="absolute top-1/3 right-1/4 translate-x-1/2 -translate-y-1/2 w-[450px] h-[350px] bg-[#086ec5]/4 rounded-full blur-[140px]" />
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-[450px] h-[250px] bg-[#086ec5]/3 rounded-full blur-[130px]" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -171,7 +171,7 @@ export function HeroSection({
             {/* FIGMA LIVE CURSOR 3: DESENVOLVIMENTO (RIGHT OF CTA / SOCIAL PROOF) */}
             <FigmaLiveCursor
               name="Desenvolvimento"
-              color="#0099FF"
+              color="#086ec5"
               positionClass="bottom-0 sm:bottom-1 right-[2%] sm:right-0 md:-right-8 lg:-right-12"
               pointerSide="top-right"
               delay={1.1}
@@ -248,7 +248,7 @@ export function HeroSection({
                   trackEvent('click_primary_cta', { location: 'hero' })
                   scrollToSection('#contato')
                 }}
-                className="inline-flex items-center justify-center gap-2.5 px-8 sm:px-10 py-3.5 sm:py-4 rounded-[20px] text-base sm:text-lg font-extrabold text-white bg-gradient-to-r from-[#209686] via-[#25ab99] to-[#2cd1bb] hover:opacity-95 shadow-xl shadow-teal-500/25 hover:shadow-2xl hover:shadow-teal-500/35 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
+                className="inline-flex items-center justify-center gap-2.5 px-8 sm:px-10 py-3.5 sm:py-4 rounded-[20px] text-base sm:text-lg font-extrabold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 shadow-xl shadow-blue-600/25 hover:shadow-2xl hover:shadow-blue-600/35 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
               >
                 <WhatsAppIcon className="w-5 h-5 fill-current" />
                 <span>{primaryCtaText}</span>

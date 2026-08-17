@@ -50,17 +50,17 @@ export function PillarsGridSection() {
   }
 
   return (
-    <section id="servicos" className="w-full bg-gradient-to-b from-[#FFFFFF] via-[#FFFDF8] to-[#F8FAFC] text-[#0F172A] py-20 sm:py-28 border-y border-slate-200/80 relative overflow-hidden">
-      {/* Ambient warm background glows */}
-      <div className="absolute top-0 right-1/4 w-[700px] h-[500px] bg-[#FF6B00]/6 rounded-full blur-[170px] pointer-events-none" />
-      <div className="absolute bottom-0 left-10 w-[500px] h-[400px] bg-[#00C968]/6 rounded-full blur-[160px] pointer-events-none" />
+    <section id="servicos" className="w-full bg-gradient-to-b from-[#FFFFFF] via-[#F8FAFC] to-[#F8FAFC] text-[#0F172A] py-20 sm:py-28 border-y border-slate-200/80 relative overflow-hidden">
+      {/* Ambient background glows */}
+      <div className="absolute top-0 right-1/4 w-[700px] h-[500px] bg-[#086ec5]/5 rounded-full blur-[170px] pointer-events-none" />
+      <div className="absolute bottom-0 left-10 w-[500px] h-[400px] bg-[#086ec5]/4 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="w-full relative z-10 space-y-8">
         {/* HEADER BAR ALIGNED WITH STANDARD PAGE WIDTH (MAX-W-7XL) */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-6 border-b border-slate-200/80 text-xs font-mono text-slate-500">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-gradient-anxis bg-white px-3.5 py-1 rounded-[20px] border border-slate-200 shadow-xs">
+              <span className="text-xs font-extrabold uppercase tracking-widest text-[#086ec5] bg-white px-3.5 py-1 rounded-[20px] border border-slate-200 shadow-xs">
                 NOSSOS SERVIÇOS
               </span>
               <span className="hidden sm:inline text-slate-300">|</span>

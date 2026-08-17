@@ -222,7 +222,7 @@ export function HeroProjectCarousel({ projects = INITIAL_PROJECTS }: HeroProject
                       <div className="absolute inset-x-2.5 bottom-2.5 sm:inset-x-3 sm:bottom-3 z-20 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="bg-slate-950/85 backdrop-blur-md border border-white/15 rounded-[16px] p-2 sm:px-3.5 sm:py-2.5 flex items-center justify-between gap-3 shadow-md shadow-black/30">
                           <div className="space-y-0.5 max-w-[68%] min-w-0">
-                            <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] uppercase bg-white/10 px-2 py-0.5 rounded-[8px] border border-white/15 inline-block">
+                            <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-wider text-[#38bdf8] uppercase bg-[#086ec5]/20 px-2 py-0.5 rounded-[8px] border border-[#086ec5]/40 inline-block">
                               {project.category}
                             </span>
                             <h4 className="text-xs sm:text-sm font-bold text-white truncate font-heading drop-shadow-xs">

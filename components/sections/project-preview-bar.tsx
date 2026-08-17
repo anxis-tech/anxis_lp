@@ -57,17 +57,17 @@ export function ProjectPreviewBar({
 
   return (
     <section id="projetos" className="relative bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-[#FFFFFF] text-[#0F172A] py-24 sm:py-32 border-b border-slate-200/80 overflow-hidden">
-      {/* Background Multi-color Top Border Line */}
-      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] opacity-80" />
+      {/* Background Subtle Accent Top Line */}
+      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#086ec5]/40 to-transparent opacity-80" />
       
-      {/* Background Accent Warm & Sky Glows */}
-      <div className="absolute -top-40 left-1/3 w-[800px] h-[350px] bg-[#0099FF]/6 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 right-10 w-[500px] h-[500px] bg-[#FF6B00]/6 rounded-full blur-[170px] pointer-events-none" />
+      {/* Background Accent Blue Glows */}
+      <div className="absolute -top-40 left-1/3 w-[800px] h-[350px] bg-[#086ec5]/5 blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 right-10 w-[500px] h-[500px] bg-[#086ec5]/4 rounded-full blur-[170px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
         {/* SECTION HEADER */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-mono uppercase tracking-[0.25em] px-4 py-1.5 rounded-[20px] bg-white border border-slate-200 shadow-sm inline-block font-extrabold text-gradient-anxis">
+          <span className="text-xs font-mono uppercase tracking-[0.25em] px-4 py-1.5 rounded-[20px] bg-white border border-slate-200 shadow-sm inline-block font-extrabold text-[#086ec5]">
             DEMONSTRAÇÃO DE PROJETOS REAIS
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2f2f2f] tracking-tight font-heading">
@@ -84,12 +84,11 @@ export function ProjectPreviewBar({
           <div className="lg:col-span-4 lg:sticky lg:top-28 self-start z-20 space-y-4">
             <div className="bg-white rounded-[20px] p-6 border border-slate-200/90 shadow-xl shadow-slate-900/5 space-y-3">
               <div className="text-xs font-mono uppercase tracking-widest text-slate-700 font-bold flex items-center gap-2 pb-3 border-b border-slate-100">
-                <Icon name="Filter" size={16} className="text-amber-500" />
+                <Icon name="Filter" size={16} className="text-[#086ec5]" />
                 <span>Filtrar por Categoria</span>
               </div>
 
-              {/* VERTICAL STACK OF CATEGORY BUTTONS WITH BRAND GRADIENT ACTIVE STATE */}
-              <div className="flex flex-col space-y-1.5">
+              <div className="space-y-1.5 pt-1">
                 {categories.map((cat) => {
                   const isActive = activeCategory === cat.key
                   const count = getCategoryCount(cat.key)
@@ -100,19 +99,17 @@ export function ProjectPreviewBar({
                       type="button"
                       onClick={() => setActiveCategory(cat.key)}
                       className={cn(
-                        'w-full text-left px-4 py-3 rounded-[20px] text-xs font-bold transition-all duration-200 flex items-center justify-between cursor-pointer group',
+                        'w-full flex items-center justify-between px-4 py-2.5 rounded-[20px] text-xs font-extrabold transition-all duration-200 cursor-pointer',
                         isActive
-                          ? 'bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] text-white shadow-lg shadow-orange-500/20'
-                          : 'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                          ? 'bg-[#086ec5] text-white shadow-md shadow-blue-600/20'
+                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                       )}
                     >
-                      <span className="truncate">{cat.label}</span>
+                      <span>{cat.label}</span>
                       <span
                         className={cn(
-                          'text-[10px] font-mono font-bold px-2 py-0.5 rounded-[20px] transition-colors shrink-0 ml-2',
-                          isActive
-                            ? 'bg-white/25 text-white'
-                            : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-700'
+                          'px-2 py-0.5 rounded-[20px] text-[10px] font-mono font-bold',
+                          isActive ? 'bg-white/20 text-white' : 'bg-slate-200/70 text-slate-600'
                         )}
                       >
                         {count}
@@ -123,10 +120,10 @@ export function ProjectPreviewBar({
               </div>
             </div>
 
-            {/* SIDEBAR HELPER CARD (WARM AMBER / MINT GRADIENT ACCENT) */}
-            <div className="bg-gradient-to-br from-[#FFF7ED] via-[#FFFFFF] to-[#F0FDF4] rounded-[20px] p-6 border border-amber-200/70 space-y-3 hidden lg:block shadow-md relative overflow-hidden">
-              <div className="flex items-center gap-2 text-gradient-anxis font-extrabold text-xs uppercase tracking-wider">
-                <Icon name="Sparkles" size={16} className="text-amber-500" />
+            {/* SIDEBAR HELPER CARD */}
+            <div className="bg-gradient-to-br from-[#F0F7FF] via-[#FFFFFF] to-[#EFF6FF] rounded-[20px] p-6 border border-blue-200/70 space-y-3 hidden lg:block shadow-md relative overflow-hidden">
+              <div className="flex items-center gap-2 text-[#086ec5] font-extrabold text-xs uppercase tracking-wider">
+                <Icon name="Sparkles" size={16} className="text-[#086ec5]" />
                 <span>Projetos Sob Medida</span>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed font-medium">
@@ -134,10 +131,10 @@ export function ProjectPreviewBar({
               </p>
               <a
                 href="#contato"
-                className="inline-flex items-center text-xs font-extrabold text-slate-900 hover:text-orange-600 transition-colors pt-1"
+                className="inline-flex items-center text-xs font-extrabold text-[#086ec5] hover:text-blue-700 transition-colors pt-1"
               >
                 <span>Solicitar proposta técnica</span>
-                <Icon name="ArrowRight" size={14} className="ml-1 text-emerald-600" />
+                <Icon name="ArrowRight" size={14} className="ml-1 text-[#086ec5]" />
               </a>
             </div>
           </div>

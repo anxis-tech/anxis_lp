@@ -35,7 +35,7 @@ export function PerformanceImpactSection() {
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
                     Projetos desenvolvidos com a ANXIS
                   </span>
-                  <span className="text-gradient-anxis font-mono font-black text-sm">99%</span>
+                  <span className="text-[#086ec5] font-mono font-black text-sm">99%</span>
                 </div>
                 <div className="w-full h-4 bg-slate-100 rounded-[20px] overflow-hidden p-0.5 border border-slate-200 shadow-inner">
                   <motion.div
@@ -43,7 +43,7 @@ export function PerformanceImpactSection() {
                     whileInView={{ width: '99%' }}
                     viewport={{ once: true }}
                     transition={{ duration: 1.2, ease: 'easeOut' }}
-                    className="h-full bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] rounded-[20px] shadow-sm"
+                    className="h-full bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] rounded-[20px] shadow-sm"
                   />
                 </div>
               </div>
@@ -76,18 +76,16 @@ export function PerformanceImpactSection() {
                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
                 className="relative w-full h-full flex items-center justify-center"
               >
-                <svg className="w-full h-full drop-shadow-[0_25px_50px_rgba(0,153,255,0.2)]" viewBox="0 0 320 320" fill="none">
+                <svg className="w-full h-full drop-shadow-[0_25px_50px_rgba(8,110,197,0.2)]" viewBox="0 0 320 320" fill="none">
                   <defs>
                     <linearGradient id="cloudGlassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.95" />
-                      <stop offset="35%" stopColor="#BAE6FD" stopOpacity="0.7" />
-                      <stop offset="70%" stopColor="#A7F3D0" stopOpacity="0.6" />
-                      <stop offset="100%" stopColor="#0099FF" stopOpacity="0.85" />
+                      <stop offset="50%" stopColor="#BAE6FD" stopOpacity="0.7" />
+                      <stop offset="100%" stopColor="#086ec5" stopOpacity="0.85" />
                     </linearGradient>
                     <linearGradient id="cpuGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#FF6B00" />
-                      <stop offset="50%" stopColor="#00C968" />
-                      <stop offset="100%" stopColor="#0099FF" />
+                      <stop offset="0%" stopColor="#086ec5" />
+                      <stop offset="100%" stopColor="#0a7ee0" />
                     </linearGradient>
                   </defs>
 
@@ -105,7 +103,7 @@ export function PerformanceImpactSection() {
                     x="160"
                     y="75"
                     textAnchor="middle"
-                    fill="#0099FF"
+                    fill="#086ec5"
                     fontSize="22"
                     fontWeight="900"
                     letterSpacing="4"

@@ -29,12 +29,12 @@ export function Footer({
 
   return (
     <footer className="bg-[#F8FAFC] text-[#0F172A] pt-20 pb-12 border-t border-slate-200/90 relative overflow-hidden">
-      {/* Top subtle brand gradient line */}
-      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] opacity-80" />
+      {/* Top subtle blue line */}
+      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#086ec5]/40 to-transparent opacity-80" />
       
       {/* Subtle Abstract Background Decoration */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#0099FF]/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#FF6B00]/5 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#086ec5]/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#086ec5]/4 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-16 border-b border-slate-200">
@@ -52,11 +52,11 @@ export function Footer({
           <div className="lg:col-span-2 space-y-4">
             <h4 className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#0F172A]">Navegação</h4>
             <ul className="space-y-2.5 text-sm text-slate-600 font-medium">
-              <li><a href="#sobre" className="hover:text-orange-600 transition-colors">Sobre a ANXIS</a></li>
-              <li><a href="#servicos" className="hover:text-orange-600 transition-colors">Serviços</a></li>
-              <li><a href="#projetos" className="hover:text-orange-600 transition-colors">Portfólio</a></li>
-              <li><a href="#processo" className="hover:text-orange-600 transition-colors">Processo</a></li>
-              <li><a href="#contato" className="hover:text-orange-600 transition-colors">Contato</a></li>
+              <li><a href="#sobre" className="hover:text-[#086ec5] transition-colors">Sobre a ANXIS</a></li>
+              <li><a href="#servicos" className="hover:text-[#086ec5] transition-colors">Serviços</a></li>
+              <li><a href="#projetos" className="hover:text-[#086ec5] transition-colors">Portfólio</a></li>
+              <li><a href="#processo" className="hover:text-[#086ec5] transition-colors">Processo</a></li>
+              <li><a href="#contato" className="hover:text-[#086ec5] transition-colors">Contato</a></li>
             </ul>
           </div>
 
@@ -77,15 +77,15 @@ export function Footer({
             <h4 className="text-xs font-mono font-extrabold uppercase tracking-widest text-[#0F172A]">Contato Direto</h4>
             <ul className="space-y-3 text-sm text-slate-600 font-medium">
               <li className="flex items-center gap-2.5">
-                <Icon name="Mail" size={18} className="text-[#0099FF] shrink-0" />
-                <a href={`mailto:${email}`} className="hover:text-[#0F172A] transition-colors">{email}</a>
+                <Icon name="Mail" size={18} className="text-[#086ec5] shrink-0" />
+                <a href={`mailto:${email}`} className="hover:text-[#086ec5] transition-colors">{email}</a>
               </li>
               <li className="flex items-center gap-2.5">
                 <WhatsAppIcon className="w-[18px] h-[18px] text-[#25D366] shrink-0 fill-current" />
-                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#0F172A] transition-colors">{phone}</a>
+                <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#086ec5] transition-colors">{phone}</a>
               </li>
               <li className="flex items-center gap-2.5">
-                <Icon name="MapPin" size={18} className="text-amber-500 shrink-0" />
+                <Icon name="MapPin" size={18} className="text-[#086ec5] shrink-0" />
                 <span>{address}</span>
               </li>
             </ul>

@@ -24,16 +24,16 @@ export function CustomSolution() {
   return (
     <section className="py-24 bg-[#FFFFFF] text-[#2f2f2f] relative overflow-hidden border-t border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-[#FFFBEB]/70 via-[#FFFFFF] to-[#EFF6FF]/80 rounded-[20px] p-8 sm:p-12 lg:p-16 text-[#2f2f2f] relative overflow-hidden shadow-2xl shadow-slate-900/5 border border-amber-200/60">
-          {/* Background Multi-color Decorative Ambient Glows */}
-          <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#0099FF]/10 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#FF6B00]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="bg-gradient-to-br from-[#F0F7FF]/90 via-[#FFFFFF] to-[#EFF6FF]/90 rounded-[20px] p-8 sm:p-12 lg:p-16 text-[#2f2f2f] relative overflow-hidden shadow-2xl shadow-slate-900/5 border border-blue-200/60">
+          {/* Background Decorative Ambient Glows */}
+          <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#086ec5]/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#086ec5]/5 rounded-full blur-3xl pointer-events-none" />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
             {/* LEFT CONTENT */}
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-[20px] bg-white text-gradient-anxis text-xs font-extrabold uppercase tracking-wider border border-slate-200 shadow-xs">
-                <Icon name="Terminal" size={14} className="text-amber-500" />
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-[20px] bg-white text-[#086ec5] text-xs font-extrabold uppercase tracking-wider border border-slate-200 shadow-xs">
+                <Icon name="Terminal" size={14} className="text-[#086ec5]" />
                 <span>DESENVOLVIMENTO EM CÓDIGO</span>
               </div>
 
@@ -49,7 +49,7 @@ export function CustomSolution() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {examples.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-700 font-medium">
-                    <div className="w-4 h-4 rounded-full bg-gradient-to-r from-[#00C968] to-[#0099FF] text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <div className="w-4 h-4 rounded-full bg-[#086ec5] text-white flex items-center justify-center shrink-0 shadow-xs">
                       <Icon name="Check" size={10} />
                     </div>
                     <span>{item}</span>
@@ -61,7 +61,7 @@ export function CustomSolution() {
                 <button
                   type="button"
                   onClick={scrollToContact}
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-gradient-to-r from-[#209686] via-[#25ab99] to-[#2cd1bb] hover:opacity-95 shadow-xl shadow-teal-500/25 transition-all duration-200 cursor-pointer group"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 shadow-xl shadow-blue-600/25 transition-all duration-200 cursor-pointer group"
                 >
                   <span>Conversar sobre um projeto personalizado</span>
                   <Icon name="ArrowRight" size={18} className="transition-transform group-hover:translate-x-1" />
