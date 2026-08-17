@@ -105,7 +105,7 @@ function FigmaLiveCursor({
 }
 
 export function HeroSection({
-  primaryCtaText = 'Solicitar Diagnóstico Gratuito',
+  primaryCtaText = 'Quero criar meu site',
   projects = INITIAL_PROJECTS,
 }: HeroSectionProps) {
   const scrollToSection = (id: string) => {
@@ -146,9 +146,9 @@ export function HeroSection({
         <div className="flex flex-col items-center text-center space-y-6 sm:space-y-8">
           {/* HERO UPPER CONTENT CONTAINER (HEADLINE, SUBTITLE, CTA, SOCIAL PROOF & FIGMA CURSORS) */}
           <div className="relative w-full max-w-4xl mx-auto flex flex-col items-center text-center space-y-4 sm:space-y-6">
-            {/* FIGMA LIVE CURSOR 1: ROBERT (TOP-RIGHT OF HEADLINE) */}
+            {/* FIGMA LIVE CURSOR 1: DESIGN & UX (TOP-RIGHT OF HEADLINE) */}
             <FigmaLiveCursor
-              name="Robert"
+              name="Design & UX"
               color="#4E9B9B"
               positionClass="-top-4 sm:-top-2 right-[2%] sm:right-0 md:-right-6 lg:-right-10"
               pointerSide="top-right"
@@ -157,9 +157,9 @@ export function HeroSection({
               duration={5.2}
             />
 
-            {/* FIGMA LIVE CURSOR 2: ELENA (LEFT OF CTA AREA) */}
+            {/* FIGMA LIVE CURSOR 2: SEO & PERFORMANCE (LEFT OF CTA AREA) */}
             <FigmaLiveCursor
-              name="Elena (UI/UX)"
+              name="SEO & Performance"
               color="#9333EA"
               positionClass="top-[68%] sm:top-[70%] left-[0%] sm:-left-4 md:-left-12 lg:-left-18"
               pointerSide="top-left"
@@ -168,9 +168,9 @@ export function HeroSection({
               duration={6.2}
             />
 
-            {/* FIGMA LIVE CURSOR 3: LUCAS (RIGHT OF CTA / SOCIAL PROOF - LOCKED SAFELY ABOVE CAROUSEL) */}
+            {/* FIGMA LIVE CURSOR 3: DESENVOLVIMENTO (RIGHT OF CTA / SOCIAL PROOF) */}
             <FigmaLiveCursor
-              name="Lucas"
+              name="Desenvolvimento"
               color="#0099FF"
               positionClass="bottom-0 sm:bottom-1 right-[2%] sm:right-0 md:-right-8 lg:-right-12"
               pointerSide="top-right"
@@ -231,7 +231,7 @@ export function HeroSection({
                 transition={{ duration: 0.6, delay: 0.2 }}
                 className="text-base sm:text-lg md:text-xl text-slate-600 font-normal leading-relaxed max-w-3xl mx-auto"
               >
-                Criamos sites profissionais com SEO estratégico para fortalecer sua presença digital, aumentar sua visibilidade e gerar novas oportunidades para o seu negócio.
+                Criamos sites profissionais com SEO estratégico para aumentar sua visibilidade, fortalecer sua autoridade e gerar novas oportunidades.
               </motion.p>
             </div>
 

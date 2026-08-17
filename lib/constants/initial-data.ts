@@ -13,7 +13,7 @@ export const INITIAL_SITE_SETTINGS: SiteSettings = {
     instagram: 'https://instagram.com/anxis.digital',
     linkedin: 'https://linkedin.com/company/anxis-digital',
   },
-  primary_cta_label: 'Solicitar uma proposta',
+  primary_cta_label: 'Quero criar meu site',
   primary_cta_url: '#contato',
 }
 
