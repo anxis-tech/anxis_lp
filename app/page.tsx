@@ -156,14 +156,14 @@ export default async function HomePage() {
         {/* 4. SEÇÃO DE IMPACTO DE PERFORMANCE & BARRAS COMPARATIVAS */}
         <PerformanceImpactSection />
 
-        {/* 5. DEMONSTRAÇÃO DE PROJETOS REAIS & PORTFÓLIO CONSOLIDADO */}
+        {/* 5. NOSSOS SERVIÇOS (5 PILARES: DESIGN UI/UX, DESENVOLVIMENTO, LOJAS VIRTUAIS, PERFORMANCE & SEO, BRANDING) */}
+        <PillarsGridSection />
+
+        {/* 6. DEMONSTRAÇÃO DE PROJETOS REAIS & PORTFÓLIO CONSOLIDADO */}
         <ProjectPreviewBar projects={projects} />
 
-        {/* 6. METODOLOGIA E PROCESSO (POSICIONADO NO LUGAR DA SEÇÃO DE SOBRE) */}
+        {/* 7. METODOLOGIA E PROCESSO */}
         <ProcessSection />
-
-        {/* 7. DOBRA OFICIAL DE NOSSOS SERVIÇOS (5 CARDS: DESIGN UI/UX, DESENVOLVIMENTO, LOJAS VIRTUAIS, PERFORMANCE & SEO, BRANDING & DESIGN) */}
-        <PillarsGridSection />
 
         {/* SOLUÇÃO PERSONALIZADA EM CÓDIGO */}
         <CustomSolution />

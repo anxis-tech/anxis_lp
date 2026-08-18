@@ -56,10 +56,7 @@ export function ProjectPreviewBar({
   }
 
   return (
-    <section id="projetos" className="relative bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-[#FFFFFF] text-[#0F172A] py-24 sm:py-32 border-b border-slate-200/80 overflow-hidden">
-      {/* Background Subtle Accent Top Line */}
-      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#086ec5]/40 to-transparent opacity-80" />
-      
+    <section id="projetos" className="relative bg-gradient-to-b from-[#FFFFFF] via-[#F1F5F9] to-[#FFFFFF] text-[#0F172A] py-24 sm:py-32 border-b border-slate-200/80 overflow-hidden">
       {/* Background Accent Blue Glows */}
       <div className="absolute -top-40 left-1/3 w-[800px] h-[350px] bg-[#086ec5]/5 blur-[150px] pointer-events-none" />
       <div className="absolute bottom-0 right-10 w-[500px] h-[500px] bg-[#086ec5]/4 rounded-full blur-[170px] pointer-events-none" />

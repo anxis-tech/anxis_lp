@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { WhatsAppIcon } from '@/components/ui/whatsapp-icon'
 import { formatWhatsAppLink } from '@/lib/utils'
 import { trackEvent } from '@/lib/analytics/events'
@@ -10,19 +9,6 @@ interface WhatsAppButtonProps {
 }
 
 export function WhatsAppButton({ whatsapp = '5511999999999' }: WhatsAppButtonProps) {
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsVisible(window.scrollY > 300)
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  if (!isVisible) return null
-
   const whatsappUrl = formatWhatsAppLink(
     whatsapp,
     'Olá! Gostaria de tirar dúvidas sobre o desenvolvimento do meu site/loja virtual.'
@@ -44,3 +30,4 @@ export function WhatsAppButton({ whatsapp = '5511999999999' }: WhatsAppButtonPro
     </a>
   )
 }
+
