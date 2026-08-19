@@ -6,10 +6,9 @@ import { PerformanceImpactSection } from '@/components/sections/performance-impa
 import { ProjectPreviewBar } from '@/components/sections/project-preview-bar'
 import { ProcessSection } from '@/components/sections/process-section'
 import { PillarsGridSection } from '@/components/sections/pillars-grid-section'
-import { CustomSolution } from '@/components/sections/custom-solution'
 import { TestimonialsSection } from '@/components/sections/testimonials-section'
 import { CTASection } from '@/components/sections/cta-section'
-import { ContactForm } from '@/components/sections/contact-form'
+import { FAQSection } from '@/components/sections/faq-section'
 import { Footer } from '@/components/layout/footer'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
 import { AnalyticsScript } from '@/components/layout/analytics-script'
@@ -165,19 +164,16 @@ export default async function HomePage() {
         {/* 7. METODOLOGIA E PROCESSO */}
         <ProcessSection />
 
-        {/* SOLUÇÃO PERSONALIZADA EM CÓDIGO */}
-        <CustomSolution />
-
-        {/* DEPOIMENTOS (REPOSICIONADO PARA FICAR ACIMA DA DOBRA VAMOS TRABALHAR JUNTOS) */}
+        {/* 8. DEPOIMENTOS */}
         <TestimonialsSection testimonials={testimonials} />
 
-        {/* 8. CTA DE CONTATO - VAMOS TRABALHAR JUNTOS */}
+        {/* 9. CTA DE CONTATO - VAMOS TRABALHAR JUNTOS */}
         <CTASection whatsapp={settings.whatsapp} />
 
-        {/* 9. UNIFIED FAQ & FORMULÁRIO DE CONTATO (50/50 SPLIT) */}
-        <ContactForm faqs={faqs} whatsapp={settings.whatsapp} />
+        {/* 10. FAQ PERGUNTAS FREQUENTES */}
+        <FAQSection faqs={faqs} />
 
-        {/* 10. FOOTER OBSIDIAN DARK */}
+        {/* 11. FOOTER OBSIDIAN DARK */}
         <Footer
           companyName={settings.company_name}
           email={settings.email}

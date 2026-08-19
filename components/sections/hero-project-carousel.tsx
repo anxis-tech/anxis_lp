@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { motion } from 'motion/react'
 import { Project } from '@/types/database.types'
 import { INITIAL_PROJECTS } from '@/lib/constants/initial-data'
-import { ExternalLink, Globe } from 'lucide-react'
+import { Globe } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { trackEvent } from '@/lib/analytics/events'
 
@@ -215,36 +215,6 @@ export function HeroProjectCarousel({ projects = INITIAL_PROJECTS }: HeroProject
                     {/* SUBTLE DARKENING OVERLAY ON INACTIVE CARDS */}
                     {!isActive && (
                       <div className="absolute inset-0 bg-slate-950/20 transition-opacity duration-300 pointer-events-none" />
-                    )}
-
-                    {/* FLOATING FROSTED GLASS BADGE (ONLY ON ACTIVE CARD) */}
-                    {isActive && (
-                      <div className="absolute inset-x-2.5 bottom-2.5 sm:inset-x-3 sm:bottom-3 z-20 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="bg-slate-950/85 backdrop-blur-md border border-white/15 rounded-[16px] p-2 sm:px-3.5 sm:py-2.5 flex items-center justify-between gap-3 shadow-md shadow-black/30">
-                          <div className="space-y-0.5 max-w-[68%] min-w-0">
-                            <span className="text-[9px] sm:text-[10px] font-mono font-bold tracking-wider text-[#38bdf8] uppercase bg-[#086ec5]/20 px-2 py-0.5 rounded-[8px] border border-[#086ec5]/40 inline-block">
-                              {project.category}
-                            </span>
-                            <h4 className="text-xs sm:text-sm font-bold text-white truncate font-heading drop-shadow-xs">
-                              {project.title}
-                            </h4>
-                          </div>
-
-                          <a
-                            href={project.project_url || '#contato'}
-                            target={project.open_new_tab ? '_blank' : '_self'}
-                            rel="noopener noreferrer"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              trackEvent('click_project_hero', { title: project.title })
-                            }}
-                            className="px-3.5 py-1.5 rounded-[12px] bg-white text-[#0F172A] hover:bg-slate-100 active:scale-95 text-[11px] font-bold shadow transition-all inline-flex items-center gap-1.5 shrink-0 cursor-pointer"
-                          >
-                            <span>Acessar</span>
-                            <ExternalLink className="w-3 h-3 text-[#0F172A]" />
-                          </a>
-                        </div>
-                      </div>
                     )}
                   </div>
                 </div>

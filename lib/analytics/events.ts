@@ -11,6 +11,7 @@ export type AnalyticsEventName =
   | 'form_submit_error'
   | 'click_phone'
   | 'click_email'
+  | 'click_social'
   | 'view_projects_section'
   | 'view_final_cta'
 

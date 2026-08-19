@@ -1,12 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Project } from '@/types/database.types'
 import { INITIAL_PROJECTS } from '@/lib/constants/initial-data'
 import { Icon } from '@/components/ui/hugeicons'
 import { cn } from '@/lib/utils'
 import { trackEvent } from '@/lib/analytics/events'
+
+gsap.registerPlugin(ScrollTrigger)
 
 interface ProjectPreviewBarProps {
   projects?: Project[]
@@ -14,248 +18,318 @@ interface ProjectPreviewBarProps {
   description?: string
 }
 
+interface ProjectTheme {
+  bg: string
+  dot: string
+  tagBg: string
+}
+
+const PROJECT_THEMES: Record<string, ProjectTheme> = {
+  p1: { bg: 'from-[#D4E89E] via-[#BFE07A] to-[#99BB4E]', dot: '#8FA836', tagBg: 'bg-[#99BB4E]/12 text-[#4D6318] border-[#99BB4E]/30' },
+  p2: { bg: 'from-[#FDBA74] via-[#FB923C] to-[#EA580C]', dot: '#EA580C', tagBg: 'bg-[#EA580C]/12 text-[#C2410C] border-[#EA580C]/30' },
+  p3: { bg: 'from-[#9B8CFA] via-[#6E54FA] to-[#4527A0]', dot: '#6E54FA', tagBg: 'bg-[#6E54FA]/12 text-[#371B8A] border-[#6E54FA]/30' },
+  p4: { bg: 'from-[#67E8F9] via-[#0EA5E9] to-[#0284C7]', dot: '#0284C7', tagBg: 'bg-[#0284C7]/12 text-[#0369A1] border-[#0284C7]/30' },
+  p5: { bg: 'from-[#FDC5CE] via-[#F472B6] to-[#EE5D7A]', dot: '#EE5D7A', tagBg: 'bg-[#EE5D7A]/12 text-[#BE123C] border-[#EE5D7A]/30' },
+}
+
+const FALLBACK_THEMES: ProjectTheme[] = [
+  { bg: 'from-[#D4E89E] via-[#BFE07A] to-[#99BB4E]', dot: '#8FA836', tagBg: 'bg-[#99BB4E]/12 text-[#4D6318] border-[#99BB4E]/30' },
+  { bg: 'from-[#9B8CFA] via-[#6E54FA] to-[#4527A0]', dot: '#6E54FA', tagBg: 'bg-[#6E54FA]/12 text-[#371B8A] border-[#6E54FA]/30' },
+  { bg: 'from-[#FDBA74] via-[#FB923C] to-[#EA580C]', dot: '#EA580C', tagBg: 'bg-[#EA580C]/12 text-[#C2410C] border-[#EA580C]/30' },
+  { bg: 'from-[#FDC5CE] via-[#F472B6] to-[#EE5D7A]', dot: '#EE5D7A', tagBg: 'bg-[#EE5D7A]/12 text-[#BE123C] border-[#EE5D7A]/30' },
+  { bg: 'from-[#67E8F9] via-[#0EA5E9] to-[#0284C7]', dot: '#0284C7', tagBg: 'bg-[#0284C7]/12 text-[#0369A1] border-[#0284C7]/30' },
+]
+
+const CATEGORY_LABELS: Record<string, string> = {
+  'institucional': 'Site Institucional',
+  'e-commerce': 'E-commerce',
+  'landing-page': 'Landing Page',
+  'personalizado': 'Sob Medida',
+}
+
 export function ProjectPreviewBar({
   projects = INITIAL_PROJECTS,
-  title = 'Experiência digital construída para alta conversão',
-  description = 'Passe o cursor ou toque nos projetos para visualizar a navegação completa. Filtre por categoria para explorar trabalhos em diferentes segmentos.',
+  title = 'Alguns dos nossos trabalhos',
+  description = 'Conheça projetos desenvolvidos para diferentes marcas, negócios e profissionais.',
 }: ProjectPreviewBarProps) {
-  const [activeCategory, setActiveCategory] = useState<string>('todos')
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [scrollProgress, setScrollProgress] = useState(0)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [tappedId, setTappedId] = useState<string | null>(null)
-  const [isReducedMotion, setIsReducedMotion] = useState<boolean>(false)
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setIsReducedMotion(mediaQuery.matches)
-  }, [])
-
-  const categories = [
-    { key: 'todos', label: 'Todos os Cases' },
-    { key: 'institucional', label: 'Sites Institucionais' },
-    { key: 'e-commerce', label: 'Lojas Virtuais' },
-    { key: 'landing-page', label: 'Landing Pages' },
-    { key: 'personalizado', label: 'Desenvolvimento Sob Medida' },
-  ]
 
   const visibleProjects = projects
     .filter((p) => p.is_visible)
     .sort((a, b) => a.display_order - b.display_order)
 
-  const filteredProjects =
-    activeCategory === 'todos'
-      ? visibleProjects
-      : visibleProjects.filter((p) => p.category === activeCategory)
+  const total = visibleProjects.length
 
-  const getCategoryCount = (key: string) => {
-    if (key === 'todos') return visibleProjects.length
-    return visibleProjects.filter((p) => p.category === key).length
-  }
+  useEffect(() => {
+    if (!sectionRef.current || !trackRef.current || !containerRef.current || total <= 1) return
+
+    const getScrollDistance = () => {
+      if (!trackRef.current || !containerRef.current) return 0
+      const trackWidth = trackRef.current.scrollWidth
+      const containerWidth = containerRef.current.offsetWidth
+      return Math.max(trackWidth - containerWidth + 60, 0)
+    }
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: 'top top',
+        end: () => `+=${getScrollDistance() * 1.2}`,
+        pin: true,
+        scrub: 0.6,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          setScrollProgress(self.progress)
+        },
+      },
+    })
+
+    tl.to(trackRef.current, {
+      x: () => -getScrollDistance(),
+      ease: 'none',
+    })
+
+    return () => {
+      tl.scrollTrigger?.kill()
+      tl.kill()
+      ScrollTrigger.getAll().forEach((st) => st.kill())
+    }
+  }, [total])
 
   const toggleTapPreview = (id: string) => {
     setTappedId((prev) => (prev === id ? null : id))
   }
 
   return (
-    <section id="projetos" className="relative bg-gradient-to-b from-[#FFFFFF] via-[#F1F5F9] to-[#FFFFFF] text-[#0F172A] py-24 sm:py-32 border-b border-slate-200/80 overflow-hidden">
-      {/* Background Accent Blue Glows */}
-      <div className="absolute -top-40 left-1/3 w-[800px] h-[350px] bg-[#086ec5]/5 blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-0 right-10 w-[500px] h-[500px] bg-[#086ec5]/4 rounded-full blur-[170px] pointer-events-none" />
+    <section
+      id="projetos"
+      ref={sectionRef}
+      className="relative bg-[#FFFFFF] text-[#0F172A] border-b border-slate-200/80"
+    >
+      {/* STICKY MARQUEE VIEWPORT CONTAINER */}
+      <div className="w-full h-screen flex flex-col justify-between pt-20 sm:pt-24 pb-8 sm:pb-10 overflow-hidden">
+        {/* Ambient light highlights */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[400px] bg-gradient-to-b from-[#086ec5]/6 via-transparent to-transparent blur-[130px] pointer-events-none z-0" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#00C968]/4 rounded-full blur-[160px] pointer-events-none z-0" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-16">
         {/* SECTION HEADER */}
-        <div className="text-center max-w-3xl mx-auto space-y-4">
-          <span className="text-xs font-mono uppercase tracking-[0.25em] px-4 py-1.5 rounded-[20px] bg-white border border-slate-200 shadow-sm inline-block font-extrabold text-[#086ec5]">
-            DEMONSTRAÇÃO DE PROJETOS REAIS
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#2f2f2f] tracking-tight font-heading">
+        <div className="relative z-10 text-center max-w-2xl mx-auto px-4 space-y-2.5 shrink-0 mb-4 sm:mb-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-slate-200 shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-[#086ec5] animate-pulse" />
+            <span className="text-[11px] font-mono font-extrabold uppercase tracking-[0.2em] text-[#086ec5]">
+              PROJETOS
+            </span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#1E293B] tracking-tight font-heading leading-tight">
             {title}
           </h2>
-          <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
+
+          <p className="text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
             {description}
           </p>
         </div>
 
-        {/* MAIN CONSOLIDATED LAYOUT: LEFT SIDEBAR FILTERS + RIGHT BROWSER PREVIEW GRID */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
-          {/* LEFT SIDEBAR CATEGORY FILTER PANEL (STICKY TO VIEWPORT) */}
-          <div className="lg:col-span-4 lg:sticky lg:top-28 self-start z-20 space-y-4">
-            <div className="bg-white rounded-[20px] p-6 border border-slate-200/90 shadow-xl shadow-slate-900/5 space-y-3">
-              <div className="text-xs font-mono uppercase tracking-widest text-slate-700 font-bold flex items-center gap-2 pb-3 border-b border-slate-100">
-                <Icon name="Filter" size={16} className="text-[#086ec5]" />
-                <span>Filtrar por Categoria</span>
-              </div>
+        {/* ===== HORIZONTAL MARQUEE TRACK (GENEROUS UN-SQUISHED CARDS WITH 20PX GAP) ===== */}
+        <div
+          ref={containerRef}
+          className="relative z-10 flex-grow w-full overflow-hidden my-auto flex items-center"
+        >
+          <div
+            ref={trackRef}
+            className="flex items-stretch will-change-transform px-6 sm:px-12 lg:px-16"
+            style={{ gap: '20px' }}
+          >
+            {visibleProjects.map((project, index) => {
+              const theme = PROJECT_THEMES[project.id] || FALLBACK_THEMES[index % FALLBACK_THEMES.length]
+              const isHovered = hoveredId === project.id
+              const isTapped = tappedId === project.id
+              const isScrolling = isHovered || isTapped
+              const projectDomain = project.project_url
+                ? project.project_url.replace(/^https?:\/\//, '').replace(/\/$/, '')
+                : 'anxis.com.br'
 
-              <div className="space-y-1.5 pt-1">
-                {categories.map((cat) => {
-                  const isActive = activeCategory === cat.key
-                  const count = getCategoryCount(cat.key)
-
-                  return (
-                    <button
-                      key={cat.key}
-                      type="button"
-                      onClick={() => setActiveCategory(cat.key)}
-                      className={cn(
-                        'w-full flex items-center justify-between px-4 py-2.5 rounded-[20px] text-xs font-extrabold transition-all duration-200 cursor-pointer',
-                        isActive
-                          ? 'bg-[#086ec5] text-white shadow-md shadow-blue-600/20'
-                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                      )}
-                    >
-                      <span>{cat.label}</span>
-                      <span
-                        className={cn(
-                          'px-2 py-0.5 rounded-[20px] text-[10px] font-mono font-bold',
-                          isActive ? 'bg-white/20 text-white' : 'bg-slate-200/70 text-slate-600'
-                        )}
-                      >
-                        {count}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* SIDEBAR HELPER CARD */}
-            <div className="bg-gradient-to-br from-[#F0F7FF] via-[#FFFFFF] to-[#EFF6FF] rounded-[20px] p-6 border border-blue-200/70 space-y-3 hidden lg:block shadow-md relative overflow-hidden">
-              <div className="flex items-center gap-2 text-[#086ec5] font-extrabold text-xs uppercase tracking-wider">
-                <Icon name="Sparkles" size={16} className="text-[#086ec5]" />
-                <span>Projetos Sob Medida</span>
-              </div>
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                Precisa de uma estrutura exclusiva para seu e-commerce ou site institucional?
-              </p>
-              <a
-                href="#contato"
-                className="inline-flex items-center text-xs font-extrabold text-[#086ec5] hover:text-blue-700 transition-colors pt-1"
-              >
-                <span>Solicitar proposta técnica</span>
-                <Icon name="ArrowRight" size={14} className="ml-1 text-[#086ec5]" />
-              </a>
-            </div>
-          </div>
-
-          {/* RIGHT SIDE: INTERACTIVE BROWSER PREVIEW GRID */}
-          <div className="lg:col-span-8">
-            {filteredProjects.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-[20px] border border-dashed border-slate-200">
-                <Icon name="Filter" size={32} className="mx-auto text-slate-400 mb-3" />
-                <p className="text-base font-semibold text-slate-600">Nenhum projeto encontrado nesta categoria.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {filteredProjects.map((project) => {
-                  const isScrolling =
-                    !isReducedMotion &&
-                    (hoveredId === project.id || tappedId === project.id)
-
-                  return (
+              return (
+                <div
+                  key={project.id}
+                  className="group relative flex flex-col justify-between shrink-0 select-none w-[340px] sm:w-[460px] md:w-[520px] lg:w-[560px] h-[380px] sm:h-[440px] md:h-[480px]"
+                  onMouseEnter={() => setHoveredId(project.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                >
+                  {/* UNIFIED COLORED CANVAS WITH OPEN-BOTTOM MOCKUP (NO OUTER WHITE BORDER) */}
+                  <div
+                    className={cn(
+                      'relative w-full flex-grow rounded-[24px] sm:rounded-[28px] overflow-hidden flex flex-col items-center justify-start pt-4 sm:pt-6 px-4 sm:px-8 select-none transition-all duration-500 bg-gradient-to-br shadow-md hover:shadow-2xl border border-black/5',
+                      theme.bg
+                    )}
+                  >
+                    {/* Ambient Glow Aura */}
                     <div
-                      key={project.id}
-                      className="group relative bg-white rounded-[20px] border border-slate-200/90 overflow-hidden shadow-xl hover:shadow-2xl hover:border-slate-300 transition-all duration-300 flex flex-col justify-between"
-                      onMouseEnter={() => setHoveredId(project.id)}
-                      onMouseLeave={() => setHoveredId(null)}
+                      className="absolute inset-0 opacity-40 mix-blend-overlay pointer-events-none"
+                      style={{ background: 'radial-gradient(circle at 50% 30%, #ffffff 0%, transparent 70%)' }}
+                    />
+
+                    {/* OPEN-BOTTOM BROWSER MOCKUP (CLICKABLE DIRECT LINK) */}
+                    <a
+                      href={project.project_url || '#contato'}
+                      target={project.open_new_tab ? '_blank' : '_self'}
+                      rel="noopener noreferrer"
+                      aria-label={`Acessar projeto ${project.title}`}
+                      onClick={() =>
+                        trackEvent('click_project', {
+                          title: project.title,
+                          location: 'marquee_mockup',
+                        })
+                      }
+                      className="relative w-full max-w-[96%] sm:max-w-[92%] flex-grow rounded-t-xl sm:rounded-t-2xl rounded-b-none overflow-hidden isolate bg-slate-900/90 border-t border-x border-white/50 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.45)] transition-transform duration-500 group-hover:scale-[1.015] group-hover:-translate-y-1 flex flex-col cursor-pointer block"
                     >
-                      {/* BROWSER TOPBAR */}
-                      <div className="bg-slate-100 px-4 py-3 flex items-center justify-between border-b border-slate-200">
+                      {/* Browser top bar */}
+                      <div className="bg-slate-900/95 backdrop-blur-md px-3.5 py-2 flex items-center justify-between border-b border-white/10 shrink-0 rounded-t-[inherit]">
                         <div className="flex items-center gap-1.5">
-                          <div className="w-2.5 h-2.5 rounded-full bg-rose-400" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                          <span className="text-[10px] font-mono text-slate-500 ml-2 truncate max-w-[150px]">
-                            {project.project_url?.replace('https://', '') || 'anxis.com.br'}
-                          </span>
+                          <div className="w-2 h-2 rounded-full bg-rose-400/90" />
+                          <div className="w-2 h-2 rounded-full bg-amber-400/90" />
+                          <div className="w-2 h-2 rounded-full bg-emerald-400/90" />
                         </div>
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-slate-700 bg-white px-2 py-0.5 rounded-[20px] border border-slate-200 shadow-2xs">
-                          {project.category}
-                        </span>
+                        <div className="bg-white/10 px-2.5 py-0.5 rounded-full text-[9px] font-mono text-white/80 max-w-[150px] sm:max-w-[200px] truncate border border-white/10">
+                          {projectDomain}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        </div>
                       </div>
 
-                      {/* BROWSER SCREENSHOT VIEWPORT WITH AUTO-SCROLL */}
-                      <div
-                        className="relative w-full aspect-[16/10] overflow-hidden bg-slate-900 cursor-pointer group/img"
-                        onClick={() => toggleTapPreview(project.id)}
-                      >
+                      {/* Screenshot viewport */}
+                      <div className="relative w-full flex-grow overflow-hidden bg-slate-950">
                         <div
                           className={cn(
-                            'relative w-full min-h-full transition-transform duration-[6500ms] ease-in-out',
-                            isScrolling ? '-translate-y-[calc(100%-100%/1.6)]' : 'translate-y-0'
+                            'w-full transition-transform duration-[6500ms] ease-in-out will-change-transform',
+                            isScrolling ? '-translate-y-[calc(100%-100%/1.35)]' : 'translate-y-0'
                           )}
                         >
                           <Image
                             src={project.desktop_image_url}
                             alt={project.image_alt || project.title}
-                            width={1000}
-                            height={2000}
-                            className="w-full h-auto object-top"
+                            width={1200}
+                            height={2400}
+                            className="w-full h-auto object-top block"
                             unoptimized
+                            priority={index < 2}
                           />
                         </div>
 
-                        {/* TOUCH INDICATOR FOR MOBILE */}
-                        <div className="md:hidden absolute bottom-3 right-3 bg-black/80 backdrop-blur-md text-white text-[11px] px-3 py-1.5 rounded-[20px] flex items-center gap-2 shadow-lg pointer-events-none">
-                          <Icon name="Touchpad" size={14} className="text-emerald-400" />
-                          <span>{tappedId === project.id ? 'Pausar prévia' : 'Toque p/ rolar'}</span>
-                        </div>
-
-                        {/* OVERLAY HOVER BADGE */}
-                        <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                          <span className="bg-gradient-to-r from-[#FF6B00] via-[#00C968] to-[#0099FF] text-white text-xs font-bold px-4 py-2 rounded-[20px] shadow-lg flex items-center gap-2">
-                            <Icon name="Globe" size={16} />
-                            <span>Ver Projeto Completo</span>
+                        {/* Hover overlay (translucent frosted glass button with perfectly aligned glowing arrow) */}
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                          <span className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-black/50 backdrop-blur-xl text-white text-xs font-bold shadow-2xl border border-white/30 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                            <span className="leading-none tracking-wide">Ver Projeto Online</span>
+                            <svg
+                              className="w-3.5 h-3.5 text-[#38BDF8] shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <line x1="6" y1="18" x2="18" y2="6" />
+                              <polyline points="9 6 18 6 18 15" />
+                            </svg>
                           </span>
                         </div>
+
+                        {/* Mobile tap helper */}
+                        <div className="md:hidden absolute bottom-2.5 right-2.5 bg-black/75 backdrop-blur-md text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1.5 shadow-md pointer-events-none">
+                          <Icon name="Touchpad" size={11} className="text-[#00C968]" />
+                          <span>{isTapped ? 'Pausar' : 'Toque p/ rolar'}</span>
+                        </div>
                       </div>
+                    </a>
+                  </div>
 
-                      {/* DETAILS & META FOOTER */}
-                      <div className="p-6 flex flex-col justify-between flex-grow space-y-4 bg-white">
-                        <div className="space-y-2.5">
-                          <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
-                            <span className="text-slate-600 uppercase tracking-wider font-bold">{project.client}</span>
-                            <span>{project.year}</span>
-                          </div>
-
-                          <h3 className="text-xl font-bold text-[#2f2f2f] group-hover:text-slate-800 transition-colors font-heading">
-                            {project.title}
-                          </h3>
-
-                          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed line-clamp-2">
-                            {project.short_description}
-                          </p>
-
-                          {/* TECHNOLOGIES BADGES */}
-                          <div className="flex flex-wrap gap-1.5 pt-1">
-                            {project.technologies.map((tech, tIdx) => (
-                              <span
-                                key={tIdx}
-                                className="bg-slate-50 border border-slate-200 text-slate-700 text-[10px] font-bold px-2.5 py-0.5 rounded-[20px]"
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* CTA LINK */}
-                        <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                          <a
-                            href={project.project_url || '#contato'}
-                            target={project.open_new_tab ? '_blank' : '_self'}
-                            rel="noopener noreferrer"
-                            onClick={() => trackEvent('click_project', { title: project.title, location: 'preview_bar' })}
-                            className="inline-flex items-center text-xs sm:text-sm font-extrabold text-[#2f2f2f] hover:text-orange-600 transition-colors"
-                          >
-                            <span>{project.button_label || 'Ver Case Completo'}</span>
-                            <Icon name="ExternalLink" size={14} className="ml-1.5 text-emerald-600" />
-                          </a>
-                        </div>
+                  {/* CARD META DIRECTLY UNDER CANVAS (NO OUTER WHITE BORDER) */}
+                  <div className="mt-3.5 sm:mt-4 px-1 flex items-center justify-between gap-3 shrink-0">
+                    {/* Title + 3 dashes below */}
+                    <div className="space-y-1.5">
+                      <h3 className="text-base sm:text-lg font-black text-[#1E293B] group-hover:text-[#086ec5] transition-colors leading-tight font-heading">
+                        {project.title.split(' - ')[0] || project.title}
+                      </h3>
+                      <div className="flex items-center gap-1" aria-hidden="true">
+                        <span
+                          className="w-3.5 h-1.5 rounded-full border transition-all duration-300"
+                          style={{
+                            borderColor: theme.dot,
+                            backgroundColor: isHovered ? theme.dot : 'transparent',
+                          }}
+                        />
+                        <span
+                          className="w-3.5 h-1.5 rounded-full border transition-all duration-300 opacity-80"
+                          style={{
+                            borderColor: theme.dot,
+                            backgroundColor: isHovered ? theme.dot : 'transparent',
+                          }}
+                        />
+                        <span
+                          className="w-3.5 h-1.5 rounded-full border transition-all duration-300 opacity-60"
+                          style={{
+                            borderColor: theme.dot,
+                            backgroundColor: isHovered ? theme.dot : 'transparent',
+                          }}
+                        />
                       </div>
                     </div>
-                  )
-                })}
-              </div>
-            )}
+
+                    {/* Category badge + external link */}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={cn('text-[11px] font-bold px-3 py-1 rounded-full border transition-colors', theme.tagBg)}>
+                        {CATEGORY_LABELS[project.category] || project.category}
+                      </span>
+                      <a
+                        href={project.project_url || '#contato'}
+                        target={project.open_new_tab ? '_blank' : '_self'}
+                        rel="noopener noreferrer"
+                        aria-label={`Ver projeto ${project.title}`}
+                        onClick={() => trackEvent('click_project', { title: project.title, location: 'marquee_portfolio' })}
+                        className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-700 hover:bg-[#086ec5] hover:text-white transition-all duration-300 hover:scale-110 shadow-xs ml-1"
+                      >
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M7 17L17 7" />
+                          <path d="M7 7h10v10" />
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* ===== CONTINUOUS PROGRESS TRAIL ===== */}
+        <div className="relative z-10 flex flex-col items-center justify-center gap-2 shrink-0 pt-4 pb-1">
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] font-mono font-bold text-slate-400">
+              01
+            </span>
+
+            {/* Progress Track */}
+            <div className="w-48 sm:w-64 h-1.5 rounded-full bg-slate-100 border border-slate-200/80 overflow-hidden relative">
+              <div
+                className="h-full rounded-full transition-all duration-75 ease-out"
+                style={{
+                  width: `${Math.min(Math.max(scrollProgress * 100, 6), 100)}%`,
+                  background: 'linear-gradient(90deg, #00ABB8 0%, #086ec5 50%, #00C968 100%)',
+                  boxShadow: '0 0 10px rgba(8, 110, 197, 0.5)',
+                }}
+              />
+            </div>
+
+            <span className="text-[11px] font-mono font-bold text-slate-400">
+              0{total}
+            </span>
           </div>
         </div>
       </div>

@@ -24,7 +24,7 @@ export function CTASection({ whatsapp = '5511999999999' }: CTASectionProps) {
   }
 
   return (
-    <section className="py-16 sm:py-24 bg-[#FAFBFC] relative overflow-hidden px-4 sm:px-6 lg:px-8">
+    <section id="contato" className="py-16 sm:py-24 bg-[#FAFBFC] relative overflow-hidden px-4 sm:px-6 lg:px-8">
       {/* BOXED OUTER WARM CARD CONTAINER */}
       <div className="max-w-7xl mx-auto bg-gradient-to-br from-[#FFF7ED]/80 via-[#FFFFFF] to-[#EFF6FF]/90 rounded-[20px] p-8 sm:p-12 lg:p-16 border border-orange-200/60 shadow-2xl shadow-slate-900/5 relative overflow-hidden text-[#2f2f2f] min-h-[500px] flex flex-col justify-between">
         {/* TECHNICAL BLUEPRINT GRID OVERLAY & BLUE AURORA GLOWS */}
@@ -88,14 +88,16 @@ export function CTASection({ whatsapp = '5511999999999' }: CTASectionProps) {
 
           {/* BOTTOM RIGHT: ACTION BUTTONS ROW */}
           <div className="lg:col-span-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-start lg:justify-end gap-4">
-            <button
-              type="button"
-              onClick={scrollToContact}
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent('click_primary_cta', { location: 'final_cta' })}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-[20px] text-base font-extrabold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 shadow-xl shadow-blue-600/25 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
             >
               <span>Solicitar uma Proposta</span>
               <Icon name="ArrowRight" size={18} className="transition-transform group-hover:translate-x-1" />
-            </button>
+            </a>
 
             <a
               href={whatsappUrl}
