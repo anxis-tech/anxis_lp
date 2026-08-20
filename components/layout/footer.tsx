@@ -126,7 +126,7 @@ export function Footer({
 
           {/* COL 2: QUICK NAVIGATION */}
           <div className="lg:col-span-2 space-y-4">
-            <h4 className="text-xs font-mono font-black uppercase tracking-[0.2em] text-[#00ABB8]">
+            <h4 className="text-xs font-heading font-black uppercase tracking-[0.2em] text-[#00ABB8]">
               Navegação
             </h4>
             <ul className="space-y-2.5 text-sm text-slate-300 font-medium">
@@ -151,11 +151,6 @@ export function Footer({
                 </a>
               </li>
               <li>
-                <a href="#contato" className="hover:text-white hover:translate-x-1 inline-block transition-all">
-                  Fale Conosco
-                </a>
-              </li>
-              <li>
                 <a href="#faq" className="hover:text-white hover:translate-x-1 inline-block transition-all">
                   Dúvidas Frequentes
                 </a>
@@ -165,7 +160,7 @@ export function Footer({
 
           {/* COL 3: SPECIALIZED SOLUTIONS */}
           <div className="lg:col-span-3 space-y-4">
-            <h4 className="text-xs font-mono font-black uppercase tracking-[0.2em] text-[#00ABB8]">
+            <h4 className="text-xs font-heading font-black uppercase tracking-[0.2em] text-[#00ABB8]">
               Especialidades
             </h4>
             <ul className="space-y-2.5 text-sm text-slate-400 font-normal">
@@ -194,7 +189,7 @@ export function Footer({
 
           {/* COL 4: DIRECT CONTACT & INSTANT CTA */}
           <div className="lg:col-span-3 space-y-4">
-            <h4 className="text-xs font-mono font-black uppercase tracking-[0.2em] text-[#00ABB8]">
+            <h4 className="text-xs font-heading font-black uppercase tracking-[0.2em] text-[#00ABB8]">
               Atendimento Direto
             </h4>
 
@@ -213,7 +208,7 @@ export function Footer({
                   </div>
                   <div>
                     <div className="text-xs font-bold text-white font-heading">Falar no WhatsApp</div>
-                    <div className="text-[11px] text-emerald-400 font-mono">Resposta em poucos minutos</div>
+                    <div className="text-[11px] text-emerald-400 font-sans font-medium">Resposta em poucos minutos</div>
                   </div>
                 </div>
                 <Icon name="ArrowUpRight" size={14} className="text-slate-400 group-hover:text-white transition-colors" />

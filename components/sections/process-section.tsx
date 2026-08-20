@@ -168,12 +168,12 @@ export function ProcessSection() {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-[#00ABB8]/30 shadow-lg shadow-[#00ABB8]/5 backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-[#00ABB8] animate-pulse" />
-            <span className="text-xs font-mono font-extrabold uppercase tracking-[0.2em] text-[#00ABB8]">
+            <span className="text-xs font-heading font-extrabold uppercase tracking-[0.2em] text-[#00ABB8]">
               METODOLOGIA & PROCESSO
             </span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight font-heading leading-[1.15]">
+          <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-white tracking-tight font-heading leading-[1.15]">
             Entenda o{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ABB8] via-[#00C968] to-[#086ec5]">
               processo de desenvolvimento
@@ -181,7 +181,7 @@ export function ProcessSection() {
             do seu projeto
           </h2>
 
-          <p className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-slate-300 font-normal leading-relaxed font-sans max-w-2xl mx-auto">
             Um processo simples, transparente e estruturado, pensado para manter tudo claro, eficiente e tranquilo do
             início ao fim.
           </p>
@@ -274,7 +274,7 @@ export function ProcessSection() {
                       <div className="flex items-center gap-2">
                         <span
                           className={cn(
-                            'text-xs font-mono font-black px-3 py-1 rounded-full border transition-colors',
+                            'text-xs font-heading font-black px-3 py-1 rounded-full border transition-colors',
                             isActive
                               ? 'text-[#00ABB8] bg-[#00ABB8]/15 border-[#00ABB8]/40 shadow-xs'
                               : isReached
@@ -286,7 +286,7 @@ export function ProcessSection() {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-xs font-mono text-slate-400 bg-slate-800/60 px-3 py-1 rounded-full border border-slate-700/60">
+                      <div className="flex items-center gap-1.5 text-xs font-sans font-medium text-slate-400 bg-slate-800/60 px-3 py-1 rounded-full border border-slate-700/60">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#00C968]" />
                         <span>Estimativa: {step.duration}</span>
                       </div>
@@ -311,7 +311,7 @@ export function ProcessSection() {
                         <h3 className="text-lg sm:text-xl font-black text-white font-heading">
                           {step.title}
                         </h3>
-                        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans font-normal">
                           {step.description}
                         </p>
                       </div>
@@ -319,7 +319,7 @@ export function ProcessSection() {
 
                     {/* DELIVERABLES PILLS */}
                     <div className="pt-1 space-y-1.5">
-                      <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                      <div className="text-[10px] font-heading font-bold uppercase tracking-wider text-slate-400">
                         O que entregamos nesta etapa:
                       </div>
                       <div className="flex flex-wrap gap-1.5">

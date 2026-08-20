@@ -121,16 +121,16 @@ export function ProjectPreviewBar({
         <div className="relative z-10 text-center max-w-2xl mx-auto px-4 space-y-2.5 shrink-0 mb-4 sm:mb-6">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-slate-200 shadow-xs">
             <span className="w-2 h-2 rounded-full bg-[#086ec5] animate-pulse" />
-            <span className="text-[11px] font-mono font-extrabold uppercase tracking-[0.2em] text-[#086ec5]">
+            <span className="text-[11px] font-heading font-extrabold uppercase tracking-[0.2em] text-[#086ec5]">
               PROJETOS
             </span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#1E293B] tracking-tight font-heading leading-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-[#1E293B] tracking-tight font-heading leading-[1.15]">
             {title}
           </h2>
 
-          <p className="text-sm sm:text-base text-slate-600 font-normal leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed font-sans">
             {description}
           </p>
         </div>
@@ -195,7 +195,7 @@ export function ProjectPreviewBar({
                           <div className="w-2 h-2 rounded-full bg-amber-400/90" />
                           <div className="w-2 h-2 rounded-full bg-emerald-400/90" />
                         </div>
-                        <div className="bg-white/10 px-2.5 py-0.5 rounded-full text-[9px] font-mono text-white/80 max-w-[150px] sm:max-w-[200px] truncate border border-white/10">
+                        <div className="bg-white/10 px-2.5 py-0.5 rounded-full text-[9px] font-sans font-medium text-white/80 max-w-[150px] sm:max-w-[200px] truncate border border-white/10">
                           {projectDomain}
                         </div>
                         <div className="flex items-center gap-1">
@@ -311,7 +311,7 @@ export function ProjectPreviewBar({
         {/* ===== CONTINUOUS PROGRESS TRAIL ===== */}
         <div className="relative z-10 flex flex-col items-center justify-center gap-2 shrink-0 pt-4 pb-1">
           <div className="flex items-center gap-3">
-            <span className="text-[11px] font-mono font-bold text-slate-400">
+            <span className="text-[11px] font-heading font-bold text-slate-400">
               01
             </span>
 
@@ -327,7 +327,7 @@ export function ProjectPreviewBar({
               />
             </div>
 
-            <span className="text-[11px] font-mono font-bold text-slate-400">
+            <span className="text-[11px] font-heading font-bold text-slate-400">
               0{total}
             </span>
           </div>

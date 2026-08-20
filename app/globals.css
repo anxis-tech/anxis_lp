@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-poppins), sans-serif;
+  --font-heading: var(--font-plus-jakarta), sans-serif;
+  --font-mono: var(--font-poppins), sans-serif;
+}
+
 @layer base {
   :root {
     --background: #FAFBFC;
@@ -59,8 +65,12 @@
     --ring: #086ec5;
   }
 
+  body {
+    font-family: var(--font-poppins), sans-serif;
+  }
+
   h1, h2, h3, h4, h5, h6, .font-heading {
-    font-family: var(--font-plus-jakarta), var(--font-inter), sans-serif;
+    font-family: var(--font-plus-jakarta), sans-serif;
   }
 }
 

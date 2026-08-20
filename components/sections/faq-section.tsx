@@ -50,13 +50,13 @@ export function FAQSection({
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* HEADER */}
         <div className="text-center space-y-4 mb-16">
-          <span className="text-xs font-extrabold uppercase tracking-widest text-[#00ABB8] bg-[#00ABB8]/10 px-4 py-1.5 rounded-[20px] border border-[#00ABB8]/20 inline-block">
-            DÚVIDAS FREQUENTES
+          <span className="text-xs font-heading font-extrabold uppercase tracking-widest text-[#00ABB8] bg-[#00ABB8]/10 px-4 py-1.5 rounded-[20px] border border-[#00ABB8]/20 inline-block">
+            FAQ
           </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#07090E] tracking-tight">
+          <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-[#07090E] tracking-tight font-heading leading-[1.15]">
             {title}
           </h2>
-          <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed font-sans">
             {description}
           </p>
         </div>

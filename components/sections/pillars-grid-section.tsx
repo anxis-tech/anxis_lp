@@ -79,188 +79,173 @@ export function PillarsGridSection() {
   }
 
   return (
-    <section id="servicos" className="w-full py-4 sm:py-6 px-[12px] sm:px-[15px] bg-[#FFFFFF]">
-      {/* FLOATING ROUNDED DARK CONTAINER */}
-      <div className="w-full bg-[#0B0F19] text-white py-12 sm:py-16 rounded-[28px] sm:rounded-[32px] relative overflow-hidden border border-slate-800/80">
-        {/* VIVID RAINBOW ACCENT TOP & BOTTOM BORDERS */}
-        <div
-          className="absolute top-0 inset-x-0 h-[2.5px] z-20"
-          style={{
-            background:
-              'linear-gradient(90deg, rgba(0,212,255,0) 0%, #00D4FF 15%, #00F5A0 50%, #FFA033 85%, rgba(255,160,51,0) 100%)',
-            boxShadow: '0 1px 12px rgba(0, 245, 160, 0.4)',
-          }}
-        />
-        <div
-          className="absolute bottom-0 inset-x-0 h-[2.5px] z-20"
-          style={{
-            background:
-              'linear-gradient(90deg, rgba(255,160,51,0) 0%, #FFA033 15%, #00F5A0 50%, #00D4FF 85%, rgba(0,212,255,0) 100%)',
-            boxShadow: '0 -1px 12px rgba(0, 212, 255, 0.4)',
-          }}
-        />
+    <section id="servicos" className="py-24 sm:py-32 bg-[#FFFFFF] text-[#0F172A] relative overflow-hidden select-none border-b border-slate-200/80">
+      {/* AMBIENT BACKGROUND GLOWS */}
+      <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[500px] bg-[#086ec5]/4 rounded-full blur-[180px] pointer-events-none" />
+      <div className="absolute top-1/3 right-10 w-[500px] h-[400px] bg-[#00C968]/4 rounded-full blur-[160px] pointer-events-none" />
 
-        {/* SOPHISTICATED DARK TECH BACKGROUND */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-          <div
-            className="absolute inset-0 pointer-events-none opacity-25 [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_85%)]"
-            style={{
-              backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.25) 1.25px, transparent 1.25px)',
-              backgroundSize: '24px 24px',
-            }}
-          />
-          <div className="absolute -top-24 left-1/4 -translate-x-1/2 w-[700px] h-[500px] bg-[#086ec5]/12 rounded-full blur-[170px]" />
-          <div className="absolute bottom-0 right-1/4 translate-x-1/2 w-[650px] h-[450px] bg-[#059669]/10 rounded-full blur-[160px]" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-10 sm:space-y-14">
+        {/* GIANT WATERMARK '02' IN THE BACKGROUND */}
+        <div
+          className="absolute -top-10 sm:-top-16 left-2 sm:left-6 text-[150px] sm:text-[220px] lg:text-[260px] font-black text-slate-100/80 font-heading select-none pointer-events-none leading-none z-0"
+          aria-hidden="true"
+        >
+          02
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6 sm:space-y-8">
-          {/* HEADER BAR */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-              <span className="text-xs sm:text-[13px] font-extrabold uppercase tracking-widest text-[#0099FF] bg-[#0099FF]/10 px-4 py-1.5 rounded-[20px] border border-[#0099FF]/30 shadow-xs">
+        {/* SPLIT HEADER: LEFT TITLE & EYEBROW VS RIGHT DESCRIPTION */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-end relative z-10 pt-4 sm:pt-6">
+          {/* LEFT COLUMN: EYEBROW & 42PX TITLE */}
+          <div className="lg:col-span-7 space-y-3 sm:space-y-4 text-left">
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-[13px] font-heading font-extrabold uppercase tracking-widest text-[#086ec5]">
                 NOSSOS SERVIÇOS
               </span>
-              <span className="hidden sm:inline text-slate-600 font-bold">|</span>
-              <span className="text-slate-200 font-sans text-sm sm:text-base font-semibold tracking-tight">
-                Passe o cursor sobre os cards para expandir os detalhes
-              </span>
+              <div className="h-[1.5px] w-8 bg-[#086ec5]/30 rounded-full" />
             </div>
 
-            <div className="flex items-center gap-2 text-xs sm:text-[13px] text-slate-300 font-sans font-semibold">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
-              <span>5 Especialidades Digitais</span>
-            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-[#1E293B] tracking-tight leading-[1.15] font-heading">
+              Especialidades para <br />
+              acelerar o seu negócio
+            </h2>
           </div>
 
-          {/* 5-CARDS ROW (EXACT 300PX HEIGHT WITH SMOOTH HOVER EXPANSION) */}
-          <div className="flex flex-col lg:flex-row items-stretch gap-3.5 sm:gap-4 w-full">
-            {pillars.map((pillar, idx) => {
-              const isExpanded = hoveredIdx === idx
+          {/* RIGHT COLUMN: DESCRIPTIVE TEXT */}
+          <div className="lg:col-span-5 text-left lg:text-left space-y-2">
+            <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed font-sans">
+              Desenvolvemos ecossistemas digitais de alta performance com design autoral, tecnologia moderna e foco em autoridade e conversão para a sua marca.
+            </p>
+          </div>
+        </div>
 
-              return (
-                <div
-                  key={idx}
-                  onMouseEnter={() => setHoveredIdx(idx)}
-                  onMouseLeave={() => setHoveredIdx(null)}
-                  onClick={() => setHoveredIdx(isExpanded ? null : idx)}
-                  className={cn(
-                    'group relative h-[300px] rounded-[22px] sm:rounded-[24px] overflow-hidden cursor-pointer border select-none transition-all duration-500 ease-out flex flex-col justify-between p-5',
-                    isExpanded
-                      ? cn(
-                          'lg:flex-[2.2] w-full shadow-2xl z-20',
-                          pillar.activeBorder,
-                          pillar.glowShadow
-                        )
-                      : 'lg:flex-[0.8] w-full border-white/10 hover:border-white/30 z-10'
-                  )}
-                >
-                  {/* BACKGROUND IMAGE */}
-                  <div className="absolute inset-0 z-0">
-                    <Image
-                      src={pillar.image}
-                      alt={pillar.alt}
-                      fill
-                      className={cn(
-                        'object-cover transition-all duration-700',
-                        isExpanded
-                          ? 'scale-110 brightness-85'
-                          : 'scale-100 brightness-60 group-hover:scale-105 group-hover:brightness-75'
-                      )}
-                      unoptimized
-                    />
-                    {/* DARK GRADIENT OVERLAY */}
-                    <div
-                      className={cn(
-                        'absolute inset-0 bg-gradient-to-b transition-all duration-500',
-                        isExpanded
-                          ? 'from-black/80 via-black/60 to-black/95'
-                          : 'from-black/85 via-black/55 to-black/95'
-                      )}
-                    />
-                  </div>
+        {/* 5-CARDS ROW: BALANCED SLATE GREY WITH VISIBLE IMAGES, FULL-COLOR ON HOVER */}
+        <div className="flex flex-col lg:flex-row items-stretch gap-3.5 sm:gap-4 w-full relative z-10">
+          {pillars.map((pillar, idx) => {
+            const isExpanded = hoveredIdx === idx
 
-                  {/* TOP ROW: NUMBER BADGE */}
-                  <div className="relative z-10 flex items-center justify-between">
-                    <span
-                      className={cn(
-                        'text-xs font-mono font-bold tracking-widest px-3 py-1 rounded-full border transition-all duration-300',
-                        isExpanded
-                          ? 'text-white bg-white/20 border-white/30 shadow-md'
-                          : 'text-white/80 bg-white/10 border-white/15'
-                      )}
-                    >
-                      {pillar.number}
-                    </span>
+            return (
+              <div
+                key={idx}
+                onMouseEnter={() => setHoveredIdx(idx)}
+                onMouseLeave={() => setHoveredIdx(null)}
+                onClick={() => setHoveredIdx(isExpanded ? null : idx)}
+                className={cn(
+                  'group relative h-[320px] rounded-[24px] sm:rounded-[28px] overflow-hidden cursor-pointer border select-none transition-all duration-500 ease-out flex flex-col justify-between p-6',
+                  isExpanded
+                    ? cn(
+                        'lg:flex-[2.4] w-full shadow-2xl z-20 bg-[#0F172A]',
+                        pillar.activeBorder,
+                        pillar.glowShadow
+                      )
+                    : 'lg:flex-[0.75] w-full bg-[#1E293B] border-slate-700/80 hover:border-slate-600 shadow-md hover:shadow-xl z-10'
+                )}
+              >
+                {/* BACKGROUND IMAGE: FULL VIVID COLOR */}
+                <div className="absolute inset-0 z-0">
+                  <Image
+                    src={pillar.image}
+                    alt={pillar.alt}
+                    fill
+                    className={cn(
+                      'object-cover transition-all duration-700',
+                      isExpanded
+                        ? 'scale-110 brightness-95 opacity-100'
+                        : 'scale-100 brightness-85 opacity-90 group-hover:scale-105 group-hover:brightness-95 group-hover:opacity-100'
+                    )}
+                    unoptimized
+                  />
+                  {/* BALANCED OVERLAY: PRESERVES VIVID COLOR AND TEXT READABILITY */}
+                  <div
+                    className={cn(
+                      'absolute inset-0 transition-all duration-500',
+                      isExpanded
+                        ? 'bg-gradient-to-b from-slate-950/70 via-slate-950/45 to-slate-950/95'
+                        : 'bg-gradient-to-b from-slate-950/60 via-slate-950/30 to-slate-950/85'
+                    )}
+                  />
+                </div>
 
-                    <span
-                      className={cn(
-                        'text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all duration-300',
-                        isExpanded
-                          ? 'opacity-100 bg-white/15 text-white border-white/25'
-                          : 'opacity-0'
-                      )}
-                    >
-                      Detalhes
-                    </span>
-                  </div>
+                {/* TOP ROW: NUMBER BADGE */}
+                <div className="relative z-10 flex items-center justify-between">
+                  <span
+                    className={cn(
+                      'text-xs font-heading font-bold tracking-widest px-3 py-1 rounded-full border transition-all duration-300',
+                      isExpanded
+                        ? 'text-white bg-white/20 border-white/30 shadow-md'
+                        : 'text-slate-200 bg-white/10 border-white/20'
+                    )}
+                  >
+                    {pillar.number}
+                  </span>
 
-                  {/* BOTTOM CONTENT CONTAINER */}
-                  <div className="relative z-10 space-y-2.5">
-                    {/* TITLE */}
-                    <h3
-                      className={cn(
-                        'font-black text-white tracking-tight font-heading leading-tight transition-all duration-300',
-                        isExpanded ? 'text-lg sm:text-xl' : 'text-base sm:text-lg lg:text-base'
-                      )}
-                    >
-                      {pillar.title}
-                    </h3>
+                  <span
+                    className={cn(
+                      'text-[10px] font-heading font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border transition-all duration-300',
+                      isExpanded
+                        ? 'opacity-100 bg-white/15 text-white border-white/25'
+                        : 'opacity-0'
+                    )}
+                  >
+                    Detalhes
+                  </span>
+                </div>
 
-                    {/* EXPANDABLE DETAILS: SUBTITLE, TAGS, AND CTA BUTTON */}
-                    <div
-                      className={cn(
-                        'space-y-2.5 transition-all duration-500 overflow-hidden',
-                        isExpanded
-                          ? 'max-h-[160px] opacity-100 pt-0.5'
-                          : 'max-h-0 opacity-0 pointer-events-none'
-                      )}
-                    >
-                      {/* SUBTITLE */}
-                      <p className="text-[11px] sm:text-xs text-slate-200 leading-snug line-clamp-2 font-normal">
-                        {pillar.subtitle}
-                      </p>
+                {/* BOTTOM CONTENT CONTAINER */}
+                <div className="relative z-10 space-y-2.5">
+                  {/* TITLE */}
+                  <h3
+                    className={cn(
+                      'font-black text-white tracking-tight font-heading leading-tight transition-all duration-300',
+                      isExpanded ? 'text-lg sm:text-xl' : 'text-base sm:text-lg lg:text-base'
+                    )}
+                  >
+                    {pillar.title}
+                  </h3>
 
-                      {/* TAGS & CTA BUTTON ROW */}
-                      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                        <div className="flex flex-wrap gap-1">
-                          {pillar.tags.slice(0, 2).map((tag, tIdx) => (
-                            <span
-                              key={tIdx}
-                              className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
+                  {/* EXPANDABLE DETAILS: SUBTITLE, TAGS, AND CTA BUTTON */}
+                  <div
+                    className={cn(
+                      'space-y-2.5 transition-all duration-500 overflow-hidden',
+                      isExpanded
+                        ? 'max-h-[160px] opacity-100 pt-0.5'
+                        : 'max-h-0 opacity-0 pointer-events-none'
+                    )}
+                  >
+                    {/* SUBTITLE */}
+                    <p className="text-[11px] sm:text-xs text-slate-200 leading-snug line-clamp-2 font-normal font-sans">
+                      {pillar.subtitle}
+                    </p>
 
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            scrollToContact(pillar.title)
-                          }}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-black text-slate-900 bg-white hover:bg-slate-100 shadow-md transition-all duration-200 cursor-pointer shrink-0"
-                        >
-                          <span>Solicitar</span>
-                          <Icon name="ArrowRight" size={11} className="text-slate-900" />
-                        </button>
+                    {/* TAGS & CTA BUTTON ROW */}
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                      <div className="flex flex-wrap gap-1">
+                        {pillar.tags.slice(0, 2).map((tag, tIdx) => (
+                          <span
+                            key={tIdx}
+                            className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-white"
+                          >
+                            {tag}
+                          </span>
+                        ))}
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          scrollToContact(pillar.title)
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-black text-slate-900 bg-white hover:bg-slate-100 shadow-md transition-all duration-200 cursor-pointer shrink-0"
+                      >
+                        <span>Solicitar</span>
+                        <Icon name="ArrowRight" size={11} className="text-slate-900" />
+                      </button>
                     </div>
                   </div>
                 </div>
-              )
-            })}
-          </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>

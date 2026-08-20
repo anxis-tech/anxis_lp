@@ -7,7 +7,6 @@ import { ProjectPreviewBar } from '@/components/sections/project-preview-bar'
 import { ProcessSection } from '@/components/sections/process-section'
 import { PillarsGridSection } from '@/components/sections/pillars-grid-section'
 import { TestimonialsSection } from '@/components/sections/testimonials-section'
-import { CTASection } from '@/components/sections/cta-section'
 import { FAQSection } from '@/components/sections/faq-section'
 import { Footer } from '@/components/layout/footer'
 import { WhatsAppButton } from '@/components/ui/whatsapp-button'
@@ -165,12 +164,9 @@ export default async function HomePage() {
         <ProcessSection />
 
         {/* 8. DEPOIMENTOS */}
-        <TestimonialsSection testimonials={testimonials} />
+        <TestimonialsSection testimonials={testimonials} whatsapp={settings.whatsapp} />
 
-        {/* 9. CTA DE CONTATO - VAMOS TRABALHAR JUNTOS */}
-        <CTASection whatsapp={settings.whatsapp} />
-
-        {/* 10. FAQ PERGUNTAS FREQUENTES */}
+        {/* 9. FAQ PERGUNTAS FREQUENTES */}
         <FAQSection faqs={faqs} />
 
         {/* 11. FOOTER OBSIDIAN DARK */}

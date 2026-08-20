@@ -90,7 +90,9 @@ export interface Testimonial {
   company: string
   role?: string
   photo_url?: string
+  headline?: string
   content: string
+  rating?: number
   related_project_id?: string
   is_visible?: boolean
   display_order?: number
