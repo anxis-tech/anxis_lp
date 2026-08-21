@@ -80,7 +80,7 @@ export function TestimonialsSection({
   return (
     <section
       id="depoimentos"
-      className="py-24 sm:py-32 bg-[#FFFFFF] text-[#0F172A] relative border-b border-slate-200/80 overflow-hidden select-none"
+      className="py-24 sm:py-32 bg-[#FFFFFF] text-[#0F172A] relative overflow-hidden select-none"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -296,7 +296,7 @@ export function TestimonialsSection({
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackEvent('click_whatsapp', { location: 'testimonials_cta' })}
-            className="inline-flex items-center justify-center gap-2.5 px-8 sm:px-10 py-3.5 sm:py-4 rounded-[18px] text-xs sm:text-sm font-heading font-black text-white bg-slate-900 hover:bg-[#086ec5] border border-slate-800 shadow-xl shadow-slate-900/15 hover:shadow-2xl hover:shadow-blue-600/25 transition-all duration-300 active:scale-95 cursor-pointer uppercase tracking-wider group"
+            className="inline-flex items-center justify-center gap-2.5 px-9 sm:px-12 py-4 rounded-full text-xs sm:text-sm font-heading font-black text-white bg-[#2f2f2f] hover:bg-[#1f1f1f] border border-[#2f2f2f]/10 shadow-xl shadow-slate-900/10 hover:shadow-2xl hover:shadow-slate-900/20 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer uppercase tracking-wider group"
           >
             <WhatsAppIcon className="w-4 h-4 text-[#25D366] fill-current shrink-0 group-hover:scale-110 transition-transform" />
             <span>Realizar um orçamento</span>

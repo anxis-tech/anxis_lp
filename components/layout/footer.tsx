@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { Icon } from '@/components/ui/hugeicons'
-import { AnxisLogo } from '@/components/ui/anxis-logo'
+import { AnxisIcon } from '@/components/ui/anxis-logo'
 import { WhatsAppIcon } from '@/components/ui/whatsapp-icon'
 import { formatWhatsAppLink } from '@/lib/utils'
 import { trackEvent } from '@/lib/analytics/events'
@@ -89,8 +89,12 @@ export function Footer({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-14 border-b border-slate-800/80">
           {/* COL 1: BRAND IDENTITY, PITCH & SOCIAL MEDIA */}
           <div className="lg:col-span-4 space-y-5">
-            <Link href="/" className="inline-block cursor-pointer">
-              <AnxisLogo size="md" theme="dark" />
+            <Link
+              href="/"
+              aria-label="Página Inicial ANXIS"
+              className="inline-block cursor-pointer transition-transform hover:scale-110 active:scale-95 group"
+            >
+              <AnxisIcon size={38} className="transition-transform duration-300 group-hover:scale-105" />
             </Link>
 
             <p className="text-sm text-slate-300 font-normal leading-relaxed max-w-sm">

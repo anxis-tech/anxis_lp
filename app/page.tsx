@@ -148,13 +148,13 @@ export default async function HomePage() {
         {/* 2. HERO GRANDE */}
         <HeroSection primaryCtaText={settings.primary_cta_label} projects={projects} />
 
-        {/* 3. LOGOS MARQUEE (TICKER MINIMALISTA LOGO ABAIXO DA HERO) */}
-        <TechMarquee technologies={technologies} />
-
-        {/* 4. SEÇÃO DE IMPACTO DE PERFORMANCE & BARRAS COMPARATIVAS */}
+        {/* 3. SEÇÃO DE IMPACTO DE PERFORMANCE & DIFERENCIAIS (1ª DOBRA) */}
         <PerformanceImpactSection />
 
-        {/* 5. NOSSOS SERVIÇOS (5 PILARES: DESIGN UI/UX, DESENVOLVIMENTO, LOJAS VIRTUAIS, PERFORMANCE & SEO, BRANDING) */}
+        {/* 4. LOGOS MARQUEE (TICKER ENTRE A 1ª E 2ª DOBRA) */}
+        <TechMarquee technologies={technologies} />
+
+        {/* 5. NOSSOS SERVIÇOS (2ª DOBRA) */}
         <PillarsGridSection />
 
         {/* 6. DEMONSTRAÇÃO DE PROJETOS REAIS & PORTFÓLIO CONSOLIDADO */}

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
 import { HugeiconsIcon, Icon } from '@/components/ui/hugeicons'
 import { FileText } from 'lucide-react'
-import { AnxisLogo } from '@/components/ui/anxis-logo'
+import { AnxisIcon } from '@/components/ui/anxis-logo'
 import { WhatsAppIcon } from '@/components/ui/whatsapp-icon'
 import { cn, formatWhatsAppLink } from '@/lib/utils'
 import { trackEvent } from '@/lib/analytics/events'
@@ -89,14 +89,14 @@ export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
             isScrolled ? 'bg-white/85 backdrop-blur-lg border-slate-200/80 shadow-xl shadow-slate-900/10 py-1.5 sm:py-2' : ''
           )}
         >
-          {/* LEFT: MENU BUTTON */}
+          {/* LEFT: MENU BUTTON (PILL CAPSULE) */}
           <button
             type="button"
             onClick={() => setIsMenuOpen((prev) => !prev)}
             aria-expanded={isMenuOpen}
             aria-label="Abrir menu de navegação"
             className={cn(
-              'flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-[20px] bg-slate-100/70 hover:bg-slate-200/80 backdrop-blur-xs text-slate-800 border border-slate-200/60 transition-all cursor-pointer select-none group',
+              'flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full bg-slate-100/70 hover:bg-slate-200/80 backdrop-blur-xs text-slate-800 border border-slate-200/60 transition-all cursor-pointer select-none group',
               isMenuOpen ? 'bg-slate-200/90 border-slate-300 ring-1 ring-slate-300' : ''
             )}
           >
@@ -125,7 +125,7 @@ export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
             </span>
           </button>
 
-          {/* CENTER: ANXIS LOGO */}
+          {/* CENTER: ANXIS LOGO (ICON ONLY) */}
           <div className="absolute left-1/2 -translate-x-1/2 flex items-center justify-center">
             <Link
               href="/"
@@ -133,13 +133,14 @@ export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
                 e.preventDefault()
                 handleNavClick('#', 'Home')
               }}
-              className="flex items-center cursor-pointer transition-transform hover:scale-105 active:scale-95"
+              aria-label="Página Inicial ANXIS"
+              className="flex items-center cursor-pointer transition-transform hover:scale-110 active:scale-95 group"
             >
-              <AnxisLogo size="md" theme="light" className="scale-90 sm:scale-100" />
+              <AnxisIcon size={32} className="scale-90 sm:scale-100 transition-transform duration-300 group-hover:scale-105" />
             </Link>
           </div>
 
-          {/* RIGHT: CTA FORM BUTTON (SQUARE WITH SUBTLE ROUNDING) */}
+          {/* RIGHT: CTA BUTTON (PILL CAPSULE IN TITLE BLACK #2f2f2f) */}
           <div className="flex items-center">
             <a
               href="#contato"
@@ -150,9 +151,10 @@ export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
               }}
               title="Solicitar Proposta"
               aria-label="Ir para formulário de contato"
-              className="inline-flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-[8px] text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 active:scale-95 shadow-md shadow-blue-600/20 transition-all cursor-pointer group"
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-heading font-black text-white bg-[#2f2f2f] hover:bg-[#1f1f1f] border border-[#2f2f2f]/10 hover:scale-105 active:scale-95 shadow-md shadow-slate-900/10 transition-all duration-200 cursor-pointer uppercase tracking-wider group"
             >
-              <FileText className="w-4 h-4 text-white transition-transform group-hover:scale-110" />
+              <FileText className="w-3.5 h-3.5 text-white transition-transform group-hover:scale-110" />
+              <span className="hidden sm:inline">Proposta</span>
             </a>
           </div>
         </div>

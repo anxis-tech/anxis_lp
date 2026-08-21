@@ -11,7 +11,7 @@ export function PerformanceImpactSection() {
   }
 
   return (
-    <section className="py-24 sm:py-32 bg-[#FFFFFF] text-[#0F172A] relative overflow-hidden select-none border-b border-slate-200/80">
+    <section className="py-24 sm:py-32 bg-[#FFFFFF] text-[#0F172A] relative overflow-hidden select-none">
       {/* AMBIENT BACKGROUND GLOWS */}
       <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[500px] bg-[#086ec5]/3 rounded-full blur-[180px] pointer-events-none" />
       <div className="absolute top-1/3 right-10 w-[500px] h-[400px] bg-[#F89520]/3 rounded-full blur-[160px] pointer-events-none" />
@@ -51,14 +51,14 @@ export function PerformanceImpactSection() {
 
             {/* 4. SOBER ACTION BUTTONS (SUBDUED FOR AN INTERMEDIATE SECTION) */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
-              {/* PRIMARY DARK BUTTON */}
+              {/* PRIMARY TITLE-BLACK BUTTON */}
               <button
                 type="button"
                 onClick={() => {
                   trackEvent('click_primary_cta', { location: 'diferenciais_section' })
                   scrollToSection('#contato')
                 }}
-                className="px-6 sm:px-8 py-3.5 rounded-full text-xs sm:text-sm font-heading font-bold text-white bg-[#111827] hover:bg-black shadow-xs hover:shadow-md transition-all duration-200 active:scale-95 cursor-pointer uppercase tracking-wider"
+                className="inline-flex items-center justify-center px-8 sm:px-10 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm font-heading font-black text-white bg-[#2f2f2f] hover:bg-[#1f1f1f] border border-[#2f2f2f]/10 shadow-xl shadow-slate-900/10 hover:shadow-2xl hover:shadow-slate-900/20 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer uppercase tracking-wider"
               >
                 <span>Solicitar proposta</span>
               </button>

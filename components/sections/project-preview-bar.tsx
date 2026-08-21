@@ -109,7 +109,7 @@ export function ProjectPreviewBar({
     <section
       id="projetos"
       ref={sectionRef}
-      className="relative bg-[#FFFFFF] text-[#0F172A] border-b border-slate-200/80"
+      className="relative bg-[#FFFFFF] text-[#0F172A]"
     >
       {/* STICKY MARQUEE VIEWPORT CONTAINER */}
       <div className="w-full h-screen flex flex-col justify-between pt-20 sm:pt-24 pb-8 sm:pb-10 overflow-hidden">

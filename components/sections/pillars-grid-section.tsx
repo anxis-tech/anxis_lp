@@ -79,7 +79,7 @@ export function PillarsGridSection() {
   }
 
   return (
-    <section id="servicos" className="py-24 sm:py-32 bg-[#FFFFFF] text-[#0F172A] relative overflow-hidden select-none border-b border-slate-200/80">
+    <section id="servicos" className="py-24 sm:py-32 bg-[#FFFFFF] text-[#0F172A] relative overflow-hidden select-none">
       {/* AMBIENT BACKGROUND GLOWS */}
       <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[500px] bg-[#086ec5]/4 rounded-full blur-[180px] pointer-events-none" />
       <div className="absolute top-1/3 right-10 w-[500px] h-[400px] bg-[#00C968]/4 rounded-full blur-[160px] pointer-events-none" />
@@ -235,7 +235,7 @@ export function PillarsGridSection() {
                           e.stopPropagation()
                           scrollToContact(pillar.title)
                         }}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[11px] font-black text-slate-900 bg-white hover:bg-slate-100 shadow-md transition-all duration-200 cursor-pointer shrink-0"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-heading font-black text-slate-900 bg-white hover:bg-slate-100 shadow-md transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shrink-0"
                       >
                         <span>Solicitar</span>
                         <Icon name="ArrowRight" size={11} className="text-slate-900" />

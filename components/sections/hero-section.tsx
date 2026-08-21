@@ -122,7 +122,7 @@ export function HeroSection({
   ]
 
   return (
-    <section className="relative pt-28 sm:pt-36 pb-10 sm:pb-16 w-full bg-gradient-to-b from-[#F8FAFC] via-[#FAFBFC] to-[#FFFFFF] overflow-hidden text-[#2f2f2f] border-b border-slate-200/80">
+    <section className="relative pt-28 sm:pt-36 pb-10 sm:pb-16 w-full bg-gradient-to-b from-[#F8FAFC] via-[#FAFBFC] to-[#FFFFFF] overflow-hidden text-[#2f2f2f]">
       {/* SOPHISTICATED NEUTRAL TECH BACKGROUND & DOT MATRIX PATTERN */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
         {/* Soft and subtle dot matrix pattern, smoothly masked so it never overlaps the carousel */}
@@ -247,7 +247,7 @@ export function HeroSection({
                   trackEvent('click_primary_cta', { location: 'hero' })
                   scrollToSection('#contato')
                 }}
-                className="inline-flex items-center justify-center px-8 sm:px-10 py-3.5 sm:py-4 rounded-[20px] text-base sm:text-lg font-extrabold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 shadow-xl shadow-blue-600/25 hover:shadow-2xl hover:shadow-blue-600/35 transition-all duration-200 active:scale-[0.98] cursor-pointer group"
+                className="inline-flex items-center justify-center px-9 sm:px-12 py-4 sm:py-4.5 rounded-full text-sm sm:text-base font-heading font-black text-white bg-[#2f2f2f] hover:bg-[#1f1f1f] border border-[#2f2f2f]/10 shadow-xl shadow-slate-900/10 hover:shadow-2xl hover:shadow-slate-900/20 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer uppercase tracking-wider group"
               >
                 <span>{primaryCtaText}</span>
               </button>

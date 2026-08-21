@@ -354,12 +354,12 @@ export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }:
                     </div>
                   )}
 
-                  {/* SUBMIT BUTTON WITH MULTI-COLOR BRAND GRADIENT */}
+                  {/* SUBMIT BUTTON */}
                   <div className="pt-2">
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[20px] text-sm font-extrabold text-white bg-gradient-to-r from-[#086ec5] to-[#0a7ee0] hover:opacity-95 shadow-xl shadow-blue-600/25 transition-all duration-200 disabled:opacity-50 cursor-pointer group"
+                      className="w-full inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full text-xs sm:text-sm font-heading font-black text-white bg-[#2f2f2f] hover:bg-[#1f1f1f] border border-[#2f2f2f]/10 shadow-xl shadow-slate-900/10 hover:shadow-2xl hover:shadow-slate-900/20 hover:scale-[1.01] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 cursor-pointer uppercase tracking-wider group"
                     >
                       {isSubmitting ? (
                         <>

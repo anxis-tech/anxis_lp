@@ -40,7 +40,7 @@ export function FAQSection({
   }
 
   return (
-    <section id="faq" className="py-24 sm:py-32 bg-[#F8FAFC] text-[#07090E] relative border-b border-slate-200">
+    <section id="faq" className="py-24 sm:py-32 bg-[#F8FAFC] text-[#07090E] relative">
       {/* Schema.org Injection */}
       <script
         type="application/ld+json"

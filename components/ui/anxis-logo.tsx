@@ -74,25 +74,28 @@ export function AnxisIcon({ size = 32, className }: AnxisIconProps) {
 interface AnxisLogoProps {
   size?: 'sm' | 'md' | 'lg'
   theme?: 'dark' | 'light'
+  showText?: boolean
   className?: string
 }
 
-export function AnxisLogo({ size = 'md', theme = 'light', className }: AnxisLogoProps) {
+export function AnxisLogo({ size = 'md', theme = 'light', showText = true, className }: AnxisLogoProps) {
   const iconSize = size === 'sm' ? 24 : size === 'md' ? 30 : 38
   const textSize = size === 'sm' ? 'text-lg tracking-wider' : size === 'md' ? 'text-xl tracking-widest' : 'text-2xl tracking-widest'
 
   return (
     <div className={cn('flex items-center gap-2.5 select-none group', className)}>
       <AnxisIcon size={iconSize} className="transition-transform duration-300 group-hover:scale-105" />
-      <span
-        className={cn(
-          'font-black font-heading leading-none',
-          textSize,
-          theme === 'dark' ? 'text-white' : 'text-[#0F172A]'
-        )}
-      >
-        ANXIS
-      </span>
+      {showText && (
+        <span
+          className={cn(
+            'font-black font-heading leading-none',
+            textSize,
+            theme === 'dark' ? 'text-white' : 'text-[#0F172A]'
+          )}
+        >
+          ANXIS
+        </span>
+      )}
     </div>
   )
 }

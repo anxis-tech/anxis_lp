@@ -147,7 +147,7 @@ export function ProcessSection() {
     <section
       id="processo"
       ref={containerRef}
-      className="relative bg-[#090D16] text-[#F8FAFC] py-24 sm:py-32 border-b border-slate-800/80"
+      className="relative bg-[#090D16] text-[#F8FAFC] py-24 sm:py-32"
     >
       {/* ATMOSPHERIC BACKGROUND GLOWS WRAPPER */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
