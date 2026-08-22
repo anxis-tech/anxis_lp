@@ -41,8 +41,8 @@ function FacebookIcon({ className = 'w-5 h-5' }: { className?: string }) {
 export function Footer({
   companyName = 'ANXIS',
   email = 'contato@anxis.com.br',
-  phone = '(11) 99999-9999',
-  whatsapp = '5511999999999',
+  phone = '(84) 98714-7049',
+  whatsapp = '5584987147049',
   address = 'São Paulo, SP - Brasil',
   socialLinks = {
     instagram: 'https://instagram.com/anxis.tech',

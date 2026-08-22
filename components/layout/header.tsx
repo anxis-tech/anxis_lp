@@ -16,7 +16,7 @@ interface HeaderProps {
   ctaLabel?: string
 }
 
-export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
+export function Header({ whatsapp = '5584987147049' }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
@@ -61,7 +61,7 @@ export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
     { label: 'Serviços', href: '#servicos', id: 'servicos' },
     { label: 'Projetos', href: '#projetos', id: 'projetos' },
     { label: 'Processo', href: '#processo', id: 'processo' },
-    { label: 'Contato', href: '#contato', id: 'contato' },
+    { label: 'Dúvidas', href: '#faq', id: 'faq' },
   ]
 
   const handleNavClick = (href: string, label: string) => {
@@ -143,17 +143,17 @@ export function Header({ whatsapp = '5511999999999' }: HeaderProps) {
           {/* RIGHT: CTA BUTTON (PILL CAPSULE IN TITLE BLACK #2f2f2f) */}
           <div className="flex items-center">
             <a
-              href="#contato"
-              onClick={(e) => {
-                e.preventDefault()
-                trackEvent('click_primary_cta', { location: 'header' })
-                handleNavClick('#contato', 'Contato')
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                trackEvent('click_whatsapp', { location: 'header_cta' })
               }}
-              title="Solicitar Proposta"
-              aria-label="Ir para formulário de contato"
+              title="Solicitar Proposta no WhatsApp"
+              aria-label="Solicitar proposta no WhatsApp"
               className="inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-heading font-black text-white bg-[#2f2f2f] hover:bg-[#1f1f1f] border border-[#2f2f2f]/10 hover:scale-105 active:scale-95 shadow-md shadow-slate-900/10 transition-all duration-200 cursor-pointer uppercase tracking-wider group"
             >
-              <FileText className="w-3.5 h-3.5 text-white transition-transform group-hover:scale-110" />
+              <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366] fill-current transition-transform group-hover:scale-110" />
               <span className="hidden sm:inline">Proposta</span>
             </a>
           </div>

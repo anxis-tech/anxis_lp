@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'motion/react'
 import { Testimonial } from '@/types/database.types'
 import { INITIAL_TESTIMONIALS } from '@/lib/constants/initial-data'
 import { ChevronLeft, ChevronRight, Star } from 'lucide-react'
 import { WhatsAppIcon } from '@/components/ui/whatsapp-icon'
+import { AnxisIcon } from '@/components/ui/anxis-logo'
 import { cn, formatWhatsAppLink } from '@/lib/utils'
 import { trackEvent } from '@/lib/analytics/events'
 
@@ -21,7 +21,7 @@ export function TestimonialsSection({
   testimonials = INITIAL_TESTIMONIALS,
   title,
   description = 'Depoimentos e resultados de empresas e profissionais que transformaram sua presença digital e autoridade com nossos projetos sob medida.',
-  whatsapp = '5511999999999',
+  whatsapp = '5584987147049',
 }: TestimonialsSectionProps) {
   const visibleItems = testimonials.filter((t) => t.is_visible)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -126,42 +126,46 @@ export function TestimonialsSection({
                   onClick={() => goToIndex(index)}
                   className={cn(
                     // EXACT SAME WIDTH FOR ALL CARDS (W-FULL with MAX-W)
-                    'relative w-[130px] sm:w-[170px] md:w-[190px] rounded-[22px] sm:rounded-[26px] overflow-hidden cursor-pointer select-none shrink-0 shadow-md group transition-all duration-500',
+                    'relative w-[130px] sm:w-[170px] md:w-[190px] rounded-[22px] sm:rounded-[26px] overflow-hidden cursor-pointer select-none shrink-0 shadow-md group transition-all duration-500 flex flex-col items-center justify-between p-3.5 sm:p-5',
                     isActive
-                      ? 'h-[170px] sm:h-[210px] md:h-[235px] border-2 border-[#FF4D4D] shadow-xl shadow-[#FF4D4D]/10 z-20'
-                      : 'h-[80px] sm:h-[95px] md:h-[105px] border border-slate-200/80 opacity-55 grayscale hover:opacity-85 hover:grayscale-0 z-10'
+                      ? 'h-[170px] sm:h-[210px] md:h-[235px] border-2 border-[#086ec5] shadow-xl shadow-[#086ec5]/15 bg-gradient-to-br from-[#0F172A] via-[#1E293B] to-[#070A12] z-20'
+                      : 'h-[80px] sm:h-[95px] md:h-[105px] border border-slate-200/80 bg-slate-50 hover:bg-slate-100 opacity-60 hover:opacity-100 z-10'
                   )}
                 >
-                  <Image
-                    src={
-                      item.photo_url ||
-                      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop'
-                    }
-                    alt={item.name}
-                    fill
-                    className={cn(
-                      'object-cover transition-all duration-500',
-                      isActive ? 'brightness-105 scale-100 object-center' : 'brightness-90 object-top'
-                    )}
-                    unoptimized
-                  />
-
-                  {/* Subtle dark vignette gradient at bottom */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-
-                  {/* Name label on active card */}
+                  {/* Glowing background accent for active */}
                   {isActive && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="absolute bottom-2.5 inset-x-2.5 text-center bg-black/65 backdrop-blur-md px-2 py-1 rounded-xl border border-white/20"
-                    >
-                      <span className="text-[11px] font-heading font-extrabold text-white truncate block">
-                        {item.name}
-                      </span>
-                    </motion.div>
+                    <div className="absolute inset-0 bg-radial from-[#086ec5]/20 via-transparent to-transparent pointer-events-none" />
                   )}
+
+                  {/* Centered ANXIS Logo Icon */}
+                  <div className="flex-1 flex items-center justify-center relative z-10 w-full">
+                    <AnxisIcon
+                      size={isActive ? 52 : 32}
+                      className={cn(
+                        'transition-transform duration-500 drop-shadow-md',
+                        isActive ? 'scale-105' : 'grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100'
+                      )}
+                    />
+                  </div>
+
+                  {/* Name label */}
+                  <div
+                    className={cn(
+                      'relative z-10 w-full text-center px-2 py-1 rounded-xl transition-all duration-300',
+                      isActive
+                        ? 'bg-white/15 backdrop-blur-md border border-white/20'
+                        : 'bg-white/90 border border-slate-200/80 shadow-2xs'
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'text-[11px] font-heading font-extrabold truncate block',
+                        isActive ? 'text-white' : 'text-slate-800'
+                      )}
+                    >
+                      {item.name}
+                    </span>
+                  </div>
                 </motion.div>
               )
             })}
@@ -220,15 +224,20 @@ export function TestimonialsSection({
                 {/* BOTTOM AUTHOR, DIVIDER & RATING ROW */}
                 <div className="relative z-10 pt-6 mt-6 border-t border-dashed border-slate-200 space-y-4">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    {/* Author & Role */}
-                    <div className="space-y-0.5">
-                      <h4 className="text-base sm:text-lg font-black text-[#1E293B] font-heading leading-tight">
-                        {current.name}
-                      </h4>
-                      <p className="text-xs sm:text-sm text-slate-500 font-sans font-medium">
-                        {current.role ? `${current.role}, ` : ''}
-                        <span className="text-[#086ec5] font-semibold">{current.company}</span>
-                      </p>
+                    {/* Author & Role with ANXIS Avatar */}
+                    <div className="flex items-center gap-3.5">
+                      <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 border border-slate-700/80 flex items-center justify-center shadow-sm shrink-0">
+                        <AnxisIcon size={24} />
+                      </div>
+                      <div className="space-y-0.5">
+                        <h4 className="text-base sm:text-lg font-black text-[#1E293B] font-heading leading-tight">
+                          {current.name}
+                        </h4>
+                        <p className="text-xs sm:text-sm text-slate-500 font-sans font-medium">
+                          {current.role ? `${current.role}, ` : ''}
+                          <span className="text-[#086ec5] font-semibold">{current.company}</span>
+                        </p>
+                      </div>
                     </div>
 
                     {/* 5-Star Rating in vibrant red/coral */}

@@ -7,11 +7,12 @@ import { Project } from '@/types/database.types'
 import { INITIAL_PROJECTS } from '@/lib/constants/initial-data'
 import { trackEvent } from '@/lib/analytics/events'
 
-import { cn } from '@/lib/utils'
+import { cn, formatWhatsAppLink } from '@/lib/utils'
 
 interface HeroSectionProps {
   primaryCtaText?: string
   projects?: Project[]
+  whatsapp?: string
 }
 
 interface FigmaLiveCursorProps {
@@ -106,13 +107,12 @@ function FigmaLiveCursor({
 export function HeroSection({
   primaryCtaText = 'Quero criar meu site',
   projects = INITIAL_PROJECTS,
+  whatsapp = '5584987147049',
 }: HeroSectionProps) {
-  const scrollToSection = (id: string) => {
-    const el = document.querySelector(id)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' })
-    }
-  }
+  const whatsappUrl = formatWhatsAppLink(
+    whatsapp,
+    'Olá! Gostaria de conversar sobre a criação de um site com a ANXIS.'
+  )
 
   const avatars = [
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop',
@@ -241,16 +241,17 @@ export function HeroSection({
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-col items-center gap-3 pt-6 sm:pt-9"
             >
-              <button
-                type="button"
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => {
-                  trackEvent('click_primary_cta', { location: 'hero' })
-                  scrollToSection('#contato')
+                  trackEvent('click_whatsapp', { location: 'hero_primary_cta' })
                 }}
                 className="inline-flex items-center justify-center px-9 sm:px-12 py-4 sm:py-4.5 rounded-full text-sm sm:text-base font-heading font-black text-white bg-[#2f2f2f] hover:bg-[#1f1f1f] border border-[#2f2f2f]/10 shadow-xl shadow-slate-900/10 hover:shadow-2xl hover:shadow-slate-900/20 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer uppercase tracking-wider group"
               >
                 <span>{primaryCtaText}</span>
-              </button>
+              </a>
 
               {/* SOCIAL PROOF (MOVED BELOW CTA, CLEAN & TRANSPARENT) */}
               <div className="flex items-center gap-2.5 sm:gap-3 pt-0.5">

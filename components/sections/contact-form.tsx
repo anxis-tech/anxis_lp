@@ -19,7 +19,7 @@ interface ContactFormProps {
   whatsapp?: string
 }
 
-export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5511999999999' }: ContactFormProps) {
+export function ContactForm({ faqs = INITIAL_FAQS, whatsapp = '5584987147049' }: ContactFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)

@@ -11,7 +11,7 @@ interface CTASectionProps {
   whatsapp?: string
 }
 
-export function CTASection({ whatsapp = '5511999999999' }: CTASectionProps) {
+export function CTASection({ whatsapp = '5584987147049' }: CTASectionProps) {
   const whatsappUrl = formatWhatsAppLink(
     whatsapp,
     'Olá! Gostaria de conversar com um especialista da ANXIS sobre o meu projeto.'

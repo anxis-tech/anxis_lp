@@ -4,9 +4,15 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Icon } from '@/components/ui/hugeicons'
 import { trackEvent } from '@/lib/analytics/events'
-import { cn } from '@/lib/utils'
+import { cn, formatWhatsAppLink } from '@/lib/utils'
 
-export function PillarsGridSection() {
+interface PillarsGridSectionProps {
+  whatsapp?: string
+}
+
+export function PillarsGridSection({
+  whatsapp = '5584987147049',
+}: PillarsGridSectionProps) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
 
   const pillars = [
@@ -229,17 +235,22 @@ export function PillarsGridSection() {
                         ))}
                       </div>
 
-                      <button
-                        type="button"
+                      <a
+                        href={formatWhatsAppLink(
+                          whatsapp,
+                          `Olá! Gostaria de solicitar um orçamento para o serviço de ${pillar.title}.`
+                        )}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         onClick={(e) => {
                           e.stopPropagation()
-                          scrollToContact(pillar.title)
+                          trackEvent('click_whatsapp', { location: 'pillar_card', title: pillar.title })
                         }}
                         className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-heading font-black text-slate-900 bg-white hover:bg-slate-100 shadow-md transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shrink-0"
                       >
                         <span>Solicitar</span>
                         <Icon name="ArrowRight" size={11} className="text-slate-900" />
-                      </button>
+                      </a>
                     </div>
                   </div>
                 </div>

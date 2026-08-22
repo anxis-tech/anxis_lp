@@ -146,16 +146,16 @@ export default async function HomePage() {
         <Header whatsapp={settings.whatsapp} ctaLabel={settings.primary_cta_label} />
 
         {/* 2. HERO GRANDE */}
-        <HeroSection primaryCtaText={settings.primary_cta_label} projects={projects} />
+        <HeroSection primaryCtaText={settings.primary_cta_label} projects={projects} whatsapp={settings.whatsapp} />
 
         {/* 3. SEÇÃO DE IMPACTO DE PERFORMANCE & DIFERENCIAIS (1ª DOBRA) */}
-        <PerformanceImpactSection />
+        <PerformanceImpactSection whatsapp={settings.whatsapp} />
 
         {/* 4. LOGOS MARQUEE (TICKER ENTRE A 1ª E 2ª DOBRA) */}
         <TechMarquee technologies={technologies} />
 
         {/* 5. NOSSOS SERVIÇOS (2ª DOBRA) */}
-        <PillarsGridSection />
+        <PillarsGridSection whatsapp={settings.whatsapp} />
 
         {/* 6. DEMONSTRAÇÃO DE PROJETOS REAIS & PORTFÓLIO CONSOLIDADO */}
         <ProjectPreviewBar projects={projects} />

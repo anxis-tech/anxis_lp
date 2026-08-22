@@ -8,7 +8,7 @@ interface WhatsAppButtonProps {
   whatsapp?: string
 }
 
-export function WhatsAppButton({ whatsapp = '5511999999999' }: WhatsAppButtonProps) {
+export function WhatsAppButton({ whatsapp = '5584987147049' }: WhatsAppButtonProps) {
   const whatsappUrl = formatWhatsAppLink(
     whatsapp,
     'Olá! Gostaria de tirar dúvidas sobre o desenvolvimento do meu site/loja virtual.'

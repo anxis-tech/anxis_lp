@@ -1,10 +1,22 @@
 'use client'
 
 import { motion } from 'motion/react'
-import { trackEvent } from '@/lib/analytics/events'
 import { Icon } from '@/components/ui/hugeicons'
+import { trackEvent } from '@/lib/analytics/events'
+import { cn, formatWhatsAppLink } from '@/lib/utils'
 
-export function PerformanceImpactSection() {
+interface PerformanceImpactSectionProps {
+  whatsapp?: string
+}
+
+export function PerformanceImpactSection({
+  whatsapp = '5584987147049',
+}: PerformanceImpactSectionProps) {
+  const whatsappUrl = formatWhatsAppLink(
+    whatsapp,
+    'Olá! Gostaria de solicitar uma proposta para meu projeto com a ANXIS.'
+  )
+
   const scrollToSection = (selector: string) => {
     const el = document.querySelector(selector)
     if (el) el.scrollIntoView({ behavior: 'smooth' })
@@ -52,16 +64,17 @@ export function PerformanceImpactSection() {
             {/* 4. SOBER ACTION BUTTONS (SUBDUED FOR AN INTERMEDIATE SECTION) */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
               {/* PRIMARY TITLE-BLACK BUTTON */}
-              <button
-                type="button"
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 onClick={() => {
-                  trackEvent('click_primary_cta', { location: 'diferenciais_section' })
-                  scrollToSection('#contato')
+                  trackEvent('click_whatsapp', { location: 'diferenciais_section' })
                 }}
                 className="inline-flex items-center justify-center px-8 sm:px-10 py-3.5 sm:py-4 rounded-full text-xs sm:text-sm font-heading font-black text-white bg-[#2f2f2f] hover:bg-[#1f1f1f] border border-[#2f2f2f]/10 shadow-xl shadow-slate-900/10 hover:shadow-2xl hover:shadow-slate-900/20 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer uppercase tracking-wider"
               >
                 <span>Solicitar proposta</span>
-              </button>
+              </a>
 
               {/* SECONDARY CLEAN LINK */}
               <button
