@@ -1,6 +1,5 @@
 'use server'
 import { z } from 'zod'
-import { revalidatePath } from 'next/cache'
 import { authorizeProspecting } from './auth.ts'
 import { campaignSchema, segments } from '../schemas/campaign.schema.ts'
 import { filterSchema, stageSchema, leadControlSchema } from '../schemas/lead.schema.ts'
@@ -17,6 +16,7 @@ import { listJobs } from '../repositories/job.repository.ts'
 import { checked } from '../repositories/base.ts'
 import { emptyMetrics } from '../types/index.ts'
 import { aiAnalysisSchema } from '../schemas/ai-analysis.schema.ts'
+
 async function actionResult<T>(
   work: () => Promise<T>
 ): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
@@ -34,6 +34,7 @@ async function actionResult<T>(
     }
   }
 }
+
 export async function createCampaignAction(raw: unknown) {
   return actionResult(async () => {
     const { db } = await authorizeProspecting(true)
@@ -42,10 +43,10 @@ export async function createCampaignAction(raw: unknown) {
       ...data,
       search_terms: data.segment === 'other' ? [data.customSegment] : segments[data.segment].terms,
     })
-    revalidatePath('/prospecting')
     return id
   })
 }
+
 export async function campaignControlAction(raw: unknown) {
   return actionResult(async () => {
     const { db } = await authorizeProspecting(true)
@@ -53,33 +54,33 @@ export async function campaignControlAction(raw: unknown) {
     checked(
       await db.rpc('prospecting_campaign_control', { p_id: input.id, p_status: input.status })
     )
-    revalidatePath('/prospecting')
   })
 }
+
 export async function changePipelineAction(raw: unknown) {
   return actionResult(async () => {
     const { db } = await authorizeProspecting(true)
     const input = stageSchema.parse(raw)
     checked(await db.rpc('prospecting_change_stage', { p_ids: input.ids, p_stage: input.stage }))
-    revalidatePath('/prospecting')
   })
 }
+
 export async function leadControlAction(raw: unknown) {
   return actionResult(async () => {
     const { db } = await authorizeProspecting(true)
     const input = leadControlSchema.parse(raw)
     checked(await db.rpc('prospecting_lead_control', { p_id: input.id, p_action: input.action }))
-    revalidatePath('/prospecting')
   })
 }
+
 export async function retryDiscoveryAction(raw: unknown) {
   return actionResult(async () => {
     const { db } = await authorizeProspecting(true)
     const id = z.uuid().parse(raw)
     checked(await db.rpc('prospecting_retry_discovery', { p_id: id }))
-    revalidatePath('/prospecting')
   })
 }
+
 export async function loadProspectingAction(raw: unknown) {
   return actionResult(async () => {
     const { db } = await authorizeProspecting()
@@ -99,6 +100,37 @@ export async function loadProspectingAction(raw: unknown) {
     return { campaigns, campaign, ...listing, metrics, jobs }
   })
 }
+
+/**
+ * Fetch a single lead row from prospecting_lead_list.
+ * Used as a targeted invalidation fetch when Realtime signals a row change.
+ * Does NOT reload the full lead list.
+ */
+export async function getLeadRowAction(id: string) {
+  return actionResult(async () => {
+    const { db } = await authorizeProspecting()
+    return getLead(db, id)
+  })
+}
+
+/**
+ * Lightweight aggregate refresh — campaign status, metrics and pending jobs only.
+ * Used by the 30-second polling interval while a campaign is running.
+ * Does NOT reload the lead list.
+ */
+export async function refreshAggregatesAction(campaignId: string) {
+  return actionResult(async () => {
+    const { db } = await authorizeProspecting()
+    const id = z.uuid().parse(campaignId)
+    const [campaign, metrics, jobs] = await Promise.all([
+      getCampaign(db, id),
+      getMetrics(db, id),
+      listJobs(db, id),
+    ])
+    return { campaign, metrics, jobs }
+  })
+}
+
 export async function leadDetailsAction(raw: unknown) {
   return actionResult(async () => {
     const { db } = await authorizeProspecting()
