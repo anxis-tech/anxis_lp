@@ -139,6 +139,15 @@ const LeadTableRow = memo(function LeadTableRow({
           : lead.classification
             ? classificationLabels[lead.classification as keyof typeof classificationLabels]
             : qualificationLabels[lead.qualification_status]}
+        {lead.audit_failure_code && lead.audit_failure_code !== 'AUDIT_BLOCKED' && (
+          <p className="mt-0.5 text-[11px] font-medium text-amber-700">
+            {lead.audit_failure_code === 'WEBSITE_DNS_FAILURE'
+              ? 'DNS do site inexistente'
+              : lead.audit_failure_code === 'WEBSITE_TLS_ERROR'
+                ? 'Certificado SSL/TLS inválido'
+                : 'Site fora do ar'}
+          </p>
+        )}
         {lead.qualification_status === 'error' && lead.classification && (
           <p className="mt-1 text-amber-700">Etapa com falha</p>
         )}
@@ -149,15 +158,39 @@ const LeadTableRow = memo(function LeadTableRow({
       <td className="px-3">{lead.rating ?? '—'}</td>
       <td className="px-3">{lead.reviews?.toLocaleString('pt-BR') ?? '—'}</td>
       <td className="whitespace-nowrap px-3">
-        {lead.website_kind === 'none'
-          ? 'Sem site'
-          : lead.website_kind === 'social'
-            ? 'Somente social'
-            : lead.bad_website
-              ? 'Site ruim'
-              : lead.website
-                ? 'Possui site'
-                : 'Aguardando'}
+        {lead.website_kind === 'none' ? (
+          'Sem site'
+        ) : lead.website_kind === 'social' ? (
+          'Somente social'
+        ) : lead.audit_failure_code ? (
+          <div className="max-w-44">
+            <span
+              className={`font-medium ${lead.audit_failure_code === 'AUDIT_BLOCKED' ? 'text-slate-600' : 'text-amber-700'}`}
+            >
+              {lead.audit_failure_code === 'WEBSITE_DNS_FAILURE'
+                ? 'DNS inexistente'
+                : lead.audit_failure_code === 'WEBSITE_TLS_ERROR'
+                  ? 'Erro de SSL/TLS'
+                  : lead.audit_failure_code === 'AUDIT_BLOCKED'
+                    ? 'Audit bloqueada'
+                    : 'Site indisponível'}
+            </span>
+            {lead.audit_failure_detail && (
+              <p
+                className="truncate text-[10px] text-slate-400"
+                title={lead.audit_failure_detail}
+              >
+                {lead.audit_failure_detail}
+              </p>
+            )}
+          </div>
+        ) : lead.bad_website ? (
+          'Site ruim'
+        ) : lead.website ? (
+          'Possui site'
+        ) : (
+          'Aguardando'
+        )}
       </td>
       <td className="px-3">
         <ContactActions compact onContact={onContact} />

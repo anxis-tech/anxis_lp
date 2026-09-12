@@ -1,5 +1,5 @@
 import { classificationLabels } from '../scoring/classification'
-import type { LeadRow, OpportunityType, QualificationStatus } from '../types/index'
+import type { LeadRow, OpportunityType, QualificationStatus, ScoreStatus } from '../types/index'
 export const inputClass =
   'min-h-10 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none focus:border-[#0075FF] focus:ring-2 focus:ring-blue-100 disabled:opacity-50'
 export const buttonClass =
@@ -25,10 +25,20 @@ export const qualificationLabels: Record<QualificationStatus, string> = {
   discarded: 'Descartado',
   error: 'Falha no processamento',
 }
+export const auditFailureLabels: Record<string, string> = {
+  WEBSITE_DNS_FAILURE: 'DNS inexistente / domínio não encontrado',
+  WEBSITE_TLS_ERROR: 'Certificado SSL/TLS inválido',
+  WEBSITE_UNREACHABLE: 'Site inacessível / fora do ar',
+  AUDIT_BLOCKED: 'Auditoria bloqueada por política do site',
+  WEBSITE_HTTP_ERROR: 'Erro HTTP no site',
+  AUDIT_UNREACHABLE: 'Site inacessível após tentativas',
+}
 export function ScoreBadge({
   lead,
 }: {
-  lead: Pick<LeadRow, 'current_score' | 'classification' | 'manually_discarded'>
+  lead: Pick<LeadRow, 'current_score' | 'classification' | 'manually_discarded'> & {
+    score_status?: ScoreStatus | null
+  }
 }) {
   const label = lead.manually_discarded
     ? 'Descartado manualmente'
@@ -44,14 +54,25 @@ export function ScoreBadge({
           : score >= 55
             ? 'bg-amber-50 text-amber-800'
             : 'bg-slate-100 text-slate-600'
+  const isProvisional = lead.score_status === 'provisional'
+  const isFinal = lead.score_status === 'final'
   return (
-    <span
-      title={label ?? 'Aguardando score'}
-      className={`inline-flex rounded-md px-2 py-1 text-xs font-bold ${color}`}
-    >
-      {score ?? '—'}
-      {score !== null && ' / 100'}
-    </span>
+    <div className="inline-flex flex-col gap-0.5">
+      <span
+        title={label ?? 'Aguardando score'}
+        className={`inline-flex rounded-md px-2 py-1 text-xs font-bold ${color}`}
+      >
+        {score ?? '—'}
+        {score !== null && ' / 100'}
+      </span>
+      {score !== null && (
+        <span
+          className={`text-[10px] font-medium ${isProvisional ? 'text-amber-700' : 'text-slate-400'}`}
+        >
+          {isProvisional ? 'Provisório' : isFinal ? 'Final' : ''}
+        </span>
+      )}
+    </div>
   )
 }
 export function dateLabel(value: string | null) {

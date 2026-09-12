@@ -686,5 +686,65 @@
     "enabled": true,
     "priority": 44,
     "campaign_id": null
+  },
+  {
+    "code": "WEBSITE_DNS_FAILURE",
+    "name": "Domínio ou DNS inexistente",
+    "description": "Domínio configurado não resolve no DNS",
+    "score_group": "site",
+    "points": 25,
+    "config": {
+      "field": "dnsFailure",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 45,
+    "campaign_id": null
+  },
+  {
+    "code": "WEBSITE_UNREACHABLE",
+    "name": "Website inacessível / fora do ar",
+    "description": "Servidor recusou conexão ou host inacessível",
+    "score_group": "site",
+    "points": 20,
+    "config": {
+      "field": "unreachable",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 46,
+    "campaign_id": null
+  },
+  {
+    "code": "WEBSITE_TLS_ERROR",
+    "name": "Certificado SSL/TLS inválido",
+    "description": "Website com certificado expirado ou erro SSL/TLS",
+    "score_group": "site",
+    "points": 15,
+    "config": {
+      "field": "tlsError",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 47,
+    "campaign_id": null
+  },
+  {
+    "code": "WEBSITE_HTTP_ERROR",
+    "name": "Website com erro HTTP 404/410",
+    "description": "Página não encontrada ou removida definitivamente",
+    "score_group": "site",
+    "points": 15,
+    "config": {
+      "field": "httpError",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 48,
+    "campaign_id": null
   }
 ]

@@ -36,7 +36,7 @@ Deno.serve(async (request) => {
   const worker = crypto.randomUUID()
   try {
     const jobs = checked(
-      await db.rpc('prospecting_claim_jobs', { p_worker: worker, p_limit: 5 })
+      await db.rpc('prospecting_claim_jobs', { p_worker: worker, p_limit: 40 })
     ) as Job[]
     const results = await Promise.allSettled(
       jobs.map(async (job) => {

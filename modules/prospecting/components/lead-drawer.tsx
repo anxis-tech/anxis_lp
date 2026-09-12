@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { X, RefreshCw, ExternalLink } from 'lucide-react'
 import { leadDetailsAction, leadControlAction } from '../actions'
 import {
+  auditFailureLabels,
   buttonClass,
   dateLabel,
   observed,
@@ -115,6 +116,19 @@ export function LeadDrawer({
                 {lead.website}
                 <ExternalLink size={14} className="shrink-0" />
               </a>
+            )}
+            {lead.audit_failure_code && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
+                <p className="font-semibold text-amber-950">
+                  Auditoria do site: {auditFailureLabels[lead.audit_failure_code] ?? lead.audit_failure_code}
+                </p>
+                <p className="mt-1 text-amber-800">
+                  {lead.audit_failure_detail ?? 'O site não pôde ser auditado por falha externa de conexão.'}
+                </p>
+                <p className="mt-2 text-slate-500">
+                  O score e a qualificação deste lead foram mantidos e calculados com base nos dados disponíveis.
+                </p>
+              </div>
             )}
             {score ? (
               <section>

@@ -34,13 +34,26 @@ export async function publicAddress(url: URL): Promise<string> {
     if (!isPublicAddress(hostname)) throw new Error('Endereço privado bloqueado.')
     return hostname
   }
-  const addresses = await Promise.race([
-    lookup(hostname, { all: true }),
-    new Promise<never>((_, reject) => {
-      const timer = setTimeout(() => reject(new Error('Timeout DNS.')), 5000)
-      timer.unref?.()
-    }),
-  ])
+  let addresses
+  try {
+    addresses = await Promise.race([
+      lookup(hostname, { all: true }),
+      new Promise<never>((_, reject) => {
+        const timer = setTimeout(() => reject(new Error('Timeout DNS.')), 5000)
+        timer.unref?.()
+      }),
+    ])
+  } catch (err: any) {
+    const msg = err?.message || ''
+    const code = err?.code || ''
+    if (
+      code === 'ENOTFOUND' ||
+      /ENOTFOUND|EAI_NONAME|EAI_NODATA|NXDOMAIN/i.test(msg)
+    ) {
+      throw new Error(`Domínio não encontrado no DNS (ENOTFOUND): ${hostname}`)
+    }
+    throw err
+  }
   if (!addresses.length || addresses.some((a) => !isPublicAddress(a.address)))
     throw new Error('DNS não público bloqueado.')
   return addresses[0].address
@@ -97,15 +110,26 @@ async function pinnedRequest(
       timeout
     )
     request.on('close', () => clearTimeout(timer))
-    request.on('error', (error) =>
-      reject(
-        new Error(
-          error.message.startsWith('Timeout') || error.message.startsWith('Website excedeu')
-            ? error.message
-            : 'Falha de conexão ou TLS ao acessar o website.'
-        )
-      )
-    )
+    request.on('error', (error: any) => {
+      const code = error?.code || ''
+      const msg = error?.message || ''
+      if (msg.startsWith('Timeout') || msg.startsWith('Website excedeu')) {
+        reject(new Error(msg))
+      } else if (code === 'ECONNREFUSED' || /ECONNREFUSED/i.test(msg)) {
+        reject(new Error('Conexão recusada (ECONNREFUSED) ao acessar o website.'))
+      } else if (code === 'ECONNRESET' || /ECONNRESET/i.test(msg)) {
+        reject(new Error('Conexão reiniciada (ECONNRESET) ao acessar o website.'))
+      } else if (code === 'ETIMEDOUT' || /ETIMEDOUT/i.test(msg)) {
+        reject(new Error('Timeout de conexão (ETIMEDOUT) ao acessar o website.'))
+      } else if (
+        /CERT_|DEPTH_|SELF_SIGNED|UNABLE_TO_VERIFY|TLS|SSL/i.test(code) ||
+        /certificate|SSL|TLS/i.test(msg)
+      ) {
+        reject(new Error(`Falha de certificado TLS/SSL (${code || msg}) ao acessar o website.`))
+      } else {
+        reject(new Error(`Falha de conexão (${code || msg}) ao acessar o website.`))
+      }
+    })
     request.end()
   })
 }

@@ -97,41 +97,167 @@ export function parseWebsite(html: string, url: string): DigitalPresence {
         ],
   }
 }
+export type AuditFailureCode =
+  | 'WEBSITE_DNS_FAILURE'
+  | 'WEBSITE_TLS_ERROR'
+  | 'WEBSITE_UNREACHABLE'
+  | 'AUDIT_BLOCKED'
+  | 'WEBSITE_HTTP_ERROR'
+
+export interface AuditTerminalFailureResult {
+  auditFailed: true
+  failureCode: AuditFailureCode
+  failureDetail: string
+  signals: { code: string; source: string; evidence?: Record<string, unknown> }[]
+  digital: DigitalPresence
+}
+
+export type AuditWebsiteResult = DigitalPresence | AuditTerminalFailureResult
+
+export function classifyAuditError(err: unknown): {
+  terminal: boolean
+  code: AuditFailureCode
+  detail: string
+} {
+  const msg = err instanceof Error ? err.message : String(err)
+
+  // 1. DNS / NXDOMAIN / ENOTFOUND / URL Inválida -> Terminal
+  if (
+    /ENOTFOUND|NXDOMAIN|EAI_NONAME|EAI_NODATA|Domínio não encontrado|Endereço de website não permitido|Endereço de website não público|DNS não público/i.test(
+      msg
+    )
+  ) {
+    return {
+      terminal: true,
+      code: 'WEBSITE_DNS_FAILURE',
+      detail: 'Domínio não encontrado ou DNS inválido',
+    }
+  }
+
+  // 2. TLS / Certificado inválido -> Terminal
+  if (/TLS|SSL|certificate|CERT_|DEPTH_|SELF_SIGNED|UNABLE_TO_VERIFY/i.test(msg)) {
+    return {
+      terminal: true,
+      code: 'WEBSITE_TLS_ERROR',
+      detail: 'Certificado TLS/SSL inválido ou expirado',
+    }
+  }
+
+  // 3. ECONNREFUSED -> Terminal
+  if (/ECONNREFUSED|Conexão recusada/i.test(msg)) {
+    return {
+      terminal: true,
+      code: 'WEBSITE_UNREACHABLE',
+      detail: 'Servidor recusou conexão (ECONNREFUSED)',
+    }
+  }
+
+  // 4. HTTP 403 / Bot protection / robots.txt -> Terminal / Bloqueado
+  if (/HTTP 403|HTTP 401|não autorizou a leitura de robots|não permitida pelo robots/i.test(msg)) {
+    return {
+      terminal: true,
+      code: 'AUDIT_BLOCKED',
+      detail: 'Acesso bloqueado por proteção de bot ou política robots.txt',
+    }
+  }
+
+  // 5. HTTP 404 / 410 -> Terminal
+  if (/HTTP 404|HTTP 410/i.test(msg)) {
+    return {
+      terminal: true,
+      code: 'WEBSITE_HTTP_ERROR',
+      detail: 'Página não encontrada (HTTP 404)',
+    }
+  }
+
+  // 6. Redirection loop / Não HTML -> Terminal
+  if (/limite de redirecionamentos|não retornou uma página HTML/i.test(msg)) {
+    return {
+      terminal: true,
+      code: 'WEBSITE_HTTP_ERROR',
+      detail: msg,
+    }
+  }
+
+  // 7. Transient / temporários: Timeout, ECONNRESET, HTTP 429, HTTP 5xx
+  return {
+    terminal: false,
+    code: 'WEBSITE_UNREACHABLE',
+    detail: msg,
+  }
+}
+
 export async function auditWebsite(
   website: string,
   key: string | undefined
-): Promise<DigitalPresence> {
-  validateWebsiteURL(website)
-  const deadline = Date.now() + 20000
-  const policies = new Map<string, ReturnType<typeof parseRobots>>()
-  const response = await fetchWebsite(website, 0, deadline, async (url) => {
-    if (!policies.has(url.origin)) {
-      const robotsURL = new URL('/robots.txt', url).href
-      const robots = await fetchWebsite(robotsURL, 0, deadline)
-      if (robots.status >= 500 || [429, 401, 403].includes(robots.status))
-        throw new Error('Website não autorizou a leitura de robots.txt. Auditoria adiada.')
-      policies.set(url.origin, parseRobots(robotsURL, robots.status === 200 ? robots.body : ''))
+): Promise<AuditWebsiteResult> {
+  try {
+    validateWebsiteURL(website)
+    const deadline = Date.now() + 20000
+    const policies = new Map<string, ReturnType<typeof parseRobots>>()
+    const response = await fetchWebsite(website, 0, deadline, async (url) => {
+      if (!policies.has(url.origin)) {
+        const robotsURL = new URL('/robots.txt', url).href
+        const robots = await fetchWebsite(robotsURL, 0, deadline)
+        if (robots.status >= 500 || [429].includes(robots.status))
+          throw new Error(`Website retornou HTTP ${robots.status} ao consultar robots.txt.`)
+        if ([401, 403].includes(robots.status))
+          throw new Error('Website não autorizou a leitura de robots.txt.')
+        policies.set(url.origin, parseRobots(robotsURL, robots.status === 200 ? robots.body : ''))
+      }
+      if (policies.get(url.origin)?.isAllowed(url.href, 'AnxisProspecting') === false)
+        throw new Error('Auditoria não permitida pelo robots.txt deste website.')
+    })
+    if (response.status < 200 || response.status >= 300)
+      throw new Error(`Website retornou HTTP ${response.status}.`)
+    if (!/text\/html|application\/xhtml\+xml/i.test(response.type))
+      throw new Error('O endereço não retornou uma página HTML.')
+    const digital = parseWebsite(response.body, response.url)
+    const speed = await pageSpeed(key, response.url)
+    return {
+      ...digital,
+      ...speed,
+      warnings: [
+        ...(digital.warnings ?? []),
+        ...('warning' in speed && speed.warning ? [speed.warning] : []),
+      ],
+      badWebsite:
+        (speed.performance !== null && speed.performance < 50) ||
+        (speed.seo !== null && speed.seo < 50) ||
+        digital.https === false ||
+        digital.hasViewport === false,
     }
-    if (policies.get(url.origin)?.isAllowed(url.href, 'AnxisProspecting') === false)
-      throw new Error('Auditoria não permitida pelo robots.txt deste website.')
-  })
-  if (response.status < 200 || response.status >= 300)
-    throw new Error(`Website retornou HTTP ${response.status}.`)
-  if (!/text\/html|application\/xhtml\+xml/i.test(response.type))
-    throw new Error('O endereço não retornou uma página HTML.')
-  const digital = parseWebsite(response.body, response.url)
-  const speed = await pageSpeed(key, response.url)
-  return {
-    ...digital,
-    ...speed,
-    warnings: [
-      ...(digital.warnings ?? []),
-      ...('warning' in speed && speed.warning ? [speed.warning] : []),
-    ],
-    badWebsite:
-      (speed.performance !== null && speed.performance < 50) ||
-      (speed.seo !== null && speed.seo < 50) ||
-      digital.https === false ||
-      digital.hasViewport === false,
+  } catch (err) {
+    const classified = classifyAuditError(err)
+    if (classified.terminal) {
+      const rawMsg = err instanceof Error ? err.message : String(err)
+      return {
+        auditFailed: true,
+        failureCode: classified.code,
+        failureDetail: classified.detail,
+        signals: [
+          {
+            code: classified.code,
+            source: 'website_audit',
+            evidence: { detail: classified.detail, error: rawMsg },
+          },
+        ],
+        digital: {
+          websiteKind: 'website',
+          crawlStatus: 'failed',
+          warnings: [classified.detail],
+          finalUrl: website,
+          crawledAt: new Date().toISOString(),
+          auditFailureCode: classified.code,
+          dnsFailure: classified.code === 'WEBSITE_DNS_FAILURE',
+          tlsError: classified.code === 'WEBSITE_TLS_ERROR',
+          unreachable: classified.code === 'WEBSITE_UNREACHABLE',
+          httpError: classified.code === 'WEBSITE_HTTP_ERROR',
+          badWebsite: classified.code !== 'AUDIT_BLOCKED',
+        },
+      }
+    }
+    // Erros temporários continuam sendo lançados para permitir retries automáticos com backoff
+    throw err
   }
 }

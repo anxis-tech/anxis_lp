@@ -78,6 +78,16 @@ export interface Business {
   commercialStructure?: boolean
   attributions?: { provider: string; providerUri?: string }[]
 }
+export type ScoreStatus = 'pending' | 'provisional' | 'final'
+export type ScoreConfidence = 'low' | 'medium' | 'high'
+export type AuditFailureCode =
+  | 'WEBSITE_DNS_FAILURE'
+  | 'WEBSITE_TLS_ERROR'
+  | 'WEBSITE_UNREACHABLE'
+  | 'AUDIT_BLOCKED'
+  | 'WEBSITE_HTTP_ERROR'
+  | 'AUDIT_UNREACHABLE'
+
 export interface DigitalPresence {
   websiteKind?: 'none' | 'social' | 'website'
   performance?: number | null
@@ -109,6 +119,11 @@ export interface DigitalPresence {
   warnings?: string[]
   finalUrl?: string
   crawledAt?: string
+  auditFailureCode?: AuditFailureCode | null
+  dnsFailure?: boolean
+  tlsError?: boolean
+  unreachable?: boolean
+  httpError?: boolean
 }
 export interface LeadRow {
   id: string
@@ -142,6 +157,10 @@ export interface LeadRow {
   digital: DigitalPresence
   enriched_at: string | null
   audited_at: string | null
+  score_status: ScoreStatus
+  score_confidence?: ScoreConfidence
+  audit_failure_code?: AuditFailureCode | null
+  audit_failure_detail?: string | null
 }
 export interface Job {
   id: string

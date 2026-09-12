@@ -71,7 +71,9 @@ export function calculateScore(input: ScoringInput, rules: readonly Rule[]): Sco
         : totals.system > totals.site
           ? 'software'
           : input.digital.websiteKind === 'website'
-            ? 'redesign'
+            ? facts.dnsFailure || facts.unreachable
+              ? 'website'
+              : 'redesign'
             : 'website',
     useAI: !eliminated && final >= 40 && final >= input.aiThreshold,
   }

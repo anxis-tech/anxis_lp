@@ -38,6 +38,11 @@ export function factsFor(input: ScoringInput): Record<string, unknown> {
       d.hasCTA === true,
     franchise: b.franchise === true,
     lowFit: b.lowFit === true,
+    dnsFailure: site && (d.dnsFailure === true || d.auditFailureCode === 'WEBSITE_DNS_FAILURE'),
+    tlsError: site && (d.tlsError === true || d.auditFailureCode === 'WEBSITE_TLS_ERROR'),
+    unreachable: site && (d.unreachable === true || d.auditFailureCode === 'WEBSITE_UNREACHABLE' || d.auditFailureCode === 'AUDIT_UNREACHABLE'),
+    httpError: site && (d.httpError === true || d.auditFailureCode === 'WEBSITE_HTTP_ERROR'),
+    auditBlocked: site && d.auditFailureCode === 'AUDIT_BLOCKED',
   }
 }
 export function evaluate(rule: Rule, facts: Record<string, unknown>): boolean {

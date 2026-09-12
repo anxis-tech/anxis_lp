@@ -250,3 +250,68 @@ test('performance and SEO boundaries, unknown metrics and excellent-site penalty
   )
   assert.equal(excellent.penalties, -15)
 })
+test('audit failure rules add deterministic site opportunity and adjust opportunityType', () => {
+  const dnsFailure = calculateScore(
+    input({
+      digital: {
+        websiteKind: 'website',
+        dnsFailure: true,
+      },
+    }),
+    rules
+  )
+  assert.equal(dnsFailure.site, 25)
+  assert.equal(dnsFailure.opportunityType, 'website')
+  assert.ok(dnsFailure.items.some((i) => i.code === 'WEBSITE_DNS_FAILURE'))
+
+  const unreachable = calculateScore(
+    input({
+      digital: {
+        websiteKind: 'website',
+        unreachable: true,
+      },
+    }),
+    rules
+  )
+  assert.equal(unreachable.site, 20)
+  assert.equal(unreachable.opportunityType, 'website')
+  assert.ok(unreachable.items.some((i) => i.code === 'WEBSITE_UNREACHABLE'))
+
+  const tlsError = calculateScore(
+    input({
+      digital: {
+        websiteKind: 'website',
+        tlsError: true,
+      },
+    }),
+    rules
+  )
+  assert.equal(tlsError.site, 15)
+  assert.equal(tlsError.opportunityType, 'redesign')
+  assert.ok(tlsError.items.some((i) => i.code === 'WEBSITE_TLS_ERROR'))
+
+  const blocked = calculateScore(
+    input({
+      digital: {
+        websiteKind: 'website',
+        auditFailureCode: 'AUDIT_BLOCKED',
+      },
+    }),
+    rules
+  )
+  assert.equal(blocked.site, 0)
+  assert.equal(blocked.penalties, 0)
+
+  // Provisional score (before audit) still scores business & commercial facts
+  const provisional = calculateScore(
+    input({
+      digital: {
+        websiteKind: 'website',
+      },
+    }),
+    rules
+  )
+  assert.ok(provisional.final > 0, 'provisional score must be > 0 with valid business data')
+  assert.equal(provisional.business, 25)
+  assert.equal(provisional.commercial, 13)
+})

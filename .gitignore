@@ -43,4 +43,4 @@ docs/*.env.example
 next-env.d.ts
 
 /supabase/migrations/*
-!/supabase/migrations/20260911*_prospecting*.sql
+!/supabase/migrations/*prospecting*.sql
