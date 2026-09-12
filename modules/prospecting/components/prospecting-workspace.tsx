@@ -120,8 +120,17 @@ const LeadTableRow = memo(function LeadTableRow({
           onClick={() => onDetail(lead.id)}
           className="text-left font-semibold text-slate-800 hover:text-blue-600"
         >
-          {lead.name}
+          {lead.name === 'Estabelecimento em enriquecimento'
+            ? 'Carregando empresa...'
+            : lead.name}
         </button>
+        {(lead.qualification_status === 'discovered' ||
+          lead.qualification_status === 'enriching' ||
+          lead.name === 'Estabelecimento em enriquecimento') && (
+          <span className="ml-1.5 inline-flex items-center rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700">
+            Enriquecendo
+          </span>
+        )}
         <p className="mt-1 text-[11px] text-slate-400">
           {segments[lead.segment as Segment]?.label ?? lead.segment}
           {lead.ai_analyzed && ' · IA'}
@@ -160,8 +169,14 @@ const LeadTableRow = memo(function LeadTableRow({
       <td className="whitespace-nowrap px-3">
         {lead.website_kind === 'none' ? (
           'Sem site'
-        ) : lead.website_kind === 'social' ? (
+        ) : lead.website_kind === 'social' || lead.website_kind === 'social_only' ? (
           'Somente social'
+        ) : lead.website_kind === 'messaging_only' ? (
+          'Somente WhatsApp'
+        ) : lead.website_kind === 'link_aggregator' ? (
+          'Linktree / Bio'
+        ) : lead.website_kind === 'shortener_unresolved' ? (
+          <span title="Encurtador de link não pôde ser resolvido">Encurtador pendente</span>
         ) : lead.audit_failure_code ? (
           <div className="max-w-44">
             <span

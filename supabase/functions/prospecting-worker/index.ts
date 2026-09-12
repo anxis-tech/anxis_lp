@@ -38,54 +38,88 @@ Deno.serve(async (request) => {
     const jobs = checked(
       await db.rpc('prospecting_claim_jobs', { p_worker: worker, p_limit: 40 })
     ) as Job[]
-    const results = await Promise.allSettled(
-      jobs.map(async (job) => {
-        try {
-          const campaign = await getCampaign(db, job.campaign_id)
-          const lead = job.campaign_lead_id ? await getLead(db, job.campaign_lead_id) : undefined
-          const result = await handlers[job.type]({
-            db,
-            job,
-            campaign,
-            lead,
-            env: {
-              places: Deno.env.get('GOOGLE_PLACES_API_KEY'),
-              pagespeed: Deno.env.get('GOOGLE_PAGESPEED_API_KEY'),
-              gemini: Deno.env.get('GEMINI_API_KEY'),
-              model: Deno.env.get('GEMINI_MODEL'),
-            },
-          })
-          checked(
-            await db.rpc('prospecting_complete_job', {
-              p_id: job.id,
-              p_worker: worker,
-              p_result: result,
+
+    if (!jobs.length) {
+      return Response.json({ claimed: 0, completed: 0, failed: 0 })
+    }
+
+    const activeJobIds = new Set(jobs.map((j) => j.id))
+    const heartbeatTimer = setInterval(async () => {
+      if (activeJobIds.size === 0) return
+      try {
+        await db.rpc('prospecting_heartbeat', {
+          p_worker: worker,
+          p_job_ids: Array.from(activeJobIds),
+        })
+      } catch {
+        // Non-fatal if a periodic heartbeat tick fails
+      }
+    }, 15000)
+
+    try {
+      const results = await Promise.allSettled(
+        jobs.map(async (job) => {
+          const startedAt = Date.now()
+          try {
+            const campaign = await getCampaign(db, job.campaign_id)
+            const lead = job.campaign_lead_id ? await getLead(db, job.campaign_lead_id) : undefined
+            const result = await handlers[job.type]({
+              db,
+              job,
+              campaign,
+              lead,
+              env: {
+                places: Deno.env.get('GOOGLE_PLACES_API_KEY'),
+                pagespeed: Deno.env.get('GOOGLE_PAGESPEED_API_KEY'),
+                gemini: Deno.env.get('GEMINI_API_KEY'),
+                model: Deno.env.get('GEMINI_MODEL'),
+              },
             })
-          )
-        } catch (error) {
-          const message =
-            error instanceof Error
-              ? error.message.slice(0, 600)
-              : 'Falha inesperada no processamento.'
-          console.error(
-            JSON.stringify({ jobId: job.id, type: job.type, attempt: job.attempts, message })
-          )
-          checked(
-            await db.rpc('prospecting_fail_job', {
-              p_id: job.id,
-              p_worker: worker,
-              p_error: message,
-            })
-          )
-          throw new Error(message)
-        }
+            checked(
+              await db.rpc('prospecting_complete_job', {
+                p_id: job.id,
+                p_worker: worker,
+                p_result: result,
+              })
+            )
+          } catch (error) {
+            const durationMs = Date.now() - startedAt
+            const rawMsg =
+              error instanceof Error
+                ? error.message.slice(0, 500)
+                : 'Falha inesperada no processamento.'
+            const formattedMessage = `[${job.type}] ${rawMsg} (${durationMs}ms)`
+            console.error(
+              JSON.stringify({
+                jobId: job.id,
+                type: job.type,
+                attempt: job.attempts,
+                durationMs,
+                message: rawMsg,
+              })
+            )
+            checked(
+              await db.rpc('prospecting_fail_job', {
+                p_id: job.id,
+                p_worker: worker,
+                p_error: formattedMessage,
+              })
+            )
+            throw new Error(formattedMessage)
+          } finally {
+            activeJobIds.delete(job.id)
+          }
+        })
+      )
+
+      return Response.json({
+        claimed: jobs.length,
+        completed: results.filter((r) => r.status === 'fulfilled').length,
+        failed: results.filter((r) => r.status === 'rejected').length,
       })
-    )
-    return Response.json({
-      claimed: jobs.length,
-      completed: results.filter((r) => r.status === 'fulfilled').length,
-      failed: results.filter((r) => r.status === 'rejected').length,
-    })
+    } finally {
+      clearInterval(heartbeatTimer)
+    }
   } catch {
     return Response.json(
       { error: 'Não foi possível processar o lote. Verifique migrations e logs.' },

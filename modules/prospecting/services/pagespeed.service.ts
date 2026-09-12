@@ -24,15 +24,32 @@ export async function pageSpeed(key: string | undefined, website: string) {
   url.searchParams.set('key', key)
   for (const c of ['performance', 'seo', 'accessibility', 'best-practices'])
     url.searchParams.append('category', c)
-  const data = schema.parse(await apiJSON(url.href, {}, 'PageSpeed', 45000))
-  const categories = data.lighthouseResult?.categories
-  if (!categories) throw new Error('PageSpeed: auditoria indisponível para este website.')
-  const score = (name: string) =>
-    typeof categories[name]?.score === 'number' ? Math.round(categories[name].score * 100) : null
-  return {
-    performance: score('performance'),
-    seo: score('seo'),
-    accessibility: score('accessibility'),
-    bestPractices: score('best-practices'),
+  try {
+    const data = schema.parse(await apiJSON(url.href, {}, 'PageSpeed', 40000))
+    const categories = data.lighthouseResult?.categories
+    if (!categories)
+      return {
+        performance: null,
+        seo: null,
+        accessibility: null,
+        bestPractices: null,
+        warning: 'PageSpeed: auditoria indisponível para este website.',
+      }
+    const score = (name: string) =>
+      typeof categories[name]?.score === 'number' ? Math.round(categories[name].score * 100) : null
+    return {
+      performance: score('performance'),
+      seo: score('seo'),
+      accessibility: score('accessibility'),
+      bestPractices: score('best-practices'),
+    }
+  } catch (error: any) {
+    return {
+      performance: null,
+      seo: null,
+      accessibility: null,
+      bestPractices: null,
+      warning: `PageSpeed não concluído (${error?.message ?? 'tempo limite excedido'}).`,
+    }
   }
 }

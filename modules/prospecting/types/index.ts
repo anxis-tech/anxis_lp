@@ -88,8 +88,17 @@ export type AuditFailureCode =
   | 'WEBSITE_HTTP_ERROR'
   | 'AUDIT_UNREACHABLE'
 
+export type WebsiteKind =
+  | 'website'
+  | 'social_only'
+  | 'social'
+  | 'messaging_only'
+  | 'link_aggregator'
+  | 'shortener_unresolved'
+  | 'none'
+
 export interface DigitalPresence {
-  websiteKind?: 'none' | 'social' | 'website'
+  websiteKind?: WebsiteKind
   performance?: number | null
   seo?: number | null
   accessibility?: number | null

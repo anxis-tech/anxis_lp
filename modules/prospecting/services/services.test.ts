@@ -34,7 +34,7 @@ test('scripts cannot masquerade as booking or CTA; JS shells remain unknown', ()
   assert.equal(result.crawlStatus, 'partial')
 })
 test('social domains are matched exactly, not substrings', () => {
-  assert.equal(websiteKind('https://www.instagram.com/clinic'), 'social')
+  assert.equal(websiteKind('https://www.instagram.com/clinic'), 'social_only')
   assert.equal(websiteKind('https://instagram.com.evil.example'), 'website')
   assert.equal(websiteKind(null), 'none')
 })
@@ -91,7 +91,7 @@ test('Places uses server headers and minimal discovery mask; enrichment maps rea
     assert.equal((await searchPlaces('fake-key', 'clínica em Natal')).nextPageToken, 'next')
     assert.equal(
       new Headers(calls[0].init.headers).get('X-Goog-FieldMask'),
-      'places.id,nextPageToken'
+      'places.id,places.displayName,nextPageToken'
     )
     assert.equal(calls[0].url.includes('fake-key'), false)
     const business = await enrichPlace('fake-key', 'place')
@@ -155,4 +155,92 @@ test('Gemini uses structured JSON, validates output and cannot mutate determinis
   } finally {
     globalThis.fetch = original
   }
+})
+
+test('classifyWebsite categorizes normal, messaging, social, link aggregator, and shorteners', async () => {
+  const { classifyWebsite } = await import('./website-classification.service.ts')
+
+  // 1. Normal URL -> website
+  const normal = await classifyWebsite('https://empresa.com.br')
+  assert.equal(normal.kind, 'website')
+  assert.equal(normal.redirected, false)
+
+  // 2. WhatsApp -> messaging_only
+  const wa = await classifyWebsite('https://wa.me/5584999999999')
+  assert.equal(wa.kind, 'messaging_only')
+
+  const waApi = await classifyWebsite('https://api.whatsapp.com/send?phone=5584999999999')
+  assert.equal(waApi.kind, 'messaging_only')
+
+  // 3. Instagram -> social_only
+  const ig = await classifyWebsite('https://instagram.com/empresa')
+  assert.equal(ig.kind, 'social_only')
+
+  // 4. Linktree -> link_aggregator
+  const linktree = await classifyWebsite('https://linktr.ee/empresa')
+  assert.equal(linktree.kind, 'link_aggregator')
+
+  const beacons = await classifyWebsite('https://beacons.ai/empresa')
+  assert.equal(beacons.kind, 'link_aggregator')
+
+  // 5. Shortener -> WhatsApp (mock resolver)
+  const mockResolverToWhatsApp = async (url: string) => ({
+    finalUrl: 'https://wa.me/5584999999999',
+    redirected: true,
+  })
+  const shortenerToWa = await classifyWebsite('https://bit.ly/3FdeLZq', mockResolverToWhatsApp)
+  assert.equal(shortenerToWa.kind, 'messaging_only')
+  assert.equal(shortenerToWa.redirected, true)
+  assert.equal(shortenerToWa.finalUrl, 'https://wa.me/5584999999999')
+
+  // 6. Shortener -> Real Site (mock resolver)
+  const mockResolverToSite = async (url: string) => ({
+    finalUrl: 'https://empresa.com.br',
+    redirected: true,
+  })
+  const shortenerToSite = await classifyWebsite('https://bit.ly/empresa123', mockResolverToSite)
+  assert.equal(shortenerToSite.kind, 'website')
+  assert.equal(shortenerToSite.redirected, true)
+  assert.equal(shortenerToSite.finalUrl, 'https://empresa.com.br')
+
+  // 7. Shortener -> Unresolved
+  const mockResolverFailed = async (url: string) => ({
+    finalUrl: url,
+    redirected: false,
+    error: 'Timeout DNS ao resolver',
+  })
+  const shortenerFailed = await classifyWebsite('https://bit.ly/quebrado', mockResolverFailed)
+  assert.equal(shortenerFailed.kind, 'shortener_unresolved')
+})
+
+test('classifyAuditError accurately separates terminal errors from transient retries', async () => {
+  const { classifyAuditError } = await import('./website-audit.service.ts')
+
+  // ENOTFOUND / NXDOMAIN -> terminal, WEBSITE_DNS_FAILURE
+  const dns = classifyAuditError(new Error('getaddrinfo ENOTFOUND empresa-inexistente.com'))
+  assert.equal(dns.terminal, true)
+  assert.equal(dns.code, 'WEBSITE_DNS_FAILURE')
+
+  // TLS error -> terminal, WEBSITE_TLS_ERROR
+  const tls = classifyAuditError(new Error('Falha de certificado TLS/SSL (CERT_HAS_EXPIRED)'))
+  assert.equal(tls.terminal, true)
+  assert.equal(tls.code, 'WEBSITE_TLS_ERROR')
+
+  // ECONNREFUSED -> terminal, WEBSITE_UNREACHABLE
+  const refused = classifyAuditError(new Error('Conexão recusada (ECONNREFUSED)'))
+  assert.equal(refused.terminal, true)
+  assert.equal(refused.code, 'WEBSITE_UNREACHABLE')
+
+  // HTTP 403 / bot blocked -> terminal, AUDIT_BLOCKED
+  const blocked = classifyAuditError(new Error('Website não autorizou a leitura de robots.txt.'))
+  assert.equal(blocked.terminal, true)
+  assert.equal(blocked.code, 'AUDIT_BLOCKED')
+
+  // Timeout -> transient (terminal: false)
+  const timeout = classifyAuditError(new Error('Timeout ao acessar o website.'))
+  assert.equal(timeout.terminal, false)
+
+  // ECONNRESET -> transient (terminal: false)
+  const reset = classifyAuditError(new Error('Conexão reiniciada (ECONNRESET)'))
+  assert.equal(reset.terminal, false)
 })

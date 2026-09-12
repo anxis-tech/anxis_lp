@@ -20,6 +20,9 @@ test('migrations, RLS, transactional jobs, dedupe, score history and retries in 
       '20260911000000_prospecting.sql',
       '20260911010000_prospecting_rules.sql',
       '20260911020000_prospecting_cron.sql',
+      '20260912000000_prospecting_realtime.sql',
+      '20260912010000_prospecting_pipeline_v2.sql',
+      '20260912020000_prospecting_pipeline_v3.sql',
     ])
       await db.exec(await readFile(`supabase/migrations/${file}`, 'utf8'))
     const login = async (id: string) =>
@@ -207,10 +210,37 @@ test('migrations, RLS, transactional jobs, dedupe, score history and retries in 
     ).rows[0].id
     await db.exec('reset role; set role service_role;')
     const secondDiscover = (await claim())[0]
-    await complete(secondDiscover.id, { places: [{ id: 'place-1' }], next: null })
-    assert.equal((await db.query('select * from prospecting_leads')).rows.length, 1)
+    await complete(secondDiscover.id, {
+      places: [{ id: 'place-new', displayName: { text: 'Clínica Especializada' } }],
+      next: null,
+    })
+    assert.equal((await db.query('select * from prospecting_leads')).rows.length, 2)
+    assert.equal(
+      (
+        await db.query<{ name: string }>(
+          'select name from prospecting_leads where google_place_id=$1',
+          ['place-new']
+        )
+      ).rows[0].name,
+      'Clínica Especializada'
+    )
     assert.equal((await db.query('select * from prospecting_campaign_leads')).rows.length, 2)
     const secondEnrich = (await claim())[0]
+    // Test heartbeat renewal
+    const beforeHb = (
+      await db.query<{ locked_at: string }>(
+        'select locked_at from prospecting_jobs where id=$1',
+        [secondEnrich.id]
+      )
+    ).rows[0].locked_at
+    await db.query('select prospecting_heartbeat($1,$2)', [worker, [secondEnrich.id]])
+    const afterHb = (
+      await db.query<{ locked_at: string }>(
+        'select locked_at from prospecting_jobs where id=$1',
+        [secondEnrich.id]
+      )
+    ).rows[0].locked_at
+    assert.ok(new Date(afterHb).getTime() >= new Date(beforeHb).getTime())
     await login(user)
     await db.query('select prospecting_campaign_control($1,$2)', [second, 'paused'])
     await db.exec('reset role; set role service_role;')

@@ -1,99 +1,26 @@
--- Migration: Two-phase scoring (provisional -> final) and external audit failure handling.
+-- Migration: Pipeline v3 - Lease heartbeat, shorter recovery window, place displayName, and robust website kinds
 begin;
 
--- 1. Add score_status, score_confidence, audit_failure_code, audit_failure_detail to prospecting_campaign_leads
-alter table public.prospecting_campaign_leads
-  add column if not exists score_status text not null default 'pending'
-    check(score_status in ('pending','provisional','final')),
-  add column if not exists score_confidence text not null default 'medium'
-    check(score_confidence in ('low','medium','high')),
-  add column if not exists audit_failure_code text,
-  add column if not exists audit_failure_detail text;
-
--- Back-fill existing leads
-update public.prospecting_campaign_leads
-set score_status = case
-  when current_score is not null and audited_at is not null then 'final'
-  when current_score is not null and (digital->>'websiteKind' in ('none', 'social')) then 'final'
-  when current_score is not null then 'provisional'
-  else 'pending'
-end,
-score_confidence = case
-  when current_score is not null and audited_at is not null then 'high'
-  when current_score is not null and (digital->>'websiteKind' in ('none', 'social')) then 'high'
-  when current_score is not null then 'medium'
-  else 'low'
-end;
-
--- 2. Add new scoring rules for external website failures (deterministic opportunity scoring)
-insert into public.prospecting_scoring_rules(code,name,description,score_group,points,config,priority)
-values
-  ('WEBSITE_DNS_FAILURE','Domínio ou DNS inexistente','Domínio configurado não resolve no DNS (oportunidade de novo site)','site',25,'{"field": "dnsFailure", "op": "eq", "value": true}'::jsonb,13),
-  ('WEBSITE_UNREACHABLE','Website inacessível / fora do ar','Servidor recusou conexão ou host inacessível (oportunidade de novo site/hospedagem)','site',20,'{"field": "unreachable", "op": "eq", "value": true}'::jsonb,14),
-  ('WEBSITE_TLS_ERROR','Certificado SSL/TLS inválido','Website com certificado expirado ou erro de segurança SSL/TLS (oportunidade de correção/redesign)','site',15,'{"field": "tlsError", "op": "eq", "value": true}'::jsonb,15),
-  ('WEBSITE_HTTP_ERROR','Website com erro HTTP 404/410','Página não encontrada ou removida definitivamente','site',15,'{"field": "httpError", "op": "eq", "value": true}'::jsonb,16)
-on conflict do nothing;
-
--- 3. Update view prospecting_lead_list to include new columns
-drop view if exists public.prospecting_lead_list cascade;
-create view public.prospecting_lead_list with (security_invoker=true) as
-  select
-    cl.id, cl.campaign_id, cl.lead_id, cl.business, cl.digital,
-    cl.qualification_status, cl.pipeline_stage, cl.current_score, cl.classification,
-    cl.opportunity_type, cl.ai_analyzed, cl.manually_discarded, cl.last_contact_at,
-    cl.enriched_at, cl.audited_at, cl.scored_at, cl.created_at, cl.updated_at,
-    cl.score_status, cl.score_confidence, cl.audit_failure_code, cl.audit_failure_detail,
-    l.name, l.google_place_id, c.segment,
-    cl.business->>'city' as city, cl.business->>'state' as state,
-    (cl.business->>'rating')::numeric as rating, (cl.business->>'reviews')::integer as reviews,
-    cl.business->>'website' as website, cl.business->>'phone' as phone,
-    cl.digital->>'email' as email, cl.digital->>'websiteKind' as website_kind,
-    (cl.digital->>'performance')::numeric as performance,
-    (cl.digital->>'badWebsite')::boolean as bad_website,
-    (cl.digital->>'hasBooking')::boolean as has_booking,
-    (cl.digital->>'whatsappOnly')::boolean as whatsapp_only
-  from prospecting_campaign_leads cl
-  join prospecting_leads l on l.id=cl.lead_id
-  join prospecting_campaigns c on c.id=cl.campaign_id;
-
-grant select on public.prospecting_lead_list to authenticated, service_role;
-
--- 4. Update prospecting_enqueue with default priorities
-create or replace function public.prospecting_enqueue(
-  p_campaign uuid,
-  p_lead uuid,
-  p_type text,
-  p_key text,
-  p_payload jsonb default '{}'::jsonb,
-  p_priority integer default null
-) returns void
+-- 1. Create heartbeat function for workers processing active jobs
+create or replace function public.prospecting_heartbeat(p_worker uuid, p_job_ids uuid[])
+returns void
 language plpgsql security definer set search_path=public as $$
-declare
-  v_prio integer;
 begin
-  v_prio := coalesce(p_priority,
-    case p_type
-      when 'calculate_score' then 10
-      when 'enrich_lead'     then 5
-      when 'refresh_lead'    then 5
-      when 'analyze_ai'      then 3
-      when 'audit_website'   then 1
-      when 'discover_places' then 0
-      else 0
-    end
-  );
-
-  insert into prospecting_jobs(campaign_id, campaign_lead_id, type, dedupe_key, payload, priority)
-  values(p_campaign, p_lead, p_type, p_key, p_payload, v_prio)
-  on conflict(dedupe_key) do nothing;
+  update public.prospecting_jobs
+  set locked_at = now()
+  where id = any(p_job_ids)
+    and locked_by = p_worker
+    and status = 'processing';
 end $$;
 
--- 5. Update prospecting_claim_jobs with partition limits per job type and higher limit
+grant execute on function public.prospecting_heartbeat(uuid, uuid[]) to authenticated, service_role;
+
+-- 2. Update prospecting_claim_jobs with 3-minute recovery window and bounded audit concurrency
 create or replace function public.prospecting_claim_jobs(p_worker uuid, p_limit integer default 40)
 returns setof prospecting_jobs
 language plpgsql security definer set search_path=public as $$
 begin
-  -- Expired leases recovery
+  -- Expired leases recovery: 3 minutes without heartbeat means the container/worker died
   with expired as (
     update prospecting_jobs set
       status = case when attempts >= max_attempts then 'failed' else 'pending' end,
@@ -101,7 +28,7 @@ begin
       locked_at = null,
       run_after = now() + interval '1 minute',
       error_message = 'Execução interrompida; lease expirado.'
-    where status = 'processing' and locked_at < now() - interval '10 minutes'
+    where status = 'processing' and locked_at < now() - interval '3 minutes'
       and pg_try_advisory_xact_lock(hashtextextended(campaign_id::text, 1701))
     returning *
   ), locked_leads as materialized (
@@ -122,7 +49,12 @@ begin
     and (c.discovery_done or exists(select 1 from prospecting_jobs where campaign_id = c.id and status = 'failed' and type <> 'audit_website'))
     and not exists(select 1 from prospecting_jobs where campaign_id = c.id and status in ('pending','processing'));
 
-  -- Pick jobs with per-type concurrency bounds to avoid starvation & network flood
+  -- Pick jobs with per-type concurrency bounds:
+  -- calculate_score: up to 40 (lightning fast)
+  -- enrich_lead / refresh_lead: up to 15
+  -- audit_website: up to 3 (strictly bounded to avoid socket/bandwidth saturation)
+  -- analyze_ai: up to 3
+  -- discover_places: up to 3
   return query with ranked as (
     select
       j.id,
@@ -141,7 +73,7 @@ begin
     join prospecting_jobs j on j.id = r.id
     where (r.type = 'calculate_score' and r.rank_in_type <= 40)
        or (r.type in ('enrich_lead', 'refresh_lead') and r.rank_in_type <= 15)
-       or (r.type = 'audit_website' and r.rank_in_type <= 8)
+       or (r.type = 'audit_website' and r.rank_in_type <= 3)
        or (r.type = 'analyze_ai' and r.rank_in_type <= 3)
        or (r.type = 'discover_places' and r.rank_in_type <= 3)
     order by j.priority desc, j.created_at
@@ -176,7 +108,7 @@ begin
   select * from claimed;
 end $$;
 
--- 6. Update prospecting_complete_job for 2-phase scoring and classified audit failures
+-- 3. Update prospecting_complete_job for discover_places to capture real displayName
 create or replace function public.prospecting_complete_job(p_id uuid, p_worker uuid, p_result jsonb)
 returns void
 language plpgsql security definer set search_path=public as $$
@@ -193,6 +125,7 @@ declare
   v_digital jsonb;
   v_has_site boolean;
   v_phase text;
+  v_display_name text;
 begin
   select * into j from prospecting_jobs where id = p_id;
   if j.id is null then return; end if;
@@ -216,9 +149,17 @@ begin
     select count(*) into v_count from prospecting_campaign_leads where campaign_id = c.id;
     for v_item in select value from jsonb_array_elements(p_result->'places') order by value->>'id' loop
       exit when v_count >= c.volume;
+
+      v_display_name := coalesce(v_item->'displayName'->>'text', 'Carregando empresa...');
+
       insert into prospecting_leads(google_place_id, name)
-      values(v_item->>'id', 'Estabelecimento em enriquecimento')
-      on conflict(google_place_id) do update set google_place_id = excluded.google_place_id
+      values(v_item->>'id', v_display_name)
+      on conflict(google_place_id) do update set
+        name = case
+          when prospecting_leads.name in ('Estabelecimento em enriquecimento', 'Carregando empresa...')
+            then coalesce(excluded.name, prospecting_leads.name)
+          else prospecting_leads.name
+        end
       returning id into v_lead;
 
       v_cl := null;
@@ -257,7 +198,7 @@ begin
     v_digital := p_result->'digital';
 
     update prospecting_leads set
-      name = v_business->>'name',
+      name = coalesce(v_business->>'name', name),
       business = v_business,
       enriched_at = now()
     where id = cl.lead_id;
@@ -289,6 +230,8 @@ begin
       on conflict do nothing;
     end if;
 
+    -- Only real 'website' kinds undergo technical crawler audit.
+    -- messaging_only, social_only, link_aggregator, shortener_unresolved, none skip audit!
     v_has_site := (v_digital->>'websiteKind' = 'website' and not coalesce((v_business->>'closed')::boolean, false));
 
     if v_has_site then
@@ -307,7 +250,7 @@ begin
         1
       );
     else
-      -- No audit needed: single FINAL score immediately (priority 10)
+      -- Non-website (social, messaging, aggregator, none): single FINAL score immediately (priority 10)
       perform prospecting_enqueue(
         c.id, cl.id, 'calculate_score',
         j.id || ':score:final',
@@ -323,7 +266,6 @@ begin
     on conflict(job_id) do nothing;
 
     if (p_result ? 'auditFailed') and (p_result->>'auditFailed')::boolean = true then
-      -- External terminal failure (DNS, TLS, unreachable, 404, blocked)
       update prospecting_campaign_leads set
         digital = coalesce(p_result->'digital', digital),
         audited_at = now(),
@@ -332,14 +274,12 @@ begin
         qualification_status = 'audited'
       where id = cl.id;
 
-      -- Persist failure signals
       for v_item in select * from jsonb_array_elements(coalesce(p_result->'signals', '[]'::jsonb)) loop
         insert into prospecting_signals(lead_id, campaign_lead_id, code, evidence)
         values(cl.lead_id, cl.id, v_item->>'code', v_item)
         on conflict(campaign_lead_id, code) do update set evidence = excluded.evidence;
       end loop;
     else
-      -- Successful audit
       update prospecting_campaign_leads set
         digital = p_result,
         audited_at = now(),
@@ -355,7 +295,6 @@ begin
       end if;
     end if;
 
-    -- Trigger FINAL score calculation
     perform prospecting_enqueue(
       c.id, cl.id, 'calculate_score',
       j.id || ':score:final',
@@ -392,7 +331,6 @@ begin
       ai_analyzed = case when v_phase = 'provisional' then false else ai_analyzed end
     where id = cl.id;
 
-    -- Only enqueue Gemini AI analysis on FINAL score
     if (p_result->'score'->>'useAI')::boolean and v_phase = 'final' then
       perform prospecting_enqueue(
         c.id, cl.id, 'analyze_ai',
@@ -411,7 +349,6 @@ begin
     update prospecting_campaign_leads set ai_analyzed = true where id = cl.id;
   end if;
 
-  -- Mark job as completed
   update prospecting_jobs set
     status = 'completed',
     completed_at = now(),
@@ -420,7 +357,6 @@ begin
     error_message = null
   where id = j.id;
 
-  -- Check campaign completion
   if ((select discovery_done from prospecting_campaigns where id = c.id) or exists(select 1 from prospecting_jobs where campaign_id = c.id and status = 'failed' and type <> 'audit_website'))
     and not exists(select 1 from prospecting_jobs where campaign_id = c.id and status in ('pending','processing')) then
     update prospecting_campaigns set status = case
@@ -430,68 +366,9 @@ begin
   end if;
 end $$;
 
--- 7. Update prospecting_fail_job
-create or replace function public.prospecting_fail_job(p_id uuid, p_worker uuid, p_error text)
-returns void
-language plpgsql security definer set search_path=public as $$
-declare
-  j prospecting_jobs;
-begin
-  select * into j from prospecting_jobs where id = p_id;
-  if j.id is null then return; end if;
-  perform prospecting_lock_campaign(j.campaign_id);
-
-  update prospecting_jobs set
-    status = case when attempts >= max_attempts then 'failed' else 'pending' end,
-    run_after = now() + case when attempts = 1 then interval '1 minute' else interval '5 minutes' end,
-    error_message = left(p_error, 600),
-    locked_by = null,
-    locked_at = null
-  where id = p_id and status = 'processing' and locked_by = p_worker
-  returning * into j;
-
-  if j.status = 'failed' then
-    if j.type = 'audit_website' then
-      -- External audit retries exhausted (timeouts, 5xx).
-      -- Preserve the lead, record unreachable status, and calculate final score with partial data!
-      update prospecting_campaign_leads set
-        audit_failure_code = 'AUDIT_UNREACHABLE',
-        audit_failure_detail = left(p_error, 200),
-        audited_at = now(),
-        qualification_status = case when qualification_status = 'auditing' then 'audited' else qualification_status end
-      where id = j.campaign_lead_id and not manually_discarded;
-
-      insert into prospecting_signals(lead_id, campaign_lead_id, code, evidence)
-      values (
-        (select lead_id from prospecting_campaign_leads where id = j.campaign_lead_id),
-        j.campaign_lead_id,
-        'WEBSITE_UNREACHABLE',
-        jsonb_build_object('detail', left(p_error, 200), 'exhausted', true)
-      ) on conflict(campaign_lead_id, code) do update set evidence = excluded.evidence;
-
-      perform prospecting_enqueue(
-        j.campaign_id,
-        j.campaign_lead_id,
-        'calculate_score',
-        j.id || ':score:final',
-        jsonb_build_object('scorePhase', 'final'),
-        10
-      );
-    else
-      -- Real internal pipeline error (unexpected bug, schema error, etc.)
-      update prospecting_campaign_leads set qualification_status = 'error'
-      where id = j.campaign_lead_id and not manually_discarded;
-    end if;
-
-    -- Only mark campaign error if real internal job failed
-    if not exists(select 1 from prospecting_jobs where campaign_id = j.campaign_id and status in ('pending','processing')) then
-      update prospecting_campaigns set status = case
-        when exists(select 1 from prospecting_jobs where campaign_id = j.campaign_id and status = 'failed' and type <> 'audit_website') then 'error'
-        else 'completed'
-      end where id = j.campaign_id and status = 'running';
-    end if;
-  end if;
-end $$;
+-- 4. Clean up legacy placeholder strings in prospecting_leads
+update public.prospecting_leads
+set name = 'Carregando empresa...'
+where name = 'Estabelecimento em enriquecimento';
 
 commit;
-

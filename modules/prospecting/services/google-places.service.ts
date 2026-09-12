@@ -1,8 +1,16 @@
 import { z } from 'zod'
 import { apiJSON, requireKey } from './http.ts'
 import type { Business, DigitalPresence } from '../types/index.ts'
+import { classifyHostname, isShortener } from './website-classification.service.ts'
 const searchSchema = z.object({
-  places: z.array(z.object({ id: z.string() })).default([]),
+  places: z
+    .array(
+      z.object({
+        id: z.string(),
+        displayName: z.object({ text: z.string() }).optional(),
+      })
+    )
+    .default([]),
   nextPageToken: z.string().optional(),
 })
 const placeSchema = z.object({
@@ -32,18 +40,8 @@ export function websiteKind(website?: string | null): NonNullable<DigitalPresenc
   if (!website) return 'none'
   try {
     const host = new URL(website).hostname.toLowerCase()
-    return [
-      'instagram.com',
-      'facebook.com',
-      'fb.com',
-      'linktr.ee',
-      'linktree.com',
-      'tiktok.com',
-      'wa.me',
-      'whatsapp.com',
-    ].some((domain) => host === domain || host.endsWith(`.${domain}`))
-      ? 'social'
-      : 'website'
+    if (isShortener(host)) return 'website'
+    return classifyHostname(host)
   } catch {
     return 'website'
   }
@@ -57,7 +55,7 @@ export async function searchPlaces(key: string | undefined, textQuery: string, p
         headers: {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': requireKey(key, 'GOOGLE_PLACES_API_KEY'),
-          'X-Goog-FieldMask': 'places.id,nextPageToken',
+          'X-Goog-FieldMask': 'places.id,places.displayName,nextPageToken',
         },
         body: JSON.stringify({
           textQuery,

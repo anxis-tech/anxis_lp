@@ -107,15 +107,39 @@ export function LeadDrawer({
               />
             </dl>
             {safeLink(lead.website) && (
-              <a
-                href={safeLink(lead.website)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex max-w-full items-center gap-2 break-all text-sm text-[#0075FF]"
-              >
-                {lead.website}
-                <ExternalLink size={14} className="shrink-0" />
-              </a>
+              <div className="space-y-1">
+                <a
+                  href={safeLink(lead.website)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex max-w-full items-center gap-2 break-all text-sm text-[#0075FF]"
+                >
+                  {lead.website}
+                  <ExternalLink size={14} className="shrink-0" />
+                </a>
+                {lead.digital?.websiteKind &&
+                  lead.digital.websiteKind !== 'website' &&
+                  lead.digital.websiteKind !== 'none' && (
+                    <p className="text-xs text-slate-500">
+                      Presença detectada:{' '}
+                      <strong className="text-slate-700">
+                        {lead.digital.websiteKind === 'messaging_only'
+                          ? 'Somente WhatsApp / Mensagem'
+                          : lead.digital.websiteKind === 'social_only' ||
+                              lead.digital.websiteKind === 'social'
+                            ? 'Rede Social'
+                            : lead.digital.websiteKind === 'link_aggregator'
+                              ? 'Agregador de Links (Linktree/Bio)'
+                              : 'Encurtador de Link'}
+                      </strong>
+                      {lead.digital.finalUrl && lead.digital.finalUrl !== lead.website && (
+                        <span className="block truncate text-slate-400 mt-0.5">
+                          Destino final: {lead.digital.finalUrl}
+                        </span>
+                      )}
+                    </p>
+                  )}
+              </div>
             )}
             {lead.audit_failure_code && (
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">

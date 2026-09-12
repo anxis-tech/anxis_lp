@@ -7,13 +7,17 @@ export function factsFor(input: ScoringInput): Record<string, unknown> {
     rating: b.rating,
     segmentPriority: s.priority,
     structure: b.multipleLocations === true || b.structure === true || b.regional === true,
-    noWebsite: d.websiteKind === 'none',
-    socialOnly: d.websiteKind === 'social',
+    noWebsite: d.websiteKind === 'none' || d.websiteKind === 'shortener_unresolved',
+    socialOnly:
+      d.websiteKind === 'social' ||
+      d.websiteKind === 'social_only' ||
+      d.websiteKind === 'link_aggregator' ||
+      d.websiteKind === 'messaging_only',
     performance: site ? d.performance : null,
     seo: site ? d.seo : null,
     noForm: site && d.hasForm === false,
     noCTA: site && d.hasCTA === false,
-    whatsappOnly: site && d.whatsappOnly === true,
+    whatsappOnly: (site && d.whatsappOnly === true) || d.websiteKind === 'messaging_only',
     mobileProblem: site && d.hasViewport === false,
     httpsProblem: site && d.https === false,
     noBooking: site && s.booking && d.hasBooking === false,
@@ -25,7 +29,9 @@ export function factsFor(input: ScoringInput): Record<string, unknown> {
     integrationNeed: d.integrationNeed === true,
     phone: Boolean(b.phone),
     email: Boolean(d.email),
-    accessibleContact: Boolean(b.phone || d.email || d.hasForm || d.hasWhatsapp),
+    accessibleContact: Boolean(
+      b.phone || d.email || d.hasForm || d.hasWhatsapp || d.websiteKind === 'messaging_only'
+    ),
     highTicket: s.highTicket,
     commercialStructure: b.commercialStructure === true,
     excellentWebsite:

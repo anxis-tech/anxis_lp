@@ -29,13 +29,15 @@ create trigger trg_prospecting_campaign_leads_updated_at
 -- The publication supabase_realtime already exists in every Supabase project.
 do $$
 begin
-  if not exists (
-    select 1 from pg_publication_tables
-    where pubname = 'supabase_realtime'
-      and schemaname = 'public'
-      and tablename = 'prospecting_campaign_leads'
-  ) then
-    alter publication supabase_realtime add table public.prospecting_campaign_leads;
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'prospecting_campaign_leads'
+    ) then
+      alter publication supabase_realtime add table public.prospecting_campaign_leads;
+    end if;
   end if;
 end $$;
 
