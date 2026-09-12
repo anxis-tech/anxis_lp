@@ -22,7 +22,7 @@ import { QuotesTab } from '@/components/admin/tabs/quotes-tab'
 import { UsersPermissionsTab } from '@/components/admin/tabs/users-permissions-tab'
 import { FinanceTab } from '@/components/admin/tabs/finance-tab'
 import { CommissionsSubtab } from '@/components/admin/tabs/commissions-subtab'
-import { LeadsTab } from '@/components/admin/tabs/leads-tab'
+import { ProspectingWorkspace } from '@/modules/prospecting/components/prospecting-workspace'
 import { saveClientProjectAction, deleteClientProjectAction } from '@/lib/actions/client-projects'
 import { getContractByProjectId, downloadContractAction } from '@/lib/actions/contracts'
 import { Contract } from '@/types/contract.types'
@@ -37,6 +37,7 @@ import { saveHomeProjectAction, deleteHomeProjectAction } from '@/lib/actions/pr
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
   DashboardSquare01Icon,
+  Search01Icon,
   Globe02Icon,
   FolderKanbanIcon,
   KanbanIcon,
@@ -408,10 +409,10 @@ export default function AdminDashboardPage() {
       title: 'Comercial',
       items: [
         {
-          id: 'leads_overview',
+          id: 'prospecting',
           label: 'Leads',
           icon: Mail01Icon,
-          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.LEADS_VIEW),
+          allowed: isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PROSPECTING_VIEW),
         },
       ],
     },
@@ -853,25 +854,10 @@ export default function AdminDashboardPage() {
                 />
               )}
 
-              {/* TAB 9: MÓDULO DE LEADS */}
-              {activeTab === 'leads_overview' && (
-                <LeadsTab
-                  teamUsers={teamUsers}
-                  userProfile={userProfile}
-                  canViewAll={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.LEADS_VIEW_ALL)}
-                  canCreate={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.LEADS_CREATE)}
-                  canEdit={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.LEADS_EDIT)}
-                  canDelete={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.LEADS_DELETE)}
-                  canAssign={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.LEADS_ASSIGN)}
-                  canChangeStatus={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.LEADS_CHANGE_STATUS)}
-                  canCreateQuote={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.LEADS_CREATE_QUOTE)}
-                  onStartQuoteForLead={(lead) => {
-                    setActiveTab('pricing_calculator')
-                  }}
-                  onStartProjectForLead={(lead, quote) => {
-                    setActiveTab('client_projects')
-                  }}
-                  isDarkMode={isDarkMode}
+              {/* TAB 9: MÓDULO DE PROSPECÇÃO */}
+              {activeTab === 'prospecting' && (
+                <ProspectingWorkspace
+                  canManage={isSuperAdmin || hasPermission(userProfile, PERMISSIONS.PROSPECTING_MANAGE)}
                 />
               )}
             </>

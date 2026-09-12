@@ -203,6 +203,8 @@ export const TAB_PERMISSION_KEYS: PermissionItem[] = [
     description: 'Permite dar baixa e registrar o pagamento mensal das comissões.',
     category: 'Financeiro',
   },
+  { key: 'prospecting.view', label: 'Visualizar Prospecção', description: 'Acessar campanhas, leads, auditorias e scores de Prospecção.', category: 'Comercial' },
+  { key: 'prospecting.manage', label: 'Gerenciar Prospecção', description: 'Criar campanhas, repetir etapas e alterar status comerciais. Requer visualizar Prospecção.', category: 'Comercial' },
   // Comercial / Leads
   {
     key: 'leads.view',

@@ -1,0 +1,13 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.112.0",
+    "zod": "npm:zod@4.4.3",
+    "linkedom": "npm:linkedom@0.18.13",
+    "ipaddr.js": "npm:ipaddr.js@2.5.0",
+    "robots-parser": "npm:robots-parser@3.0.1"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "lib": ["deno.ns", "dom", "dom.iterable", "esnext"]
+  }
+}

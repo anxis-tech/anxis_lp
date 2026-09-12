@@ -1,0 +1,690 @@
+[
+  {
+    "code": "REVIEWS_5",
+    "name": "5–19 avaliações",
+    "description": "5–19 avaliações",
+    "score_group": "business",
+    "points": 2,
+    "config": {
+      "field": "reviews",
+      "op": "between",
+      "value": 5,
+      "max": 20
+    },
+    "enabled": true,
+    "priority": 0,
+    "campaign_id": null
+  },
+  {
+    "code": "REVIEWS_20",
+    "name": "20–49 avaliações",
+    "description": "20–49 avaliações",
+    "score_group": "business",
+    "points": 4,
+    "config": {
+      "field": "reviews",
+      "op": "between",
+      "value": 20,
+      "max": 50
+    },
+    "enabled": true,
+    "priority": 1,
+    "campaign_id": null
+  },
+  {
+    "code": "REVIEWS_50",
+    "name": "50–99 avaliações",
+    "description": "50–99 avaliações",
+    "score_group": "business",
+    "points": 6,
+    "config": {
+      "field": "reviews",
+      "op": "between",
+      "value": 50,
+      "max": 100
+    },
+    "enabled": true,
+    "priority": 2,
+    "campaign_id": null
+  },
+  {
+    "code": "REVIEWS_100",
+    "name": "100–299 avaliações",
+    "description": "100–299 avaliações",
+    "score_group": "business",
+    "points": 8,
+    "config": {
+      "field": "reviews",
+      "op": "between",
+      "value": 100,
+      "max": 300
+    },
+    "enabled": true,
+    "priority": 3,
+    "campaign_id": null
+  },
+  {
+    "code": "REVIEWS_300",
+    "name": "300+ avaliações",
+    "description": "300+ avaliações",
+    "score_group": "business",
+    "points": 10,
+    "config": {
+      "field": "reviews",
+      "op": "between",
+      "value": 300
+    },
+    "enabled": true,
+    "priority": 4,
+    "campaign_id": null
+  },
+  {
+    "code": "RATING_3.5",
+    "name": "Rating a partir de 3.5",
+    "description": "Rating a partir de 3.5",
+    "score_group": "business",
+    "points": 2,
+    "config": {
+      "field": "rating",
+      "op": "between",
+      "value": 3.5,
+      "max": 4
+    },
+    "enabled": true,
+    "priority": 5,
+    "campaign_id": null
+  },
+  {
+    "code": "RATING_4",
+    "name": "Rating a partir de 4",
+    "description": "Rating a partir de 4",
+    "score_group": "business",
+    "points": 5,
+    "config": {
+      "field": "rating",
+      "op": "between",
+      "value": 4,
+      "max": 4.5
+    },
+    "enabled": true,
+    "priority": 6,
+    "campaign_id": null
+  },
+  {
+    "code": "RATING_4.5",
+    "name": "Rating a partir de 4.5",
+    "description": "Rating a partir de 4.5",
+    "score_group": "business",
+    "points": 7,
+    "config": {
+      "field": "rating",
+      "op": "between",
+      "value": 4.5
+    },
+    "enabled": true,
+    "priority": 7,
+    "campaign_id": null
+  },
+  {
+    "code": "SEGMENT_2",
+    "name": "Peso do segmento",
+    "description": "Peso do segmento",
+    "score_group": "business",
+    "points": 2,
+    "config": {
+      "field": "segmentPriority",
+      "op": "eq",
+      "value": 2
+    },
+    "enabled": true,
+    "priority": 8,
+    "campaign_id": null
+  },
+  {
+    "code": "SEGMENT_5",
+    "name": "Peso do segmento",
+    "description": "Peso do segmento",
+    "score_group": "business",
+    "points": 5,
+    "config": {
+      "field": "segmentPriority",
+      "op": "eq",
+      "value": 5
+    },
+    "enabled": true,
+    "priority": 9,
+    "campaign_id": null
+  },
+  {
+    "code": "SEGMENT_8",
+    "name": "Peso do segmento",
+    "description": "Peso do segmento",
+    "score_group": "business",
+    "points": 8,
+    "config": {
+      "field": "segmentPriority",
+      "op": "eq",
+      "value": 8
+    },
+    "enabled": true,
+    "priority": 10,
+    "campaign_id": null
+  },
+  {
+    "code": "STRUCTURE",
+    "name": "Estrutura comprovada",
+    "description": "Estrutura comprovada",
+    "score_group": "business",
+    "points": 5,
+    "config": {
+      "field": "structure",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 11,
+    "campaign_id": null
+  },
+  {
+    "code": "NO_WEBSITE",
+    "name": "Sem website",
+    "description": "Sem website",
+    "score_group": "site",
+    "points": 35,
+    "config": {
+      "field": "noWebsite",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 12,
+    "campaign_id": null
+  },
+  {
+    "code": "SOCIAL_ONLY_WEBSITE",
+    "name": "Somente redes sociais",
+    "description": "Somente redes sociais",
+    "score_group": "site",
+    "points": 30,
+    "config": {
+      "field": "socialOnly",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 13,
+    "campaign_id": null
+  },
+  {
+    "code": "PERFORMANCE_0",
+    "name": "Performance mobile 0–29",
+    "description": "Performance mobile 0–29",
+    "score_group": "site",
+    "points": 12,
+    "config": {
+      "field": "performance",
+      "op": "between",
+      "value": 0,
+      "max": 30
+    },
+    "enabled": true,
+    "priority": 14,
+    "campaign_id": null
+  },
+  {
+    "code": "PERFORMANCE_30",
+    "name": "Performance mobile 30–49",
+    "description": "Performance mobile 30–49",
+    "score_group": "site",
+    "points": 10,
+    "config": {
+      "field": "performance",
+      "op": "between",
+      "value": 30,
+      "max": 50
+    },
+    "enabled": true,
+    "priority": 15,
+    "campaign_id": null
+  },
+  {
+    "code": "PERFORMANCE_50",
+    "name": "Performance mobile 50–69",
+    "description": "Performance mobile 50–69",
+    "score_group": "site",
+    "points": 6,
+    "config": {
+      "field": "performance",
+      "op": "between",
+      "value": 50,
+      "max": 70
+    },
+    "enabled": true,
+    "priority": 16,
+    "campaign_id": null
+  },
+  {
+    "code": "PERFORMANCE_70",
+    "name": "Performance mobile 70–84",
+    "description": "Performance mobile 70–84",
+    "score_group": "site",
+    "points": 3,
+    "config": {
+      "field": "performance",
+      "op": "between",
+      "value": 70,
+      "max": 85
+    },
+    "enabled": true,
+    "priority": 17,
+    "campaign_id": null
+  },
+  {
+    "code": "SEO_0",
+    "name": "SEO 0–49",
+    "description": "SEO 0–49",
+    "score_group": "site",
+    "points": 7,
+    "config": {
+      "field": "seo",
+      "op": "between",
+      "value": 0,
+      "max": 50
+    },
+    "enabled": true,
+    "priority": 18,
+    "campaign_id": null
+  },
+  {
+    "code": "SEO_50",
+    "name": "SEO 50–69",
+    "description": "SEO 50–69",
+    "score_group": "site",
+    "points": 4,
+    "config": {
+      "field": "seo",
+      "op": "between",
+      "value": 50,
+      "max": 70
+    },
+    "enabled": true,
+    "priority": 19,
+    "campaign_id": null
+  },
+  {
+    "code": "SEO_70",
+    "name": "SEO 70–84",
+    "description": "SEO 70–84",
+    "score_group": "site",
+    "points": 2,
+    "config": {
+      "field": "seo",
+      "op": "between",
+      "value": 70,
+      "max": 85
+    },
+    "enabled": true,
+    "priority": 20,
+    "campaign_id": null
+  },
+  {
+    "code": "NO_FORM",
+    "name": "Sem formulário",
+    "description": "Sem formulário",
+    "score_group": "site",
+    "points": 5,
+    "config": {
+      "field": "noForm",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 21,
+    "campaign_id": null
+  },
+  {
+    "code": "NO_CTA",
+    "name": "Sem CTA claro",
+    "description": "Sem CTA claro",
+    "score_group": "site",
+    "points": 4,
+    "config": {
+      "field": "noCTA",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 22,
+    "campaign_id": null
+  },
+  {
+    "code": "WHATSAPP_ONLY",
+    "name": "WhatsApp como único CTA",
+    "description": "WhatsApp como único CTA",
+    "score_group": "site",
+    "points": 5,
+    "config": {
+      "field": "whatsappOnly",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 23,
+    "campaign_id": null
+  },
+  {
+    "code": "MOBILE_PROBLEM",
+    "name": "Sem viewport mobile",
+    "description": "Sem viewport mobile",
+    "score_group": "site",
+    "points": 6,
+    "config": {
+      "field": "mobileProblem",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 24,
+    "campaign_id": null
+  },
+  {
+    "code": "HTTPS_PROBLEM",
+    "name": "Website sem HTTPS",
+    "description": "Website sem HTTPS",
+    "score_group": "site",
+    "points": 8,
+    "config": {
+      "field": "httpsProblem",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 25,
+    "campaign_id": null
+  },
+  {
+    "code": "NO_BOOKING",
+    "name": "Sem agendamento relevante",
+    "description": "Sem agendamento relevante",
+    "score_group": "site",
+    "points": 7,
+    "config": {
+      "field": "noBooking",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 26,
+    "campaign_id": null
+  },
+  {
+    "code": "SYSTEM_BOOKING",
+    "name": "Agendamento relevante inexistente",
+    "description": "Agendamento relevante inexistente",
+    "score_group": "system",
+    "points": 12,
+    "config": {
+      "field": "noBooking",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 27,
+    "campaign_id": null
+  },
+  {
+    "code": "SYSTEM_WHATSAPP",
+    "name": "Atendimento via WhatsApp como único CTA",
+    "description": "Atendimento via WhatsApp como único CTA",
+    "score_group": "system",
+    "points": 10,
+    "config": {
+      "field": "whatsappOnly",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 28,
+    "campaign_id": null
+  },
+  {
+    "code": "SYSTEM_LOCATIONS",
+    "name": "Múltiplas unidades comprovadas",
+    "description": "Múltiplas unidades comprovadas",
+    "score_group": "system",
+    "points": 8,
+    "config": {
+      "field": "multipleLocations",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 29,
+    "campaign_id": null
+  },
+  {
+    "code": "SYSTEM_FORMS",
+    "name": "Formulários manuais comprovados",
+    "description": "Formulários manuais comprovados",
+    "score_group": "system",
+    "points": 6,
+    "config": {
+      "field": "manualForms",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 30,
+    "campaign_id": null
+  },
+  {
+    "code": "SYSTEM_CLIENT_AREA",
+    "name": "Sem área do cliente relevante",
+    "description": "Sem área do cliente relevante",
+    "score_group": "system",
+    "points": 8,
+    "config": {
+      "field": "noClientArea",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 31,
+    "campaign_id": null
+  },
+  {
+    "code": "SYSTEM_CATALOG",
+    "name": "Catálogo sem estrutura comprovado",
+    "description": "Catálogo sem estrutura comprovado",
+    "score_group": "system",
+    "points": 6,
+    "config": {
+      "field": "unstructuredCatalog",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 32,
+    "campaign_id": null
+  },
+  {
+    "code": "SYSTEM_MANUAL",
+    "name": "Processos manuais comprovados",
+    "description": "Processos manuais comprovados",
+    "score_group": "system",
+    "points": 8,
+    "config": {
+      "field": "manualProcesses",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 33,
+    "campaign_id": null
+  },
+  {
+    "code": "SYSTEM_INTEGRATION",
+    "name": "Necessidade de integração comprovada",
+    "description": "Necessidade de integração comprovada",
+    "score_group": "system",
+    "points": 6,
+    "config": {
+      "field": "integrationNeed",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 34,
+    "campaign_id": null
+  },
+  {
+    "code": "PHONE",
+    "name": "Telefone disponível",
+    "description": "Telefone disponível",
+    "score_group": "commercial",
+    "points": 5,
+    "config": {
+      "field": "phone",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 35,
+    "campaign_id": null
+  },
+  {
+    "code": "EMAIL",
+    "name": "E-mail encontrado",
+    "description": "E-mail encontrado",
+    "score_group": "commercial",
+    "points": 4,
+    "config": {
+      "field": "email",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 36,
+    "campaign_id": null
+  },
+  {
+    "code": "CONTACT",
+    "name": "Contato acessível",
+    "description": "Contato acessível",
+    "score_group": "commercial",
+    "points": 3,
+    "config": {
+      "field": "accessibleContact",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 37,
+    "campaign_id": null
+  },
+  {
+    "code": "HIGH_TICKET",
+    "name": "Segmento de alto ticket",
+    "description": "Segmento de alto ticket",
+    "score_group": "commercial",
+    "points": 5,
+    "config": {
+      "field": "highTicket",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 38,
+    "campaign_id": null
+  },
+  {
+    "code": "COMMERCIAL_STRUCTURE",
+    "name": "Estrutura comercial comprovada",
+    "description": "Estrutura comercial comprovada",
+    "score_group": "commercial",
+    "points": 3,
+    "config": {
+      "field": "commercialStructure",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 39,
+    "campaign_id": null
+  },
+  {
+    "code": "FEW_REVIEWS",
+    "name": "Menos de 5 avaliações",
+    "description": "Menos de 5 avaliações",
+    "score_group": "penalties",
+    "points": -10,
+    "config": {
+      "field": "reviews",
+      "op": "lt",
+      "value": 5
+    },
+    "enabled": true,
+    "priority": 40,
+    "campaign_id": null
+  },
+  {
+    "code": "LOW_RATING",
+    "name": "Rating abaixo de 3.5",
+    "description": "Rating abaixo de 3.5",
+    "score_group": "penalties",
+    "points": -8,
+    "config": {
+      "field": "rating",
+      "op": "lt",
+      "value": 3.5
+    },
+    "enabled": true,
+    "priority": 41,
+    "campaign_id": null
+  },
+  {
+    "code": "EXCELLENT_SITE",
+    "name": "Website excelente",
+    "description": "Website excelente",
+    "score_group": "penalties",
+    "points": -15,
+    "config": {
+      "field": "excellentWebsite",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 42,
+    "campaign_id": null
+  },
+  {
+    "code": "FRANCHISE",
+    "name": "Grande rede ou franquia comprovada",
+    "description": "Grande rede ou franquia comprovada",
+    "score_group": "penalties",
+    "points": -20,
+    "config": {
+      "field": "franchise",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 43,
+    "campaign_id": null
+  },
+  {
+    "code": "LOW_FIT",
+    "name": "Baixa aderência à campanha",
+    "description": "Baixa aderência à campanha",
+    "score_group": "penalties",
+    "points": -15,
+    "config": {
+      "field": "lowFit",
+      "op": "eq",
+      "value": true
+    },
+    "enabled": true,
+    "priority": 44,
+    "campaign_id": null
+  }
+]

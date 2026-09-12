@@ -1,0 +1,4 @@
+[functions.prospecting-worker]
+verify_jwt = false
+entrypoint = "./functions/prospecting-worker/index.ts"
+import_map = "./functions/prospecting-worker/deno.json"

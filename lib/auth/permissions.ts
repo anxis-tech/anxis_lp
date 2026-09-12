@@ -1,4 +1,6 @@
 export const PERMISSIONS = {
+  PROSPECTING_VIEW: 'prospecting.view',
+  PROSPECTING_MANAGE: 'prospecting.manage',
   // Portfólio da Home
   PORTFOLIO_VIEW: 'portfolio.view',
   PORTFOLIO_CREATE: 'portfolio.create',
