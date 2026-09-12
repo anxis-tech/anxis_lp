@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js'
-import { timingSafeEqual } from 'node:crypto'
 import { checked } from '../../../modules/prospecting/repositories/base.ts'
 import { getCampaign } from '../../../modules/prospecting/repositories/campaign.repository.ts'
 import { getLead } from '../../../modules/prospecting/repositories/lead.repository.ts'
@@ -9,6 +8,15 @@ import { enrichLead } from './handlers/enrich-lead.ts'
 import { auditLead } from './handlers/audit-website.ts'
 import { scoreLead } from './handlers/calculate-score.ts'
 import { analyzeLead } from './handlers/analyze-ai.ts'
+
+function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false
+  let diff = 0
+  for (let i = 0; i < a.length; i++) {
+    diff |= a[i] ^ b[i]
+  }
+  return diff === 0
+}
 const handlers = {
   discover_places: discoverPlaces,
   enrich_lead: enrichLead,
